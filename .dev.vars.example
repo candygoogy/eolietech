@@ -1,0 +1,3 @@
+# Copy to .dev.vars for local development (wrangler dev reads it; .dev.vars is gitignored).
+# Cloudflare's official Turnstile test secret key: always passes.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA

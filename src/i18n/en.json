@@ -1,0 +1,20 @@
+{
+  "site.name": "Eolietech",
+  "site.tagline": "Free tools for images, PDFs and audio that run in your browser. Your files never leave your device.",
+  "site.description": "Free, privacy-first tools for images, PDFs and audio. Everything runs in your browser: your files never leave your device. No ads, no accounts.",
+  "a11y.skipToContent": "Skip to content",
+  "nav.home": "Home",
+  "home.title": "Eolietech: private tools that run in your browser",
+  "home.h1": "Eolietech",
+  "notFound.title": "Page not found | Eolietech",
+  "notFound.description": "This page does not exist.",
+  "notFound.h1": "Page not found",
+  "notFound.body": "The page you are looking for does not exist or has moved.",
+  "notFound.back": "Back to the home page",
+  "tool.howTo": "How to use it",
+  "tool.faq": "Frequently asked questions",
+  "tool.related": "Related tools",
+  "tool.loading": "Loading the tool…",
+  "tool.noscript": "This tool runs in your browser and needs JavaScript.",
+  "footer.copyright": "© {year} Francesco Basile. Code licensed under AGPL-3.0."
+}

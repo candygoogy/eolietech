@@ -1,0 +1,12 @@
+---
+// Placeholder home page. The design/marketing step replaces it.
+import Base from "../layouts/Base.astro";
+import { t } from "../i18n";
+
+const locale = "en";
+---
+
+<Base locale={locale} title={t(locale, "home.title")} description={t(locale, "site.description")} path="/">
+  <h1>{t(locale, "home.h1")}</h1>
+  <p>{t(locale, "site.tagline")}</p>
+</Base>

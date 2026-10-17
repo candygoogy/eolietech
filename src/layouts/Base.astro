@@ -1,0 +1,56 @@
+---
+import "../styles/tokens.css";
+import "../styles/global.css";
+import { t } from "../i18n";
+import { DEFAULT_LOCALE, type Locale } from "../tools/types";
+
+export interface Alternate {
+  locale: Locale;
+  /** Site-relative path, e.g. "/compress-image/" or "/it/comprimi-immagine/". */
+  path: string;
+}
+
+interface Props {
+  locale?: Locale;
+  title: string;
+  description: string;
+  /** Site-relative canonical path. Omit (with noindex) for pages like 404. */
+  path?: string;
+  /** Translations of this page, including itself. Defaults to just this page. */
+  alternates?: Alternate[];
+  noindex?: boolean;
+}
+
+const { locale = DEFAULT_LOCALE, title, description, path, noindex = false } = Astro.props;
+const site = Astro.site ?? new URL("https://eolietech.com");
+const abs = (p: string) => new URL(p, site).href;
+const alternates: Alternate[] = Astro.props.alternates ?? (path ? [{ locale, path }] : []);
+const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {path && <link rel="canonical" href={abs(path)} />}
+    {!noindex && alternates.map((a) => <link rel="alternate" hreflang={a.locale} href={abs(a.path)} />)}
+    {!noindex && xDefault && <link rel="alternate" hreflang="x-default" href={abs(xDefault.path)} />}
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t(locale, "a11y.skipToContent")}</a>
+    <slot name="header" />
+    <main id="main">
+      <slot />
+    </main>
+    <footer>
+      <slot name="footer" />
+      <p>{t(locale, "footer.copyright", { year })}</p>
+    </footer>
+  </body>
+</html>

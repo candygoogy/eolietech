@@ -1,0 +1,37 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+
+# cloudflare
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# tests
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+
+# logs
+*.log
+npm-debug.log*
+
+# env
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~

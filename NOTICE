@@ -1,0 +1,11 @@
+Eolietech
+Copyright (C) 2026 Francesco Basile
+
+This program is free software: you can redistribute it and/or modify it under the terms of
+the GNU Affero General Public License as published by the Free Software Foundation, version 3.
+See LICENSE for the full text.
+
+The AGPL covers the source code only. The name "Eolietech", the logo, the site copy and the
+design are not licensed under the AGPL; see TRADEMARK.md.
+
+Third-party packages keep their own licenses (see node_modules/<package>/LICENSE).

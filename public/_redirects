@@ -1,0 +1,5 @@
+# Old site URLs (301). /?lang=it|en cannot be matched here (query strings are ignored);
+# those URLs serve the home page, whose canonical is https://eolietech.com/.
+/privacy.html  /privacy/  301
+/index.html    /          301
+/404.html      /          301
