@@ -1,6 +1,10 @@
 ---
 import "../styles/tokens.css";
 import "../styles/global.css";
+import "../styles/components.css";
+import "../styles/tool.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 import { t } from "../i18n";
 import { DEFAULT_LOCALE, type Locale } from "../tools/types";
 
@@ -26,7 +30,6 @@ const site = Astro.site ?? new URL("https://eolietech.com");
 const abs = (p: string) => new URL(p, site).href;
 const alternates: Alternate[] = Astro.props.alternates ?? (path ? [{ locale, path }] : []);
 const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
-const year = new Date().getFullYear();
 ---
 
 <!doctype html>
@@ -40,17 +43,28 @@ const year = new Date().getFullYear();
     {path && <link rel="canonical" href={abs(path)} />}
     {!noindex && alternates.map((a) => <link rel="alternate" hreflang={a.locale} href={abs(a.path)} />)}
     {!noindex && xDefault && <link rel="alternate" hreflang="x-default" href={abs(xDefault.path)} />}
+    <link rel="preload" href="/fonts/atkinson-hyperlegible-next-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f3f1ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111416" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:site_name" content={t(locale, "site.name")} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {path && <meta property="og:url" content={abs(path)} />}
     <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main">{t(locale, "a11y.skipToContent")}</a>
-    <slot name="header" />
-    <main id="main">
+    <Header locale={locale} />
+    <main id="main" tabindex="-1">
       <slot />
     </main>
-    <footer>
-      <slot name="footer" />
-      <p>{t(locale, "footer.copyright", { year })}</p>
-    </footer>
+    <Footer locale={locale} />
   </body>
 </html>

@@ -66,6 +66,12 @@ describe("tool registry", () => {
   it("has no content files for unknown tools, variants or undeclared locales", () => {
     for (const dir of fs.readdirSync(toolsDir, { withFileTypes: true })) {
       if (!dir.isDirectory()) continue;
+      // Shared helper folders (e.g. pdf-shared) hold code only: no page, no client, no copy.
+      if (dir.name.endsWith("-shared")) {
+        const files = fs.readdirSync(path.join(toolsDir, dir.name));
+        expect(files.filter((f) => f === "client.ts" || f.startsWith("content")), `src/tools/${dir.name}`).toEqual([]);
+        continue;
+      }
       const tool = tools.find((t) => t.id === dir.name);
       expect(tool, `folder src/tools/${dir.name} has no registry entry`).toBeDefined();
       for (const file of fs.readdirSync(path.join(toolsDir, dir.name))) {

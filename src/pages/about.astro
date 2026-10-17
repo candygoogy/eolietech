@@ -1,0 +1,49 @@
+---
+import Base from "../layouts/Base.astro";
+import { localePath, t } from "../i18n";
+import type { Locale } from "../tools/types";
+
+const locale: Locale = "en";
+const sections = [
+  { id: "origin", paragraphs: ["about.origin.p1", "about.origin.p2"] },
+  { id: "privacy", paragraphs: ["about.privacy.p1", "about.privacy.p2"] },
+  { id: "open", paragraphs: ["about.open.p1", "about.open.p2"] },
+  { id: "money", paragraphs: ["about.money.p1"] },
+];
+const palette = ["basalt", "pumice", "sea", "ember"];
+---
+
+<Base locale={locale} title={t(locale, "about.title")} description={t(locale, "about.description")} path={localePath(locale, "about")}>
+  <header class="page-head container">
+    <h1>{t(locale, "about.h1")}</h1>
+    <p class="lede">{t(locale, "about.lede")}</p>
+  </header>
+
+  <div class="container doc">
+    <aside class="doc__aside" aria-labelledby="palette-h">
+      <h2 id="palette-h">{t(locale, "about.palette.label")}</h2>
+      <ul class="palette">
+        {palette.map((name) => <li class={`palette__${name}`}>{t(locale, `about.palette.${name}`)}</li>)}
+      </ul>
+    </aside>
+
+    <div class="doc__body">
+      {
+        sections.map((s) => (
+          <section aria-labelledby={`about-${s.id}`}>
+            <h2 id={`about-${s.id}`}>{t(locale, `about.${s.id}.h2`)}</h2>
+            {s.paragraphs.map((key) => (
+              <p>{t(locale, key)}</p>
+            ))}
+          </section>
+        ))
+      }
+      <section>
+        <ul class="links">
+          <li><a href={localePath(locale, "security")}>{t(locale, "about.cta.security")}</a></li>
+          <li><a href={localePath(locale, "pricing")}>{t(locale, "about.cta.pricing")}</a></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</Base>

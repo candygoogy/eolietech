@@ -1,0 +1,58 @@
+---
+import Base from "../layouts/Base.astro";
+import WaitlistForm from "../components/WaitlistForm.astro";
+import { localePath, t } from "../i18n";
+import type { Locale } from "../tools/types";
+
+const locale: Locale = "en";
+const free = ["pricing.free.f1", "pricing.free.f2", "pricing.free.f3", "pricing.free.f4"];
+const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
+---
+
+<Base locale={locale} title={t(locale, "pricing.title")} description={t(locale, "pricing.description")} path={localePath(locale, "pricing")}>
+  <header class="page-head container">
+    <h1>{t(locale, "pricing.h1")}</h1>
+    <p class="lede">{t(locale, "pricing.lede")}</p>
+  </header>
+
+  <div class="container plans">
+    <section class="plan" aria-labelledby="plan-free">
+      <h2 id="plan-free">{t(locale, "pricing.free.name")}</h2>
+      <p class="plan__price">
+        <span class="plan__amount">{t(locale, "pricing.free.price")}</span>
+        <span class="plan__period">{t(locale, "pricing.free.period")}</span>
+      </p>
+      <ul>
+        {free.map((key) => <li>{t(locale, key)}</li>)}
+      </ul>
+      <a class="btn btn--primary" href={localePath(locale, "tools")}>{t(locale, "pricing.free.cta")}</a>
+    </section>
+
+    <section class="plan plan--later" aria-labelledby="plan-pro">
+      <h2 id="plan-pro">{t(locale, "pricing.pro.name")}</h2>
+      <p class="plan__price">
+        <span class="plan__amount">{t(locale, "pricing.pro.price")}</span>
+        <span class="plan__period">{t(locale, "pricing.pro.period")}</span>
+      </p>
+      <ul>
+        {pro.map((key) => <li>{t(locale, key)}</li>)}
+      </ul>
+      <a class="btn" href="#waitlist">{t(locale, "home.pro.link")}</a>
+    </section>
+  </div>
+
+  <section id="waitlist" class="section container waitlist" aria-labelledby="waitlist-h">
+    <div class="waitlist__intro">
+      <h2 id="waitlist-h">{t(locale, "waitlist.h2")}</h2>
+      <p>{t(locale, "waitlist.lede")}</p>
+    </div>
+    <WaitlistForm locale={locale} />
+  </section>
+
+  <section class="section container" aria-labelledby="why-h">
+    <div class="closing__item">
+      <h2 id="why-h">{t(locale, "pricing.why.h2")}</h2>
+      <p>{t(locale, "pricing.why.body")}</p>
+    </div>
+  </section>
+</Base>

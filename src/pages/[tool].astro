@@ -66,65 +66,86 @@ const strings = { ...siteToolStrings, ...baseEntry.data.ui, ...(variant ? entry.
 ---
 
 <Base locale={locale} {title} {description} path={localePath(locale, slug)} {alternates}>
-  <h1>{h1}</h1>
-  {intro && <p>{intro}</p>}
+  <article class="tool-page">
+    <header class="tool-page__head container">
+      <a class="tool-page__back" href={localePath(locale, "tools")}>{t(locale, "toolPage.allTools")}</a>
+      <h1>{h1}</h1>
+      {intro && <p class="lede">{intro}</p>}
+    </header>
 
-  <div
-    data-tool-root
-    data-tool-id={tool.id}
-    data-variant-id={variant?.id ?? ""}
-    data-locale={locale}
-    data-preset={JSON.stringify(variant?.preset ?? {})}
-    data-limits={JSON.stringify(tool.limits.free)}
-    data-strings={JSON.stringify(strings)}
-  >
-    <p>{t(locale, "tool.loading")}</p>
-  </div>
-  <noscript><p>{t(locale, "tool.noscript")}</p></noscript>
+    <div class="container">
+      <div class="tool-panel">
+        <div
+          data-tool-root
+          data-tool-id={tool.id}
+          data-variant-id={variant?.id ?? ""}
+          data-locale={locale}
+          data-preset={JSON.stringify(variant?.preset ?? {})}
+          data-limits={JSON.stringify(tool.limits.free)}
+          data-strings={JSON.stringify(strings)}
+        >
+          <p>{t(locale, "tool.loading")}</p>
+        </div>
+        <noscript><p class="tool-note">{t(locale, "tool.noscript")}</p></noscript>
+      </div>
+      <p class="tool-page__private">
+        <span>{t(locale, "toolPage.private")}</span>
+        <a href={localePath(locale, "security")}>{t(locale, "toolPage.verify")}</a>
+      </p>
+    </div>
 
-  <Content />
+    <div class="tool-page__body container">
+      <div class="prose">
+        <Content />
+      </div>
 
-  {
-    howTo.length > 0 && (
-      <section>
-        <h2>{t(locale, "tool.howTo")}</h2>
-        <ol>
-          {howTo.map((step) => (
-            <li>{step}</li>
-          ))}
-        </ol>
-      </section>
-    )
-  }
+      {
+        howTo.length > 0 && (
+          <section class="tool-page__section">
+            <h2>{t(locale, "tool.howTo")}</h2>
+            <ol class="tool-page__steps">
+              {howTo.map((step) => (
+                <li>{step}</li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
 
-  {
-    faq.length > 0 && (
-      <section>
-        <h2>{t(locale, "tool.faq")}</h2>
-        {faq.map((item) => (
-          <details>
-            <summary>{item.q}</summary>
-            <p>{item.a}</p>
-          </details>
-        ))}
-      </section>
-    )
-  }
+      {
+        faq.length > 0 && (
+          <section class="tool-page__section">
+            <h2>{t(locale, "tool.faq")}</h2>
+            <div class="faq">
+              {faq.map((item) => (
+                <details>
+                  <summary>{item.q}</summary>
+                  <p>{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )
+      }
 
-  {
-    related.length > 0 && (
-      <nav aria-label={t(locale, "tool.related")}>
-        <h2>{t(locale, "tool.related")}</h2>
-        <ul>
-          {related.map((r) => (
-            <li>
-              <a href={r.href}>{r.label}</a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    )
-  }
+      {
+        related.length > 0 && (
+          <nav class="tool-page__section" aria-label={t(locale, "tool.related")}>
+            <h2>{t(locale, "tool.related")}</h2>
+            <ul class="related-list">
+              {related.map((r) => (
+                <li>
+                  <a class="btn" href={r.href}>
+                    {r.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+    </div>
+  </article>
 </Base>
 
 <script>

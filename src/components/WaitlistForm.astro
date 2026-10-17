@@ -1,0 +1,238 @@
+---
+/**
+ * Pro waitlist form. Posts JSON to the waitlist Worker (src/worker) with a Cloudflare Turnstile token.
+ * Turnstile is loaded only here (the /pricing/ page), and only once the form scrolls near the viewport.
+ * Without JavaScript the fields stay disabled: the spam check needs it, and a plain form submit would
+ * put the email address in a URL.
+ */
+import { localePath, t } from "../i18n";
+import { siteConfig } from "../site.config";
+import type { Locale } from "../tools/types";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const messages = {
+  sending: t(locale, "waitlist.sending"),
+  success: t(locale, "waitlist.success"),
+  invalidEmail: t(locale, "waitlist.error.invalidEmail"),
+  badRequest: t(locale, "waitlist.error.badRequest"),
+  turnstile: t(locale, "waitlist.error.turnstile"),
+  rateLimited: t(locale, "waitlist.error.rateLimited"),
+  generic: t(locale, "waitlist.error.generic"),
+  network: t(locale, "waitlist.error.network"),
+  check: t(locale, "waitlist.error.check"),
+  checkLoad: t(locale, "waitlist.error.checkLoad"),
+};
+---
+
+<form
+  class="waitlist-form"
+  data-waitlist
+  data-endpoint={siteConfig.waitlistEndpoint}
+  data-sitekey={siteConfig.turnstileSiteKey}
+  data-turnstile-src={siteConfig.turnstileScriptUrl}
+  data-locale={locale}
+  data-messages={JSON.stringify(messages)}
+  novalidate
+>
+  <fieldset data-waitlist-fields disabled>
+    <label for="waitlist-email">{t(locale, "waitlist.label")}</label>
+    <div class="waitlist-form__row">
+      <input
+        id="waitlist-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        spellcheck="false"
+        required
+        maxlength="254"
+        aria-describedby="waitlist-status waitlist-privacy"
+      />
+    </div>
+    <div class="waitlist-form__check" data-turnstile></div>
+    <div>
+      <button class="btn btn--primary" type="submit">{t(locale, "waitlist.submit")}</button>
+    </div>
+  </fieldset>
+  <p class="waitlist-form__status" id="waitlist-status" role="status" aria-live="polite" data-status></p>
+  <p class="waitlist-form__privacy" id="waitlist-privacy">
+    {t(locale, "waitlist.privacy")}{" "}
+    <a href={localePath(locale, "privacy")}>{t(locale, "waitlist.privacyLink")}</a>
+  </p>
+  <noscript><p class="waitlist-form__privacy">{t(locale, "waitlist.noscript")}</p></noscript>
+</form>
+
+<script>
+  type Messages = Record<
+    | "sending"
+    | "success"
+    | "invalidEmail"
+    | "badRequest"
+    | "turnstile"
+    | "rateLimited"
+    | "generic"
+    | "network"
+    | "check"
+    | "checkLoad",
+    string
+  >;
+
+  interface Turnstile {
+    render(el: HTMLElement, opts: Record<string, unknown>): string | undefined;
+    reset(widgetId?: string): void;
+    getResponse(widgetId?: string): string | undefined;
+  }
+
+  const win = window as Window & { turnstile?: Turnstile };
+
+  let loading: Promise<Turnstile> | undefined;
+  function loadTurnstile(src: string): Promise<Turnstile> {
+    if (win.turnstile) return Promise.resolve(win.turnstile);
+    loading ??= new Promise<Turnstile>((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      script.addEventListener("load", () => (win.turnstile ? resolve(win.turnstile) : reject(new Error("turnstile"))));
+      script.addEventListener("error", () => {
+        // Allow a retry on the next attempt.
+        script.remove();
+        loading = undefined;
+        reject(new Error("turnstile"));
+      });
+      document.head.append(script);
+    });
+    return loading;
+  }
+
+  function setup(form: HTMLFormElement) {
+    const fields = form.querySelector<HTMLFieldSetElement>("[data-waitlist-fields]")!;
+    const input = form.querySelector<HTMLInputElement>('input[type="email"]')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const status = form.querySelector<HTMLElement>("[data-status]")!;
+    const checkEl = form.querySelector<HTMLElement>("[data-turnstile]")!;
+    const msg = JSON.parse(form.dataset.messages ?? "{}") as Messages;
+    const endpoint = form.dataset.endpoint ?? "/api/v1/waitlist";
+
+    let turnstile: Turnstile | undefined;
+    let widgetId: string | undefined;
+    let token = "";
+    let busy = false;
+
+    const say = (text: string, tone: "info" | "success" | "error" = "info") => {
+      status.textContent = text;
+      status.dataset.tone = tone;
+    };
+
+    const startTurnstile = () => {
+      if (turnstile || loading) return;
+      loadTurnstile(form.dataset.turnstileSrc ?? "")
+        .then((ts) => {
+          turnstile = ts;
+          widgetId = ts.render(checkEl, {
+            sitekey: form.dataset.sitekey,
+            theme: "auto",
+            size: "flexible",
+            language: form.dataset.locale ?? "auto",
+            action: "waitlist",
+            callback: (value: string) => {
+              token = value;
+            },
+            "expired-callback": () => {
+              token = "";
+            },
+            "error-callback": () => {
+              token = "";
+              say(msg.turnstile, "error");
+            },
+          });
+        })
+        .catch(() => say(msg.checkLoad, "error"));
+    };
+
+    // The form works as soon as the script runs; the spam check loads when the form is near the viewport.
+    fields.disabled = false;
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            startTurnstile();
+          }
+        },
+        { rootMargin: "300px" },
+      );
+      io.observe(form);
+    } else {
+      startTurnstile();
+    }
+    form.addEventListener("focusin", startTurnstile, { once: true });
+
+    input.addEventListener("input", () => input.removeAttribute("aria-invalid"));
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (busy) return;
+
+      const email = input.value.trim();
+      if (!email || !input.checkValidity()) {
+        input.setAttribute("aria-invalid", "true");
+        say(msg.invalidEmail, "error");
+        input.focus();
+        return;
+      }
+
+      const turnstileToken = (turnstile && widgetId !== undefined ? turnstile.getResponse(widgetId) : "") || token;
+      if (!turnstileToken) {
+        say(turnstile ? msg.check : msg.checkLoad, "error");
+        startTurnstile();
+        return;
+      }
+
+      busy = true;
+      button.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      say(msg.sending);
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, turnstileToken }),
+        });
+        const body = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+
+        if (res.status === 201 && body?.ok) {
+          say(msg.success, "success");
+          input.value = "";
+        } else if (res.status === 400 && body?.error === "invalid_email") {
+          input.setAttribute("aria-invalid", "true");
+          say(msg.invalidEmail, "error");
+          input.focus();
+        } else if (res.status === 400) {
+          say(msg.badRequest, "error");
+        } else if (res.status === 403) {
+          say(msg.turnstile, "error");
+        } else if (res.status === 429) {
+          say(msg.rateLimited, "error");
+        } else {
+          say(msg.generic, "error");
+        }
+      } catch {
+        say(msg.network, "error");
+      } finally {
+        busy = false;
+        button.disabled = false;
+        form.removeAttribute("aria-busy");
+        // Tokens are single-use: get a fresh one for the next attempt.
+        token = "";
+        if (turnstile && widgetId !== undefined) turnstile.reset(widgetId);
+      }
+    });
+  }
+
+  for (const form of document.querySelectorAll<HTMLFormElement>("form[data-waitlist]")) setup(form);
+</script>

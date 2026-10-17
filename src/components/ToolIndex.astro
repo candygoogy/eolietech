@@ -1,0 +1,106 @@
+---
+/**
+ * Tools grouped by category, straight from the registry. A tool links to its page only when the
+ * page is built (status "live", or every tool under EOLIETECH_ALL_TOOLS=1); others read "Coming soon".
+ */
+import { localePath, t } from "../i18n";
+import { formatBytes } from "../lib/tool-ui";
+import { publishedTools, tools } from "../tools/registry";
+import type { Category, Locale } from "../tools/types";
+
+interface Props {
+  locale: Locale;
+  /** Heading level for the category titles. */
+  level?: 2 | 3;
+  /** Show limits and format converters (the /tools/ page). */
+  detailed?: boolean;
+}
+
+const { locale, level = 2, detailed = false } = Astro.props;
+const Heading = `h${level}` as "h2" | "h3";
+const published = new Set(publishedTools().map((tool) => tool.id));
+const categories: Category[] = ["image", "pdf", "audio"];
+
+/** File format names as written (data, not copy). */
+const formatName = (f: unknown) => (f === "webp" ? "WebP" : String(f).toUpperCase());
+
+const groups = categories
+  .map((category) => ({
+    category,
+    items: tools
+      .filter((tool) => tool.category === category)
+      .map((tool) => {
+        const slug = tool.slug[locale];
+        const live = published.has(tool.id) && Boolean(slug) && tool.locales.includes(locale);
+        const { maxFiles, maxBytes } = tool.limits.free;
+        const size = formatBytes(maxBytes);
+        return {
+          id: tool.id,
+          name: t(locale, `tools.${tool.id}.name`),
+          summary: t(locale, `tools.${tool.id}.summary`),
+          href: live && slug ? localePath(locale, slug) : undefined,
+          limits:
+            maxFiles === 1
+              ? t(locale, "tools.limits.one", { size })
+              : t(locale, "tools.limits.many", { files: maxFiles, size }),
+          converters: live
+            ? (tool.variants ?? []).flatMap((v) =>
+                v.slug[locale]
+                  ? [
+                      {
+                        href: localePath(locale, v.slug[locale]!),
+                        label: t(locale, "tools.convert", { from: formatName(v.preset.from), to: formatName(v.preset.to) }),
+                      },
+                    ]
+                  : [],
+              )
+            : [],
+        };
+      }),
+  }))
+  .filter((group) => group.items.length > 0);
+---
+
+<div class:list={["tool-index", { "tool-index--detailed": detailed }]}>
+  {
+    groups.map((group) => (
+      <section class="tool-index__group" aria-labelledby={`cat-${group.category}`}>
+        <div class="tool-index__head">
+          <Heading id={`cat-${group.category}`}>{t(locale, `tools.category.${group.category}`)}</Heading>
+          <p>{t(locale, `tools.category.${group.category}.lede`)}</p>
+        </div>
+        <ul class="tool-index__list">
+          {group.items.map((item) => (
+            <li class="tool-index__item" data-status={item.href ? "live" : "soon"}>
+              {item.href ? (
+                <a class="tool-index__row" href={item.href}>
+                  <span class="tool-index__name">{item.name}</span>
+                  <span class="tool-index__summary">{item.summary}</span>
+                  {detailed && <span class="tool-index__limits">{item.limits}</span>}
+                </a>
+              ) : (
+                <div class="tool-index__row">
+                  <span class="tool-index__name">{item.name}</span>
+                  <span class="tool-index__summary">{item.summary}</span>
+                  <span class="tool-index__soon">{t(locale, "tools.soon")}</span>
+                </div>
+              )}
+              {detailed && item.converters.length > 0 && (
+                <div class="tool-index__converters">
+                  <p>{t(locale, "tools.converters")}</p>
+                  <ul>
+                    {item.converters.map((c) => (
+                      <li>
+                        <a href={c.href}>{c.label}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>

@@ -1,12 +1,19 @@
 ---
 import Base from "../layouts/Base.astro";
 import { t, localePath } from "../i18n";
+import type { Locale } from "../tools/types";
 
-const locale = "en";
+const locale: Locale = "en";
 ---
 
 <Base locale={locale} title={t(locale, "notFound.title")} description={t(locale, "notFound.description")} noindex>
-  <h1>{t(locale, "notFound.h1")}</h1>
-  <p>{t(locale, "notFound.body")}</p>
-  <p><a href={localePath(locale)}>{t(locale, "notFound.back")}</a></p>
+  <section class="container not-found">
+    <p class="not-found__code" aria-hidden="true">{t(locale, "notFound.code")}</p>
+    <h1>{t(locale, "notFound.h1")}</h1>
+    <p class="lede">{t(locale, "notFound.body")}</p>
+    <div class="btn-row">
+      <a class="btn btn--primary" href={localePath(locale)}>{t(locale, "notFound.back")}</a>
+      <a class="btn" href={localePath(locale, "tools")}>{t(locale, "notFound.tools")}</a>
+    </div>
+  </section>
 </Base>

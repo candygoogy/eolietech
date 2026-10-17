@@ -1,12 +1,74 @@
 ---
-// Placeholder home page. The design/marketing step replaces it.
 import Base from "../layouts/Base.astro";
-import { t } from "../i18n";
+import ToolIndex from "../components/ToolIndex.astro";
+import { directive } from "../components/csp";
+import { localePath, t } from "../i18n";
+import type { Locale } from "../tools/types";
 
-const locale = "en";
+const locale: Locale = "en";
+const facts = ["home.fact.local", "home.fact.free", "home.fact.open", "home.fact.offline"];
+const checks = ["network", "csp", "offline", "code"];
+const connectSrc = directive("connect-src");
 ---
 
 <Base locale={locale} title={t(locale, "home.title")} description={t(locale, "site.description")} path="/">
-  <h1>{t(locale, "home.h1")}</h1>
-  <p>{t(locale, "site.tagline")}</p>
+  <section class="hero container">
+    <div class="hero__text">
+      <h1>{t(locale, "home.h1")}</h1>
+      <p class="lede">{t(locale, "home.lede")}</p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="#tools">{t(locale, "home.cta.tools")}</a>
+        <a class="btn btn--ghost" href={localePath(locale, "security")}>{t(locale, "home.cta.verify")}</a>
+      </div>
+    </div>
+    <div class="hero__facts">
+      <h2 class="visually-hidden">{t(locale, "home.facts.label")}</h2>
+      <ul>
+        {facts.map((key) => <li>{t(locale, key)}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section id="tools" class="section container" aria-labelledby="tools-h">
+    <div class="section__head">
+      <h2 id="tools-h">{t(locale, "home.tools.h2")}</h2>
+      <p class="muted">{t(locale, "home.tools.lede")}</p>
+    </div>
+    <ToolIndex locale={locale} level={3} />
+    <p class="section__more"><a href={localePath(locale, "tools")}>{t(locale, "home.tools.all")}</a></p>
+  </section>
+
+  <section class="verify" aria-labelledby="verify-h">
+    <div class="container verify__inner">
+      <div class="verify__intro">
+        <h2 id="verify-h">{t(locale, "home.verify.h2")}</h2>
+        <p>{t(locale, "home.verify.lede")}</p>
+        {connectSrc && <pre class="verify__policy"><code>{connectSrc}</code></pre>}
+        <a class="verify__more" href={localePath(locale, "security")}>{t(locale, "home.verify.more")}</a>
+      </div>
+      <ol class="verify__list">
+        {
+          checks.map((id) => (
+            <li>
+              <h3>{t(locale, `home.verify.${id}.title`)}</h3>
+              <p>{t(locale, `home.verify.${id}.body`)}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section container closing">
+    <div class="closing__item">
+      <h2>{t(locale, "home.maker.h2")}</h2>
+      <p>{t(locale, "home.maker.body")}</p>
+      <p><a href={localePath(locale, "about")}>{t(locale, "home.maker.link")}</a></p>
+    </div>
+    <div class="closing__item">
+      <h2>{t(locale, "home.pro.h2")}</h2>
+      <p>{t(locale, "home.pro.body")}</p>
+      <p><a href={`${localePath(locale, "pricing")}#waitlist`}>{t(locale, "home.pro.link")}</a></p>
+    </div>
+  </section>
 </Base>
