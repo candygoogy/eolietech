@@ -18,6 +18,9 @@
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+  # Workers (image codecs, PDF.js, Ghostscript) are built into /_astro/. On cross-origin-isolated tool
+  # pages Chromium only starts a dedicated worker if its script response carries COEP too.
+  Cross-Origin-Embedder-Policy: credentialless
 
 # Cross-origin isolation (SharedArrayBuffer for multi-threaded WASM: AVIF encoder, ONNX Runtime)
 # on tool pages ONLY. Not site-wide: COEP would break the Turnstile iframe on the waitlist page.
