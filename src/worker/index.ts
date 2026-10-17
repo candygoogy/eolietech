@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import waitlist from "./routes/waitlist";
 
 /** Worker bindings (see wrangler.jsonc). TURNSTILE_SECRET is a secret (.dev.vars locally). */
 export interface Env {
@@ -13,7 +14,8 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.get("/api/health", (c) => c.json({ ok: true }));
 
-// Feature routes (e.g. POST /api/v1/waitlist) live in ./routes/ and are mounted here.
+// Feature routes live in ./routes/ and are mounted here.
+app.route("/api/v1/waitlist", waitlist);
 
 app.all("/api/*", (c) => c.json({ ok: false, error: "not_found" }, 404));
 
