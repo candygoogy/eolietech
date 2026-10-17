@@ -1,0 +1,50 @@
+/* Organize PDF only: lay pages out as a thumbnail grid. Scoped to this tool; colours/spacing come from tokens. */
+.tool--pdf-organize .tool-list--pages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--space-3, 1rem);
+  padding: 0;
+  list-style: none;
+}
+
+.tool--pdf-organize .tool-list--pages .tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1, 0.25rem);
+  text-align: center;
+}
+
+.tool--pdf-organize .tool-list--pages .tool-item[draggable="true"] {
+  cursor: grab;
+}
+
+.tool--pdf-organize .tool-list--pages .tool-item[data-dragging] {
+  opacity: 0.5;
+}
+
+.tool--pdf-organize .tool-list--pages .tool-item[data-drop-target] {
+  outline: 2px dashed var(--color-focus, currentColor);
+  outline-offset: 2px;
+}
+
+.tool--pdf-organize .tool-item__thumb {
+  display: grid;
+  place-items: center;
+  width: 9rem;
+  height: 9rem;
+}
+
+.tool--pdf-organize .tool-item__thumb canvas {
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 25%, transparent);
+  background: #fff;
+}
+
+.tool--pdf-organize .tool-list--pages .tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1, 0.25rem);
+}
