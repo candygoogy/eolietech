@@ -16,5 +16,16 @@
   "tool.related": "Related tools",
   "tool.loading": "Loading the tool…",
   "tool.noscript": "This tool runs in your browser and needs JavaScript.",
+  "tool.drop.label": "Choose a file or drop it here",
+  "tool.drop.labelMany": "Choose files or drop them here",
+  "tool.drop.hint": "Processed on your device. Nothing is uploaded.",
+  "tool.download": "Download",
+  "tool.downloadAll": "Download all (.zip)",
+  "tool.remove": "Remove",
+  "tool.reset": "Start over",
+  "tool.error.type": "{name} is not a supported file type.",
+  "tool.error.tooLarge": "{name} is larger than {max}.",
+  "tool.error.tooMany": "You can add up to {max} files at once.",
+  "tool.error.generic": "Something went wrong while processing this file.",
   "footer.copyright": "© {year} Francesco Basile. Code licensed under AGPL-3.0."
 }
