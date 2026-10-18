@@ -15,7 +15,7 @@ import type { Locale } from "../tools/types";
 const locale: Locale = "en";
 const email = t(locale, "privacy.email");
 const mailto = `mailto:${email}`;
-const toc = ["short", "who", "files", "browser", "waitlist", "turnstile", "hosting", "never", "transfers", "rights", "changes"];
+const toc = ["short", "who", "files", "browser", "waitlist", "turnstile", "hosting", "email", "never", "transfers", "rights", "changes"];
 const summary = ["files", "cookies", "tracking", "waitlist"];
 const kept = ["email", "day", "consent"];
 const rights = ["access", "rectify", "erase", "restrict", "object", "port", "withdraw"];
@@ -126,6 +126,17 @@ const rights = ["access", "rectify", "erase", "restrict", "object", "port", "wit
         </ul>
       </section>
 
+      <section aria-labelledby="email">
+        <h2 id="email">{t(locale, "privacy.email.h2")}</h2>
+        <p>{t(locale, "privacy.email.p1")}</p>
+        <p>{t(locale, "privacy.email.p2")}</p>
+        <p>{t(locale, "privacy.email.p3")}</p>
+        <p>{t(locale, "privacy.email.p4")}</p>
+        <ul class="links">
+          <li><a href="https://www.fastmail.com/policies/privacy/">{t(locale, "privacy.email.link")}</a></li>
+        </ul>
+      </section>
+
       <section aria-labelledby="never">
         <h2 id="never">{t(locale, "privacy.never.h2")}</h2>
         <ul class="never">
@@ -137,6 +148,7 @@ const rights = ["access", "rectify", "erase", "restrict", "object", "port", "wit
         <h2 id="transfers">{t(locale, "privacy.transfers.h2")}</h2>
         <p>{t(locale, "privacy.transfers.p1")}</p>
         <p>{t(locale, "privacy.transfers.p2")}</p>
+        <p>{t(locale, "privacy.transfers.p3")}</p>
       </section>
 
       <section aria-labelledby="rights">
