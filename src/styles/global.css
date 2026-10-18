@@ -354,33 +354,101 @@ hr {
   }
 }
 
-/* ---------- site footer ---------- */
-/* A designed close on a sunken field: the place line and links, then the name at full width. */
+/* ---------- site footer: the closing band ----------
+ * The site's one loud field (sulphur, --color-loud) on every page: a sign-off line and the two actions,
+ * the handwritten place line with the links, then the name at full width, cropped by the page's bottom
+ * edge. Everything on the band is ink (--color-loud-ink, 11:1 light / 9.9:1 dark); teal is not used here
+ * because it reads muddy on yellow, so links and focus rings switch to ink. */
 .site-footer {
   margin-top: var(--section-space);
-  background: var(--color-sunken);
-  color: var(--color-text);
+  overflow: hidden;
+  background: var(--color-loud);
+  color: var(--color-loud-ink);
+}
+
+.site-footer ::selection {
+  background: var(--color-loud-ink);
+  color: var(--color-loud);
+}
+
+.site-footer :focus-visible {
+  outline-color: var(--color-loud-ink);
 }
 
 .site-footer__inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--space-4) var(--space-5);
+  grid-template-areas:
+    "line actions"
+    "made nav"
+    "legal legal";
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
   max-width: calc(var(--content-width) + 2 * var(--gutter));
   margin-inline: auto;
-  padding: var(--space-6) var(--gutter) var(--space-4);
+  padding: clamp(3.5rem, 2rem + 5vw, 6.5rem) var(--gutter) 0;
+}
+
+.site-footer__line {
+  grid-area: line;
+  max-width: 16ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.2rem + 3.2vw, 4rem);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-h1);
+  text-wrap: balance;
+}
+
+.site-footer__actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+/* Buttons on the band: an ink outline, and one solid ink pill for the main way on.
+ * (.site-footer prefix: these must beat .btn, which comes later in this file.) */
+.site-footer .site-footer__btn {
+  min-height: 3.25rem;
+  padding-inline: 1.5rem;
+  border: 2px solid var(--color-loud-ink);
+  background: transparent;
+  color: var(--color-loud-ink);
+}
+
+.site-footer .site-footer__btn--solid {
+  background: var(--color-loud-ink);
+  color: var(--color-loud);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-footer .site-footer__btn:hover {
+    background: color-mix(in srgb, var(--color-loud-ink) 10%, transparent);
+    color: var(--color-loud-ink);
+  }
+
+  .site-footer .site-footer__btn--solid:hover {
+    background: color-mix(in srgb, var(--color-loud-ink) 84%, var(--color-loud));
+    color: var(--color-loud);
+  }
 }
 
 .site-footer__made {
-  max-width: 18ch;
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-stretch: 118%;
-  font-weight: 750;
+  grid-area: made;
+  margin-top: var(--space-6);
+  font-family: var(--font-hand);
+  font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+  font-weight: 600;
   line-height: 1.1;
-  letter-spacing: var(--track-h2);
-  text-wrap: balance;
+  rotate: -1.5deg;
+  transform-origin: left center;
+}
+
+.site-footer__nav {
+  grid-area: nav;
+  margin-top: var(--space-6);
 }
 
 .site-footer__nav ul {
@@ -398,41 +466,86 @@ hr {
   min-height: var(--target-min);
   padding-inline: var(--space-3);
   border-radius: var(--radius-full);
-  color: var(--color-text);
+  color: var(--color-loud-ink);
   font-size: var(--text-base);
+  font-weight: 700;
   text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-color);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .site-footer__nav a:hover {
-    background: var(--color-bg);
-    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-loud-ink) 10%, transparent);
+    color: var(--color-loud-ink);
   }
 }
 
-/* The name returns at full container width. */
-.site-footer__logo {
-  grid-column: 1 / -1;
-  margin-block: var(--space-6) var(--space-4);
-  color: var(--color-text);
+.site-footer__legal {
+  grid-area: legal;
+  font-size: var(--text-sm);
 }
 
-.site-footer__logo .logo {
+/* The name at full width, its lower quarter cut off by the bottom of the page. */
+.site-footer__word {
+  max-width: calc(var(--content-width) + 2 * var(--gutter));
+  margin: var(--space-5) auto 0;
+  padding-inline: calc(var(--gutter) * 0.5);
+  aspect-ratio: 4926 / 590;
+  box-sizing: content-box;
+  overflow: hidden;
+  color: var(--color-loud-ink);
+}
+
+.site-footer__word .logo {
+  display: block;
   width: 100%;
   height: auto;
 }
 
-.site-footer__legal {
-  grid-column: 1 / -1;
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
+/* The name rises out of the page edge as it scrolls into view (scroll-driven, CSS only). Where
+ * scroll timelines are unsupported, or motion is reduced, it simply sits there. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .site-footer__word {
+      view-timeline: --footer-word block;
+    }
+
+    .site-footer__word .logo {
+      animation: footer-word-rise linear both;
+      animation-timeline: --footer-word;
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes footer-word-rise {
+  from {
+    translate: 0 55%;
+  }
 }
 
 @media (max-width: 48rem) {
   .site-footer__inner {
     grid-template-columns: minmax(0, 1fr);
-    padding-top: var(--space-5);
+    grid-template-areas:
+      "line"
+      "actions"
+      "made"
+      "nav"
+      "legal";
+    align-items: start;
+  }
+
+  .site-footer__actions {
+    margin-top: var(--space-3);
+  }
+
+  .site-footer__made {
+    margin-top: var(--space-5);
+  }
+
+  .site-footer__nav {
+    margin-top: 0;
   }
 
   .site-footer__nav ul {
@@ -441,10 +554,6 @@ hr {
 
   .site-footer__nav a {
     padding-inline: var(--space-2);
-  }
-
-  .site-footer__logo {
-    margin-block: var(--space-4) var(--space-3);
   }
 }
 

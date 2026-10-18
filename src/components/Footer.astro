@@ -1,4 +1,9 @@
 ---
+/**
+ * The closing band on every page: the site's one loud colour (sulphur, from Vulcano's fumaroles).
+ * A sign-off line with the two actions, the handwritten place line and the links, then the name at
+ * full width, cropped by the bottom edge of the page. Styles: global.css, "site footer".
+ */
 import Logo from "./Logo.astro";
 import { localePath, t } from "../i18n";
 import { siteConfig } from "../site.config";
@@ -20,6 +25,11 @@ const links = [
 
 <footer class="site-footer">
   <div class="site-footer__inner">
+    <p class="site-footer__line">{t(locale, "footer.line")}</p>
+    <div class="site-footer__actions">
+      <a class="btn site-footer__btn site-footer__btn--solid" href={localePath(locale, "tools")}>{t(locale, "footer.cta.tools")}</a>
+      <a class="btn site-footer__btn" href={localePath(locale, "security")}>{t(locale, "footer.cta.verify")}</a>
+    </div>
     <p class="site-footer__made">{t(locale, "footer.made")}</p>
     <nav class="site-footer__nav" aria-label={t(locale, "footer.label")}>
       <ul>
@@ -32,9 +42,9 @@ const links = [
         }
       </ul>
     </nav>
-    <div class="site-footer__logo">
-      <Logo />
-    </div>
     <p class="site-footer__legal">{t(locale, "footer.copyright", { year })}</p>
+  </div>
+  <div class="site-footer__word">
+    <Logo wordmark />
   </div>
 </footer>

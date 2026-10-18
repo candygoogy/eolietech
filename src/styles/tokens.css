@@ -2,9 +2,15 @@
  * Eolietech design tokens.
  *
  * Palette: neutral white and greys for surfaces and text (Apple/Cloudflare-like; owner choice 2026-10-18),
- * plus two colours taken from the Aeolian Islands:
+ * plus three colours taken from the Aeolian Islands:
  *   Tyrrhenian sea     (deep teal)                         -> links, primary actions, focus
- *   ember              (Stromboli at night)                -> the logo mark only
+ *   ember              (Stromboli at night)                -> the logo mark; a deeper ember inks handwritten notes
+ *   sulphur            (Vulcano's fumaroles)               -> the one loud colour: closing band, stickers
+ *
+ * Identity (home desk, owner choice 2026-10-18): "postcards that never get posted". The visitor's
+ * files lie on a dotted desk as paper objects with handwritten notes (Caveat) and postmarks.
+ * Contrast of the additions: note ink 5.5:1 on white / 5.1:1 on surface, 10.2:1 on black;
+ * ink on sulphur 11.1:1 (light band), 9.9:1 (dark band); sulphur on the dark verify field 11.1:1.
  *
  * Contrast (WCAG 2.2): body text >= 13:1, muted text >= 5.6:1, accent text >= 6.2:1 on every
  * surface, control borders (--color-border-strong) >= 3:1, in both themes.
@@ -24,6 +30,15 @@
 @font-face {
   font-family: "Atkinson Hyperlegible Next";
   src: url("/fonts/atkinson-hyperlegible-next-var-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Handwriting: notes and annotations only (never running text, never UI labels). */
+@font-face {
+  font-family: "Caveat";
+  src: url("/fonts/caveat-var-latin.woff2") format("woff2");
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;
@@ -54,6 +69,14 @@
   --sea-wash-light: #dcebee;
   --sea-wash-dark: #16323a;
   --ember: #e0623a;
+  --ember-ink: #b5441c; /* notes on light grounds */
+  --ember-ink-light: #ff9b72; /* notes on dark grounds */
+  /* Vulcano sulphur */
+  --sulphur-100: #fdf1bf;
+  --sulphur-200: #fbe48a;
+  --sulphur-400: #f6cf2c;
+  --sulphur-500: #e0b81c;
+  --sulphur-700: #8a6d00;
 
   /* semantic colour: light theme */
   --color-bg: var(--neutral-0);
@@ -79,10 +102,23 @@
   --color-mark-fg: var(--neutral-50);
   --color-mark-sea: #3fa7b9;
   --color-mark-ember: var(--ember);
+  /* identity: the loud colour, handwriting, the desk and the paper objects on it */
+  --color-loud: var(--sulphur-400);
+  --color-loud-ink: var(--neutral-800);
+  --color-note: var(--ember-ink);
+  --color-stamp: var(--neutral-700); /* postmark ink */
+  --desk-dot: var(--neutral-200);
+  --paper: #fffdf8;
+  --paper-edge: rgb(0 0 0 / 0.07);
+  --paper-ink: var(--neutral-800);
+  --paper-shadow: 0 1px 1px rgb(0 0 0 / 0.06), 0 6px 14px -4px rgb(0 0 0 / 0.16), 0 18px 32px -16px rgb(0 0 0 / 0.18);
+  --paper-shadow-lift: 0 2px 2px rgb(0 0 0 / 0.06), 0 12px 22px -6px rgb(0 0 0 / 0.2), 0 30px 48px -20px rgb(0 0 0 / 0.22);
+  --sticker-edge: var(--neutral-800);
 
   /* typography */
   --font-sans: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Archivo", "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
   --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;
@@ -128,7 +164,7 @@
   --narrow-width: 46rem;
   --target-min: 2.75rem; /* 44px touch targets */
 
-  /* elevation: nothing on this site floats; surfaces are separated by tone. Name kept for tool.css. */
+  /* elevation: surfaces are separated by tone; only the home desk's paper objects cast shadows (--paper-shadow). Name kept for tool.css. */
   --shadow-panel: none;
 
   /* motion */
@@ -168,6 +204,18 @@
     --color-mark-bg: var(--neutral-750);
     --color-mark-fg: var(--neutral-50);
     --color-mark-sea: #3fa7b9;
+    /* identity: the desk at night. Paper is dimmed, not inverted; the band deepens a step. */
+    --color-loud: var(--sulphur-500);
+    --color-loud-ink: #111112;
+    --color-note: var(--ember-ink-light);
+    --color-stamp: var(--neutral-700);
+    --desk-dot: var(--neutral-750);
+    --paper: #e9e6de;
+    --paper-edge: rgb(0 0 0 / 0.2);
+    --paper-ink: var(--neutral-800);
+    --paper-shadow: 0 1px 1px rgb(0 0 0 / 0.5), 0 10px 24px -6px rgb(0 0 0 / 0.8);
+    --paper-shadow-lift: 0 2px 2px rgb(0 0 0 / 0.5), 0 18px 36px -8px rgb(0 0 0 / 0.9);
+    --sticker-edge: #000000;
   }
 }
 

@@ -1,0 +1,164 @@
+---
+/**
+ * The home desk: "postcards that never get posted". The visitor's own kinds of files lie on the desk
+ * as paper objects (a postcard of Stromboli, a tax PDF, a voice memo, a cut-out lemon), each with a
+ * handwritten note. Drawings are inline SVG in the site's colours (no external images, CSP-clean) and
+ * aria-hidden; the notes are real text, read as a list. Placement, tilts, entrance and hover:
+ * components.css, "home: desk".
+ */
+import { t } from "../i18n";
+import type { Locale } from "../tools/types";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/* Stamp perforations: hole centres along each edge of a 56 x 66 stamp. */
+const W = 56;
+const H = 66;
+const STEP = 6;
+const holes = [
+  ...Array.from({ length: Math.floor(W / STEP) + 1 }, (_, i) => [i * STEP + 1, 0]),
+  ...Array.from({ length: Math.floor(W / STEP) + 1 }, (_, i) => [i * STEP + 1, H]),
+  ...Array.from({ length: Math.floor(H / STEP) + 1 }, (_, i) => [0, i * STEP + 3]),
+  ...Array.from({ length: Math.floor(H / STEP) + 1 }, (_, i) => [W, i * STEP + 3]),
+];
+
+/* Voice memo waveform: bar heights (data for the drawing, not copy). */
+const wave = [10, 18, 26, 14, 34, 44, 30, 52, 40, 24, 46, 58, 36, 20, 30, 48, 62, 44, 28, 38, 50, 32, 18, 26, 40, 22, 14, 24, 12, 8];
+const PLAYED = 11;
+---
+
+<ul class="pile" aria-label={t(locale, "home.desk.label")}>
+  <li class="obj obj--postcard">
+    <div class="obj__paper" aria-hidden="true">
+      <svg class="obj__art" viewBox="0 0 300 196" focusable="false">
+        <rect class="pc-sky" width="300" height="196"></rect>
+        <rect class="pc-sky-low" y="92" width="300" height="60"></rect>
+        <circle class="pc-sun" cx="236" cy="138" r="24"></circle>
+        <path class="pc-smoke" d="M120 52c4-12 18-16 26-8 8-12 28-10 32 2 12-4 22 6 16 16"></path>
+        <path class="pc-cone" d="M14 152 98 68q6-6 13-6h12q7 0 13 6l82 84z"></path>
+        <path class="pc-cone-shade" d="M123 62q7 0 13 6l82 84h-58z"></path>
+        <path class="pc-lava" d="M130 70c9 18 15 36 30 62"></path>
+        <circle class="pc-ember" cx="117" cy="58" r="5.5"></circle>
+        <circle class="pc-ember" cx="107" cy="44" r="2"></circle>
+        <circle class="pc-ember" cx="128" cy="41" r="1.6"></circle>
+        <rect class="pc-sea" y="148" width="300" height="48"></rect>
+        <path class="pc-wave" d="M18 164h42M92 174h56M176 186h30M250 184h34M36 186h26"></path>
+        <path class="pc-glint" d="M218 160h36M226 170h20"></path>
+        <path class="pc-sail" d="M62 142v-24l14 22z"></path>
+        <path class="pc-hull" d="M52 144h30l-4 6H56z"></path>
+        <text class="pc-hello" x="16" y="34">saluti dalle Eolie!</text>
+      </svg>
+      <svg class="stamp" viewBox={`-2 -2 ${W + 4} ${H + 4}`} focusable="false">
+        <defs>
+          <mask id="stamp-perf">
+            <rect x="-2" y="-2" width={W + 4} height={H + 4} fill="#fff"></rect>
+            {holes.map(([x, y]) => <circle cx={x} cy={y} r="2.3" fill="#000"></circle>)}
+          </mask>
+        </defs>
+        <g mask="url(#stamp-perf)">
+          <rect class="stamp__paper" width={W} height={H}></rect>
+          <rect class="stamp__field" x="5" y="5" width="46" height="56"></rect>
+          <path class="stamp__cone" d="M12 46 25.5 25h5L44 46z"></path>
+          <circle class="stamp__ember" cx="29.5" cy="17" r="2.6"></circle>
+          <rect class="stamp__sea" x="10" y="50" width="36" height="3.5" rx="1.75"></rect>
+        </g>
+      </svg>
+      <svg class="postmark" viewBox="0 0 150 80" focusable="false">
+        <path class="postmark__waves" d="M0 24q7-5 14 0t14 0 14 0 14 0 14 0 14 0M0 34q7-5 14 0t14 0 14 0 14 0 14 0 14 0M0 44q7-5 14 0t14 0 14 0 14 0 14 0 14 0M0 54q7-5 14 0t14 0 14 0 14 0 14 0 14 0"></path>
+        <circle class="postmark__ring" cx="114" cy="40" r="31"></circle>
+        <circle class="postmark__ring postmark__ring--inner" cx="114" cy="40" r="17"></circle>
+        <path id="postmark-arc" d="M91.5 40a22.5 22.5 0 1 1 45 0 22.5 22.5 0 1 1-45 0" fill="none"></path>
+        <text class="postmark__arc"><textPath href="#postmark-arc" textLength="138" lengthAdjust="spacing">{t(locale, "home.desk.stamp")} ·</textPath></text>
+        <text class="postmark__mid" x="114" y="43">EOLIE</text>
+      </svg>
+    </div>
+    <p class="hand obj__note">{t(locale, "home.desk.photo")}</p>
+    <p class="sticker sticker--loud obj__sticker">{t(locale, "home.desk.sticker")}</p>
+  </li>
+
+  <li class="obj obj--pdf">
+    <div class="obj__paper" aria-hidden="true">
+      <svg class="obj__art" viewBox="0 0 170 220" focusable="false">
+        <rect class="doc-tab" x="120" y="14" width="36" height="17" rx="3"></rect>
+        <text class="doc-tab__text" x="138" y="26.5">PDF</text>
+        <rect class="doc-ink" x="14" y="16" width="80" height="9" rx="2"></rect>
+        <rect class="doc-soft" x="14" y="31" width="52" height="5" rx="2"></rect>
+        <rect class="doc-line" x="14" y="52" width="142" height="4" rx="2"></rect>
+        <rect class="doc-line" x="14" y="61" width="128" height="4" rx="2"></rect>
+        <rect class="doc-line" x="14" y="70" width="138" height="4" rx="2"></rect>
+        <rect class="doc-line" x="14" y="79" width="92" height="4" rx="2"></rect>
+        <rect class="doc-row" x="14" y="98" width="142" height="13" rx="2"></rect>
+        <rect class="doc-row" x="14" y="124" width="142" height="13" rx="2"></rect>
+        <rect class="doc-soft" x="20" y="102.5" width="48" height="4" rx="2"></rect>
+        <rect class="doc-soft" x="20" y="115.5" width="60" height="4" rx="2"></rect>
+        <rect class="doc-soft" x="20" y="128.5" width="40" height="4" rx="2"></rect>
+        <rect class="doc-soft" x="20" y="141.5" width="54" height="4" rx="2"></rect>
+        <rect class="doc-ink" x="122" y="102.5" width="28" height="4" rx="2"></rect>
+        <rect class="doc-ink" x="128" y="115.5" width="22" height="4" rx="2"></rect>
+        <rect class="doc-ink" x="118" y="128.5" width="32" height="4" rx="2"></rect>
+        <rect class="doc-ink" x="126" y="141.5" width="24" height="4" rx="2"></rect>
+        <rect class="doc-line" x="14" y="162" width="136" height="4" rx="2"></rect>
+        <rect class="doc-line" x="14" y="171" width="104" height="4" rx="2"></rect>
+        <path class="doc-sign" d="M18 200c5-11 9 5 15-3s7-9 11-1 8-7 13 1 6-4 10-1"></path>
+        <path class="doc-clip" d="M22-8v30a7 7 0 0 0 14 0V0a4.5 4.5 0 0 0-9 0v20"></path>
+      </svg>
+    </div>
+    <p class="hand obj__note">{t(locale, "home.desk.pdf")}</p>
+  </li>
+
+  <li class="obj obj--memo">
+    <div class="obj__paper" aria-hidden="true">
+      <svg class="obj__art" viewBox="0 0 260 130" focusable="false">
+        <circle class="memo-play" cx="36" cy="58" r="21"></circle>
+        <path class="memo-play__icon" d="M29 47v22l18-11z"></path>
+        {
+          wave.map((h, i) => (
+            <rect
+              class={i < PLAYED ? "memo-bar memo-bar--played" : "memo-bar"}
+              x={70 + i * 6}
+              y={58 - h / 2}
+              width="3.2"
+              height={h}
+              rx="1.6"
+            ></rect>
+          ))
+        }
+        <rect class="memo-track" x="70" y="104" width="178" height="3" rx="1.5"></rect>
+        <rect class="memo-track memo-track--played" x="70" y="104" width="64" height="3" rx="1.5"></rect>
+        <circle class="memo-knob" cx="134" cy="105.5" r="5"></circle>
+      </svg>
+    </div>
+    <p class="hand obj__note">{t(locale, "home.desk.memo")}</p>
+  </li>
+
+  <li class="obj obj--lemon">
+    <div class="obj__paper" aria-hidden="true">
+      <svg class="obj__art" viewBox="0 0 160 160" focusable="false">
+        <defs>
+          <pattern id="desk-checker" width="16" height="16" patternUnits="userSpaceOnUse">
+            <rect class="chk-a" width="16" height="16"></rect>
+            <rect class="chk-b" width="8" height="8"></rect>
+            <rect class="chk-b" x="8" y="8" width="8" height="8"></rect>
+          </pattern>
+        </defs>
+        <rect width="160" height="160" fill="url(#desk-checker)"></rect>
+        <g transform="rotate(-18 80 88)">
+          <ellipse class="lemon-cut" cx="80" cy="88" rx="58" ry="43"></ellipse>
+          <path class="lemon" d="M22 88q2-6 9-7 6-28 49-30 43 2 49 30 7 1 9 7-2 6-9 7-6 28-49 30-43-2-49-30-7-1-9-7z"></path>
+          <ellipse class="lemon-shine" cx="62" cy="72" rx="15" ry="6"></ellipse>
+          <circle class="lemon-pore" cx="96" cy="70" r="1.6"></circle>
+          <circle class="lemon-pore" cx="108" cy="92" r="1.6"></circle>
+          <circle class="lemon-pore" cx="84" cy="104" r="1.6"></circle>
+          <circle class="lemon-pore" cx="58" cy="96" r="1.6"></circle>
+        </g>
+        <path class="leaf" d="M84 42c10-20 34-25 48-18-6 17-27 27-48 18z"></path>
+        <path class="leaf-vein" d="M87 41c14-7 28-13 42-16"></path>
+      </svg>
+    </div>
+    <p class="hand obj__note">{t(locale, "home.desk.lemon")}</p>
+  </li>
+</ul>

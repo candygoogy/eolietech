@@ -1,52 +1,100 @@
 ---
+/**
+ * Home: "postcards that never get posted". A dotted desk with the visitor's kinds of files lying on
+ * it (Desk.astro) and the real image compressor running on it (LiveTool.astro), then the tools, the
+ * formats as stickers, how it works, the checks, the maker. The sulphur closing band is the Footer.
+ */
 import Base from "../layouts/Base.astro";
+import Desk from "../components/Desk.astro";
 import HowItWorks from "../components/HowItWorks.astro";
+import LiveTool from "../components/LiveTool.astro";
+import NoteArrow from "../components/NoteArrow.astro";
 import ToolIndex from "../components/ToolIndex.astro";
 import { directive } from "../components/csp";
 import { localePath, t } from "../i18n";
+import { getTool } from "../tools/registry";
 import type { Locale } from "../tools/types";
 
 const locale: Locale = "en";
-const facts = ["local", "free", "open", "offline"];
+const facts = ["free", "open", "offline"];
 const checks = ["network", "csp", "offline", "code"];
 const connectSrc = directive("connect-src");
+const compressSlug = getTool("image-compress")?.slug[locale] ?? "compress-image";
+
+/** Formats some tool really accepts (see each tool's accept list); names as written, not copy. */
+const formats = ["JPG", "PNG", "WebP", "AVIF", "HEIC", "GIF", "BMP", "PDF", "MP3", "M4A", "WAV", "OGG", "FLAC", "MP4", "WebM"];
 ---
 
 <Base locale={locale} title={t(locale, "home.title")} description={t(locale, "site.description")} path="/">
-  <section class="hero container">
-    <h1>{t(locale, "home.h1")}</h1>
-    <p class="lede hero__lede">{t(locale, "home.lede")}</p>
-    <div class="hero__actions">
-      <a class="btn btn--primary hero__cta" href="#tools">{t(locale, "home.cta.tools")}</a>
-      <a class="link-strong" href={localePath(locale, "security")}>{t(locale, "home.cta.verify")}</a>
-    </div>
-    <h2 class="visually-hidden">{t(locale, "home.facts.label")}</h2>
-    <ul class="hero__specs">
-      {
-        facts.map((id) => (
-          <li>
-            <span class="hero__spec-term">{t(locale, `home.fact.${id}.term`)}</span>
-            <span class="hero__spec-text">{t(locale, `home.fact.${id}`)}</span>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
+  {/* The desk's notes are handwritten and on the first screen: fetch Caveat early (home only). */}
+  <link slot="head" rel="preload" href="/fonts/caveat-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <div class="desk">
+    <section class="desk__hero container" aria-labelledby="hero-h">
+      <h1 id="hero-h" class="desk__title">{t(locale, "home.h1")}</h1>
+      <div class="desk__body">
+        <div class="desk__intro">
+          <p class="lede desk__lede">{t(locale, "home.lede")}</p>
+          <div class="desk__actions">
+            <a class="btn btn--primary desk__cta" href="#try">{t(locale, "home.cta.try")}</a>
+            <a class="link-strong" href="#tools">{t(locale, "home.cta.tools")}</a>
+          </div>
+        </div>
+        <Desk locale={locale} />
+      </div>
+    </section>
+
+    <section id="try" class="try container" aria-labelledby="try-h">
+      <div class="try__head" data-reveal data-reveal-stagger>
+        <h2 id="try-h">{t(locale, "home.try.h2")}</h2>
+        <p class="try__lede">{t(locale, "home.try.lede")}</p>
+        <ul class="try__facts" aria-label={t(locale, "home.facts.label")}>
+          {
+            facts.map((id) => (
+              <li>{t(locale, `home.fact.${id}`)}</li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="try__stage">
+        <p class="hand try__note">
+          {t(locale, "home.try.note")}
+          <NoteArrow />
+        </p>
+        <p class="sticker sticker--ink try__sticker" aria-hidden="true">{t(locale, "home.try.sticker")}</p>
+        <LiveTool locale={locale} toolId="image-compress" />
+        <p class="try__more"><a class="link-strong" href={localePath(locale, compressSlug)}>{t(locale, "home.try.more")}</a></p>
+      </div>
+    </section>
+  </div>
 
   <section id="tools" class="section container" aria-labelledby="tools-h">
-    <div class="section__head" data-reveal>
+    <div class="section__head section__head--noted" data-reveal>
       <h2 id="tools-h">{t(locale, "home.tools.h2")}</h2>
       <p>{t(locale, "home.tools.lede")}</p>
+      <p class="hand section__note">{t(locale, "home.tools.note")}</p>
     </div>
     <ToolIndex locale={locale} level={3} reveal />
     <p class="section__more"><a class="link-strong" href={localePath(locale, "tools")}>{t(locale, "home.tools.all")}</a></p>
+  </section>
+
+  <section class="formats desk-ground" aria-labelledby="formats-h">
+    <div class="container formats__inner">
+      <h2 id="formats-h" data-reveal>{t(locale, "home.formats.h2")}</h2>
+      <p class="formats__lede" data-reveal>{t(locale, "home.formats.lede")}</p>
+      <ul class="stickers" data-reveal data-reveal-stagger>
+        {formats.map((name) => <li class="sticker">{name}</li>)}
+      </ul>
+    </div>
   </section>
 
   <HowItWorks locale={locale} />
 
   <section class="verify" aria-labelledby="verify-h">
     <div class="container verify__inner">
-      <h2 id="verify-h" class="verify__title" data-reveal>{t(locale, "home.verify.h2")}</h2>
+      <div class="verify__title" data-reveal>
+        <h2 id="verify-h">{t(locale, "home.verify.h2")}</h2>
+        <p class="hand hand--loud verify__note">{t(locale, "home.verify.note")}</p>
+      </div>
       <div class="verify__intro" data-reveal>
         <p>{t(locale, "home.verify.lede")}</p>
         {connectSrc && <pre class="verify__policy"><code>{connectSrc}</code></pre>}
@@ -66,7 +114,10 @@ const connectSrc = directive("connect-src");
   </section>
 
   <section class="section container closing">
-    <h2 class="closing__title" data-reveal>{t(locale, "home.maker.h2")}</h2>
+    <div class="closing__head" data-reveal>
+      <h2 class="closing__title">{t(locale, "home.maker.h2")}</h2>
+      <p class="hand closing__note">{t(locale, "home.maker.note")}</p>
+    </div>
     <div class="closing__row" data-reveal data-reveal-stagger>
       <div class="closing__maker">
         <p>{t(locale, "home.maker.body")}</p>

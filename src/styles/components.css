@@ -37,17 +37,89 @@
   }
 }
 
-/* ---------- home: hero ---------- */
-/* One dominant thing: the statement, set at display size across the grid. */
-.hero {
-  padding-block: clamp(4rem, 2rem + 7vw, 8.5rem) var(--section-space);
+/* ---------- identity: handwritten notes and stickers ----------
+ * Notes (.hand) are Caveat in the note ink (deep ember: 5.5:1 on white, 10.2:1 on black); they annotate,
+ * they never carry running text or UI labels. Stickers are tilted pills with a hard sticker edge. */
+.hand {
+  font-family: var(--font-hand);
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--color-note);
+  text-wrap: balance;
 }
 
-.hero + .section {
-  padding-top: 0;
+/* On dark fields only (sulphur on ink, 11:1). */
+.hand--loud {
+  color: var(--color-loud);
 }
 
-.hero h1 {
+.hand__arrow {
+  flex: none;
+  width: 2.2em;
+  height: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sticker {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42em 1em 0.5em;
+  border: 2px solid var(--sticker-edge);
+  border-radius: var(--radius-full);
+  background: var(--paper);
+  box-shadow: 0 0.18em 0 var(--sticker-edge);
+  color: var(--paper-ink);
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  rotate: var(--tilt, 0deg);
+}
+
+.sticker--loud {
+  background: var(--color-loud);
+  color: var(--color-loud-ink);
+}
+
+.sticker--ink {
+  background: var(--neutral-800);
+  color: var(--neutral-50);
+}
+
+@media (prefers-color-scheme: dark) {
+  .sticker--ink {
+    background: var(--neutral-750);
+  }
+}
+
+/* ---------- home: desk ----------
+ * The home's ground: the white page with a faint dot grid (a desk, not graph paper: dots only, no lines).
+ * The hero statement sits on it with the paper objects (Desk.astro), then the live compressor. */
+.desk,
+.desk-ground {
+  background-color: var(--color-bg);
+  background-image: radial-gradient(circle, var(--desk-dot) 1.25px, transparent 1.75px);
+  background-position: center top;
+  background-size: 1.375rem 1.375rem;
+}
+
+.desk {
+  overflow-x: clip;
+}
+
+.desk__hero {
+  padding-top: clamp(2.5rem, 1rem + 4.5vw, 5.5rem);
+}
+
+/* One dominant thing: the statement, at display size across the grid. */
+.desk__title {
   max-width: none;
   font-size: var(--text-display);
   font-stretch: 125%;
@@ -57,22 +129,22 @@
 }
 
 @media (max-width: 48rem) {
-  .hero h1 {
+  .desk__title {
     font-stretch: 112%;
   }
 }
 
 @media (max-width: 30rem) {
-  .hero h1 {
+  .desk__title {
     font-stretch: 100%;
   }
 }
 
-.hero__lede {
+.desk__body {
   margin-top: var(--space-4);
 }
 
-.hero__actions {
+.desk__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -80,93 +152,941 @@
   margin-top: var(--space-5);
 }
 
-.hero__cta {
+.desk__cta {
   min-height: 3.25rem;
   padding-inline: 1.75rem;
 }
 
-/* Spec row: four short facts, a term over its sentence. No rules, no markers. */
-.hero__specs {
+/* The pile: a canvas with a fixed aspect ratio; objects sit at percentages of it and notes size with
+ * it (container units), so the arrangement holds at every width. Phones and tablets get their own
+ * arrangement under the intro; wide screens lay the intro over the pile's empty left side. */
+.pile {
+  --note-size: clamp(1.125rem, 4.6cqi, 1.5rem);
+  position: relative;
+  aspect-ratio: 360 / 440;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+  container-type: inline-size;
+}
+
+@media (min-width: 40rem) and (max-width: 74.99rem) {
+  .pile {
+    --note-size: clamp(1.25rem, 2.8cqi, 1.5rem);
+    aspect-ratio: 720 / 560;
+  }
+}
+
+@media (min-width: 75rem) {
+  .desk__body {
+    display: grid;
+    grid-template-areas: "stack";
+    margin-top: var(--space-3);
+  }
+
+  .desk__intro,
+  .pile {
+    grid-area: stack;
+  }
+
+  .desk__intro {
+    position: relative;
+    z-index: 2;
+    align-self: start;
+    max-width: 38%;
+  }
+
+  .pile {
+    --note-size: clamp(1.25rem, 2.2cqi, 1.75rem);
+    aspect-ratio: 1152 / 560;
+    margin-top: 0;
+  }
+}
+
+.obj {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: var(--w);
+  rotate: var(--tilt);
+}
+
+.obj__paper {
+  position: relative;
+  border-radius: 3px;
+  background: var(--paper);
+  box-shadow: var(--paper-shadow);
+}
+
+.obj__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.obj__note {
+  position: absolute;
+  width: max-content;
+  max-width: 11em;
+  font-size: var(--note-size);
+}
+
+.obj__sticker {
+  position: absolute;
+  z-index: 1;
+  font-size: clamp(0.875rem, 3.4cqi, 1.25rem);
+}
+
+/* Arrangement: phones (default), tablets, wide screens. --x/--y/--w are % of the pile. */
+.obj--postcard {
+  --x: 1%;
+  --y: 1%;
+  --w: 64%;
+  --tilt: -4deg;
+  --i: 0;
+}
+
+.obj--pdf {
+  --x: 70%;
+  --y: 5%;
+  --w: 28%;
+  --tilt: 6deg;
+  --i: 1;
+}
+
+.obj--memo {
+  --x: 34%;
+  --y: 56%;
+  --w: 62%;
+  --tilt: 2.5deg;
+  --i: 2;
+}
+
+.obj--lemon {
+  --x: 3%;
+  --y: 52%;
+  --w: 27%;
+  --tilt: -7deg;
+  --i: 3;
+}
+
+.obj--postcard .obj__note {
+  top: 106%;
+  left: 2%;
+  rotate: 2deg;
+}
+
+.obj--postcard .obj__sticker {
+  top: -9%;
+  left: -3%;
+  --tilt: -8deg;
+}
+
+.obj--pdf .obj__note {
+  top: 105%;
+  right: -4%;
+  max-width: 6.5em;
+  rotate: -4deg;
+  text-align: right;
+}
+
+.obj--memo .obj__note {
+  top: 108%;
+  right: 0;
+  max-width: 9em;
+  rotate: -1.5deg;
+  text-align: right;
+}
+
+.obj--lemon .obj__note {
+  top: 106%;
+  left: 0;
+  max-width: 5.5em;
+  rotate: 3deg;
+}
+
+@media (min-width: 40rem) and (max-width: 74.99rem) {
+  .obj--postcard {
+    --x: 2%;
+    --y: 2%;
+    --w: 42%;
+  }
+
+  .obj--pdf {
+    --x: 52%;
+    --y: 0%;
+    --w: 20%;
+  }
+
+  .obj--memo {
+    --x: 48%;
+    --y: 60%;
+    --w: 34%;
+  }
+
+  .obj--lemon {
+    --x: 79%;
+    --y: 12%;
+    --w: 17%;
+  }
+
+  .obj--pdf .obj__note {
+    right: auto;
+    left: 0;
+    text-align: left;
+  }
+
+  .obj--lemon .obj__note {
+    max-width: 6em;
+  }
+}
+
+@media (min-width: 75rem) {
+  .obj--postcard {
+    --x: 41%;
+    --y: 0%;
+    --w: 34%;
+  }
+
+  .obj--pdf {
+    --x: 79.5%;
+    --y: 1%;
+    --w: 17.5%;
+  }
+
+  .obj--memo {
+    --x: 53%;
+    --y: 64%;
+    --w: 26%;
+  }
+
+  .obj--lemon {
+    --x: 5%;
+    --y: 60%;
+    --w: 14%;
+  }
+
+  .obj--postcard .obj__note {
+    top: 104%;
+    left: -4%;
+    max-width: 8em;
+    rotate: -3deg;
+  }
+
+  .obj--postcard .obj__sticker {
+    top: auto;
+    left: auto;
+    right: -4%;
+    bottom: -7%;
+    --tilt: 9deg;
+  }
+
+  .obj--pdf .obj__note {
+    top: 104%;
+    right: auto;
+    left: -10%;
+    max-width: 8em;
+    text-align: left;
+  }
+
+  .obj--memo .obj__note {
+    top: 106%;
+    right: auto;
+    left: 6%;
+    max-width: none;
+    text-align: left;
+  }
+
+  .obj--lemon .obj__note {
+    top: 30%;
+    left: 112%;
+    max-width: 6em;
+  }
+}
+
+/* Paper details. */
+.obj--postcard .obj__paper {
+  padding: 4%;
+}
+
+/* The PDF: two sheets under the top one. */
+.obj--pdf .obj__paper {
+  border-radius: 2px;
+}
+
+.obj--pdf .obj__paper::before,
+.obj--pdf .obj__paper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 2px;
+  background: var(--paper);
+  box-shadow: var(--paper-shadow);
+}
+
+.obj--pdf .obj__paper::before {
+  translate: -5% 3%;
+  rotate: -6deg;
+}
+
+.obj--pdf .obj__paper::after {
+  translate: 4% 2%;
+  rotate: 4deg;
+}
+
+.obj--memo .obj__paper {
+  border-radius: 1rem;
+}
+
+.obj--lemon .obj__paper {
+  overflow: hidden;
+}
+
+/* Postcard illustration: Stromboli at dusk (sulphur sky, ember crater, the sea line). */
+.pc-sky {
+  fill: var(--sulphur-200);
+}
+
+.pc-sky-low {
+  fill: var(--sulphur-100);
+}
+
+.pc-sun {
+  fill: #f39a6e;
+}
+
+.pc-smoke {
+  fill: none;
+  stroke: #fffaf0;
+  stroke-width: 7;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+.pc-cone {
+  fill: #2b2b30;
+}
+
+.pc-cone-shade {
+  fill: #3b3b42;
+}
+
+.pc-lava {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.pc-ember {
+  fill: var(--ember);
+}
+
+.pc-sea {
+  fill: var(--color-mark-sea);
+}
+
+.pc-wave {
+  fill: none;
+  stroke: var(--sea-200);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.pc-glint {
+  fill: none;
+  stroke: var(--sulphur-200);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.pc-sail {
+  fill: #fffdf8;
+}
+
+.pc-hull {
+  fill: #2b2b30;
+}
+
+.pc-hello {
+  font-family: var(--font-hand);
+  font-size: 24px;
+  font-weight: 700;
+  fill: #2b2b30;
+}
+
+/* Stamp (perforated) and postmark, top right of the postcard. */
+.stamp {
+  position: absolute;
+  top: 7%;
+  right: 6%;
+  width: 17%;
+  height: auto;
+  rotate: 4deg;
+}
+
+.stamp__paper {
+  fill: #fffdf8;
+}
+
+.stamp__field {
+  fill: var(--sulphur-400);
+}
+
+.stamp__cone {
+  fill: #2b2b30;
+}
+
+.stamp__ember {
+  fill: var(--ember);
+}
+
+.stamp__sea {
+  fill: var(--color-mark-sea);
+}
+
+.postmark {
+  position: absolute;
+  top: 10%;
+  right: 14%;
+  width: 52%;
+  height: auto;
+  overflow: visible;
+  rotate: -8deg;
+  color: var(--color-stamp);
+  opacity: 0.85;
+}
+
+.postmark__waves,
+.postmark__ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.postmark__ring--inner {
+  stroke-width: 1.4;
+}
+
+.postmark__arc,
+.postmark__mid {
+  fill: currentColor;
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.postmark__arc {
+  font-size: 6.6px;
+}
+
+.postmark__mid {
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
+  text-anchor: middle;
+}
+
+/* The PDF's top sheet. */
+.doc-tab {
+  fill: #c8462a;
+}
+
+.doc-tab__text {
+  fill: #fff;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.doc-ink {
+  fill: #2b2b30;
+}
+
+.doc-soft {
+  fill: #a9a9b0;
+}
+
+.doc-line {
+  fill: #d8d8de;
+}
+
+.doc-row {
+  fill: #efeff3;
+}
+
+.doc-sign {
+  fill: none;
+  stroke: #2b4a8a;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.doc-clip {
+  fill: none;
+  stroke: #8d8d95;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* Voice memo card. */
+.memo-play {
+  fill: var(--ember);
+}
+
+.memo-play__icon {
+  fill: #fff;
+}
+
+.memo-bar {
+  fill: #b9b9c0;
+}
+
+.memo-bar--played {
+  fill: #2b2b30;
+}
+
+.memo-track {
+  fill: #dcdce1;
+}
+
+.memo-track--played,
+.memo-knob {
+  fill: #2b2b30;
+}
+
+/* The cut-out lemon on the transparency checkerboard. */
+.chk-a {
+  fill: #ffffff;
+}
+
+.chk-b {
+  fill: #e4e4e9;
+}
+
+.lemon {
+  fill: #f4cf3b;
+  stroke: #d6a40c;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.lemon-shine {
+  fill: #fff4bf;
+}
+
+.lemon-pore {
+  fill: #dfb21a;
+}
+
+.lemon-cut {
+  fill: none;
+  stroke: #2b2b30;
+  stroke-width: 1.6;
+  stroke-dasharray: 5 4;
+}
+
+.leaf {
+  fill: #5f8f3e;
+}
+
+.leaf-vein {
+  fill: none;
+  stroke: #46702b;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Paper at night: the same drawings, a step dimmer, so the desk does not glare. */
+  .obj__art,
+  .stamp {
+    filter: brightness(0.9);
+  }
+
+  .chk-a {
+    fill: #e9e6de;
+  }
+
+  .chk-b {
+    fill: #cfcdc6;
+  }
+}
+
+/* Motion. Signature move: the objects are dropped onto the desk one after another (they arrive a
+ * little high and turned, then settle), the notes are written on, the postmark lands once. Only
+ * transform and opacity (clip-path for the writing). Under reduced motion it is all just there. */
+@media (prefers-reduced-motion: no-preference) {
+  .obj {
+    animation: desk-land 640ms var(--ease-out) backwards;
+    animation-delay: calc(160ms + var(--i) * 90ms);
+  }
+
+  .obj__note {
+    animation: desk-write 620ms var(--ease-out) backwards;
+    animation-delay: calc(560ms + var(--i) * 90ms);
+  }
+
+  .postmark {
+    animation: desk-thump 300ms var(--ease-out) 900ms backwards;
+  }
+
+  .obj__sticker {
+    animation: desk-stick 360ms var(--ease-out) 1050ms backwards;
+  }
+
+  .desk__lede {
+    animation: rise var(--duration-reveal) var(--stagger) var(--ease-out) both;
+  }
+
+  .desk__actions {
+    animation: rise var(--duration-reveal) calc(2 * var(--stagger)) var(--ease-out) both;
+  }
+
+  /* The h1 is the LCP element: it moves but never fades, so it paints at full strength at once. */
+  .desk__title {
+    animation: settle var(--duration-reveal) var(--ease-out) both;
+  }
+}
+
+@keyframes desk-land {
+  from {
+    opacity: 0;
+    translate: 0 -1.5rem;
+    rotate: calc(var(--tilt) + 5deg);
+    scale: 1.05;
+  }
+}
+
+@keyframes desk-write {
+  from {
+    clip-path: inset(-20% 100% -20% 0);
+  }
+
+  to {
+    clip-path: inset(-20% 0 -20% 0);
+  }
+}
+
+@keyframes desk-thump {
+  from {
+    opacity: 0;
+    scale: 1.35;
+  }
+}
+
+@keyframes desk-stick {
+  from {
+    opacity: 0;
+    scale: 1.2;
+    rotate: calc(var(--tilt) - 10deg);
+  }
+}
+
+/* Objects react to a real pointer: picked up a little and straightened. Touch gets nothing. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .obj {
+    transition:
+      translate var(--duration-base) var(--ease-out),
+      rotate var(--duration-base) var(--ease-out);
+  }
+
+  .obj__paper {
+    transition: box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .obj:hover {
+    z-index: 3;
+    translate: 0 -0.375rem;
+    rotate: calc(var(--tilt) * 0.4);
+  }
+
+  .obj:hover .obj__paper {
+    box-shadow: var(--paper-shadow-lift);
+  }
+}
+
+/* ---------- home: the live compressor on the desk ---------- */
+.try {
+  padding-block: clamp(3rem, 1.5rem + 4vw, 5.5rem) clamp(4rem, 2rem + 6vw, 8rem);
+}
+
+.try__head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4) var(--space-5);
-  margin-top: var(--space-7);
+  gap: var(--space-3) var(--space-6);
+}
+
+.try__head h2 {
+  font-size: var(--text-3xl);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-h1);
+}
+
+.try__lede {
+  max-width: 36rem;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+}
+
+/* Three short facts; the marker is the logo's sea line. */
+.try__facts {
+  display: grid;
+  gap: var(--space-2);
   padding: 0;
   list-style: none;
 }
 
-.hero__specs li {
-  display: grid;
-  align-content: start;
-  gap: var(--space-1);
-}
-
-.hero__spec-term {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-stretch: 125%;
-  font-weight: 750;
-  line-height: 1.2;
-  letter-spacing: var(--track-h3);
-}
-
-.hero__spec-text {
-  max-width: 28ch;
-  font-size: var(--text-sm);
+.try__facts li {
+  position: relative;
+  padding-left: 1.75rem;
+  font-size: var(--text-base);
   line-height: 1.45;
-  color: var(--color-text-muted);
 }
 
-@media (min-width: 30rem) {
-  .hero__specs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.try__facts li::before {
+  content: "";
+  position: absolute;
+  top: 0.68em;
+  left: 0;
+  width: 1rem;
+  height: var(--sea-line);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
 }
 
-@media (min-width: 64rem) {
-  .hero__specs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 30rem) {
-  .hero__specs {
-    margin-top: var(--space-6);
-  }
-}
-
-/* Entrance, once per visit. The h1 is the LCP element: it moves but never fades, so it paints at
-   full strength on the first frame. Everything is visible without the animation. */
-@media (prefers-reduced-motion: no-preference) {
-  .hero h1 {
-    animation: settle var(--duration-reveal) var(--ease-out) both;
+@media (min-width: 52rem) {
+  .try__head {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
   }
 
-  .hero__lede {
-    animation: rise var(--duration-reveal) var(--stagger) var(--ease-out) both;
+  .try__head h2,
+  .try__lede {
+    grid-column: 1;
   }
 
-  .hero__actions {
-    animation: rise var(--duration-reveal) calc(2 * var(--stagger)) var(--ease-out) both;
-  }
-
-  .hero__specs > li {
-    animation: rise var(--duration-reveal) calc(3 * var(--stagger)) var(--ease-out) both;
-  }
-
-  .hero__specs > li:nth-child(2) {
-    animation-delay: calc(4 * var(--stagger));
-  }
-
-  .hero__specs > li:nth-child(3) {
-    animation-delay: calc(5 * var(--stagger));
-  }
-
-  .hero__specs > li:nth-child(4) {
-    animation-delay: calc(6 * var(--stagger));
+  .try__facts {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
   }
 }
 
+.try__stage {
+  position: relative;
+  margin-top: var(--space-5);
+}
+
+/* The panel is the one big object on the desk, so it lies on it like the paper does. */
+.try__stage .tool-panel {
+  box-shadow: var(--paper-shadow);
+}
+
+.try__note {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  rotate: -1.5deg;
+}
+
+.try__note .hand__arrow {
+  rotate: 70deg;
+  translate: 0 0.4em;
+}
+
+.try__sticker {
+  position: absolute;
+  z-index: 2;
+  right: 0.5rem;
+  top: -0.25rem;
+  --tilt: 7deg;
+  font-size: var(--text-sm);
+}
+
+.try__more {
+  margin-top: var(--space-4);
+}
+
+@media (min-width: 52rem) {
+  .try__stage {
+    margin-top: var(--space-7);
+  }
+
+  .try__note {
+    position: absolute;
+    bottom: 100%;
+    right: 14%;
+    max-width: 22em;
+  }
+
+  .try__sticker {
+    top: -1.1rem;
+    right: auto;
+    left: -0.9rem;
+    --tilt: -8deg;
+    font-size: var(--text-base);
+  }
+}
+
+@media (max-width: 51.99rem) {
+  .try__note .hand__arrow {
+    rotate: 80deg;
+  }
+
+  .try__sticker {
+    top: auto;
+    bottom: calc(100% - 1.25rem);
+  }
+}
+
+/* ---------- home: section notes (a handwritten aside next to a heading) ---------- */
+.section__head--noted {
+  display: grid;
+  grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-6);
+}
+
+.section__head--noted h2 {
+  grid-column: 1 / -1;
+}
+
+.section__head--noted > p:not(.hand) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.section__head .section__note {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
+  max-width: 11em;
+  margin-top: 0;
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  line-height: 1.05;
+  rotate: -4deg;
+}
+
+@media (max-width: 40rem) {
+  .section__head--noted {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .section__head .section__note {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: var(--space-3);
+    rotate: -2deg;
+  }
+}
+
+/* ---------- home: formats as stickers ---------- */
+.formats {
+  margin-top: var(--section-space);
+  padding-block: clamp(4.5rem, 2rem + 7vw, 9rem);
+  text-align: center;
+}
+
+.formats h2 {
+  font-size: var(--text-3xl);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-h1);
+}
+
+.formats__lede {
+  max-width: 34rem;
+  margin: var(--space-3) auto 0;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+}
+
+.stickers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3) var(--space-2);
+  max-width: 50rem;
+  margin: var(--space-5) auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stickers .sticker {
+  font-size: clamp(1.125rem, 0.95rem + 0.7vw, 1.625rem);
+}
+
+.stickers .sticker:nth-child(8n + 1) {
+  --tilt: -4deg;
+}
+
+.stickers .sticker:nth-child(8n + 2) {
+  --tilt: 3deg;
+}
+
+.stickers .sticker:nth-child(8n + 3) {
+  --tilt: -1.5deg;
+}
+
+.stickers .sticker:nth-child(8n + 4) {
+  --tilt: 5deg;
+}
+
+.stickers .sticker:nth-child(8n + 5) {
+  --tilt: -3deg;
+}
+
+.stickers .sticker:nth-child(8n + 6) {
+  --tilt: 2deg;
+}
+
+.stickers .sticker:nth-child(8n + 7) {
+  --tilt: -5deg;
+}
+
+.stickers .sticker:nth-child(8n) {
+  --tilt: 3.5deg;
+}
+
+/* Colour mix: a few loud, a few ink, the rest paper (no regular pattern). */
+.stickers .sticker:is(:nth-child(1), :nth-child(4), :nth-child(6), :nth-child(10), :nth-child(13)) {
+  background: var(--color-loud);
+  color: var(--color-loud-ink);
+}
+
+.stickers .sticker:is(:nth-child(3), :nth-child(8), :nth-child(12), :nth-child(15)) {
+  background: var(--neutral-800);
+  color: var(--neutral-50);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stickers .sticker:is(:nth-child(3), :nth-child(8), :nth-child(12), :nth-child(15)) {
+    background: var(--neutral-750);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .stickers .sticker {
+    transition:
+      translate var(--duration-fast) var(--ease-out),
+      rotate var(--duration-base) var(--ease-out);
+  }
+
+  .stickers .sticker:hover {
+    translate: 0 -0.25rem;
+    rotate: 0deg;
+  }
+}
+
+/* Shared entrance keyframes (home desk, inner page heads, about). */
 @keyframes rise {
   from {
     opacity: 0;
@@ -880,6 +1800,15 @@ a.tool-index__row:focus-visible::after {
 
 .verify__title {
   grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+}
+
+.verify__note {
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2.125rem);
+  rotate: -4deg;
 }
 
 .verify__intro > * + * {
@@ -950,6 +1879,16 @@ a.tool-index__row:focus-visible::after {
 
 /* ---------- home: closing ---------- */
 /* Two blocks with different weights under one statement: the maker leads, Pro is a quiet tile. */
+.closing__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+}
+
+.closing__note {
+  rotate: -3deg;
+}
 .closing__title {
   font-size: var(--text-3xl);
   font-stretch: 125%;
