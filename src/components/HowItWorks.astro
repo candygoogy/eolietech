@@ -1,11 +1,14 @@
 ---
 /**
- * Home diagram: what crosses the network when you use a tool, and what never does.
- * HTML + CSS so the text is real, wraps and translates; connectors are CSS elements in the logo's
- * sea-line style (styles and the one-shot draw animation: components.css, "home: flow diagram").
+ * Home diagram: what crosses the network when you use a tool, and what never does. Told in the
+ * site's postal language: the server and the device are paper cards (the device with the airmail
+ * edge of the footer postcard), the code arrives along an airmail-striped lane, and the lane back
+ * is a dotted stub that ends in a NOT SENT rubber stamp. HTML + CSS so the text is real, wraps and
+ * translates (styles and the one-shot draw animation: components.css, "home: flow diagram").
  * DOM order is the story (server, code lane, device and its pipeline, the lane that stops); CSS grid
  * areas place the two lanes side by side. Drawing parts are aria-hidden: every fact is in the text.
  */
+import Stamp from "./Stamp.astro";
 import { directive } from "./csp";
 import { localePath, t } from "../i18n";
 import type { Locale } from "../tools/types";
@@ -66,10 +69,12 @@ const steps = [
 
       <div class="flow__lane flow__lane--out">
         <p class="flow__lane-title">{t(locale, "home.flow.out.title")}</p>
-        <span class="flow__line flow__line--stop" aria-hidden="true"><span class="flow__cap"></span></span>
+        <span class="flow__line flow__line--stop" aria-hidden="true">
+          <Stamp as="span" class="flow__stamp" text={t(locale, "home.desk.notsent")} ink="ember" tilt={-3} land="none" />
+        </span>
         <p class="flow__lane-body">
           {t(locale, "home.flow.out.body")}
-          {connectSrc && <code>{connectSrc}</code>}
+          {connectSrc && <code class="flow__csp">{connectSrc}</code>}
         </p>
       </div>
     </div>

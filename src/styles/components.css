@@ -130,7 +130,7 @@
 .pile {
   --label-size: clamp(0.75rem, 3.3cqi, 0.875rem);
   position: relative;
-  aspect-ratio: 360 / 510; /* the bottom ~50/510 is room for the memo's transcript (desk-play.css) */
+  aspect-ratio: 360 / 545; /* the bottom ~50/545 is room for the memo's transcript (desk-play.css) */
   margin: var(--space-6) 0 0;
   padding: 0;
   list-style: none;
@@ -165,7 +165,7 @@
 
   .pile {
     --label-size: clamp(0.8125rem, 1.25cqi, 0.9375rem);
-    aspect-ratio: 1152 / 560;
+    aspect-ratio: 1152 / 640; /* room under the CTAs for the lemon, and between every label */
     margin-top: 0;
   }
 }
@@ -231,7 +231,7 @@
 
 .obj--pdf {
   --x: 70%;
-  --y: 5%;
+  --y: 4.7%;
   --w: 28%;
   --tilt: 6deg;
   --i: 1;
@@ -239,7 +239,7 @@
 
 .obj--memo {
   --x: 34%;
-  --y: 55%;
+  --y: 57.9%;
   --w: 62%;
   --tilt: 2.5deg;
   --i: 2;
@@ -247,7 +247,7 @@
 
 .obj--lemon {
   --x: 3%;
-  --y: 49%;
+  --y: 52.3%;
   --w: 27%;
   --tilt: -7deg;
   --i: 3;
@@ -333,14 +333,14 @@
   }
 
   .obj--memo {
-    --x: 53%;
-    --y: 64%;
+    --x: 56%;
+    --y: 62%;
     --w: 26%;
   }
 
   .obj--lemon {
-    --x: 5%;
-    --y: 60%;
+    --x: 3%;
+    --y: 66%;
     --w: 14%;
   }
 
@@ -1144,19 +1144,24 @@ a.tool-index__row:focus-visible::after {
 }
 
 /* ---------- home: flow diagram (src/components/HowItWorks.astro) ----------
- * Nodes are surfaces; connectors are CSS bars in the logo's sea-line style. Lanes use
- * display: contents so their title, line and text sit straight in the figure's grid.
+ * The postal version of "what crosses the network". The server and the device are paper cards; the
+ * device has the footer postcard's airmail edge, and its pipeline is three paper slips. The code
+ * lane is an airmail-striped band (sea and sulphur, the --airmail-* tokens) with a sea arrowhead;
+ * the lane back is a dotted stub that never arrives and ends in a NOT SENT rubber stamp
+ * (Stamp.astro). Lanes use display: contents so their title, line and text sit straight in the
+ * figure's grid.
  * Default = final, static state. The draw sequence plays once, only after reveal.ts marks the
  * figure "in" and only without a reduced-motion preference. Total about 3.2s, never loops. */
 .flow {
-  --flow-line: var(--sea-line);
+  --flow-line: 5px;
   --flow-lane-draw: flow-draw-y;
   --flow-link-draw: flow-draw-y;
+  --flow-stamp-turn: -90deg; /* phones and tablets: the stamp runs along the upright stub */
 }
 
 .flow__grid {
   display: grid;
-  grid-template-columns: 1rem 1.5rem 1.5rem minmax(0, 1fr);
+  grid-template-columns: 1rem 1.75rem 1.75rem minmax(0, 1fr);
   grid-template-areas:
     "a a a a"
     ". l1 . t1"
@@ -1170,9 +1175,10 @@ a.tool-index__row:focus-visible::after {
   display: contents;
 }
 
+/* Paper cards: the postcard paper of the footer (light: soft white; dark: deep paper). */
 .flow__node {
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  background: var(--postcard-paper);
 }
 
 .flow__node h3 {
@@ -1193,10 +1199,21 @@ a.tool-index__row:focus-visible::after {
   padding: var(--space-4);
 }
 
+/* The device: the airmail edge (stripes with the page showing between them) drawn as its border. */
 .flow__device {
   grid-area: b;
   padding: var(--space-4);
-  border-radius: var(--radius-xl);
+  border: 8px solid transparent;
+  background:
+    linear-gradient(var(--postcard-paper) 0 0) padding-box,
+    repeating-linear-gradient(
+        -45deg,
+        var(--airmail-a) 0 14px,
+        transparent 14px 21px,
+        var(--airmail-b) 21px 35px,
+        transparent 35px 42px
+      )
+      border-box;
 }
 
 .flow__device > h3 {
@@ -1232,7 +1249,7 @@ a.tool-index__row:focus-visible::after {
 }
 
 .flow__lane-title {
-  padding: var(--space-4) 0 0 var(--space-3);
+  padding: var(--space-5) 0 0 var(--space-3);
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-stretch: 112%;
@@ -1243,62 +1260,73 @@ a.tool-index__row:focus-visible::after {
 
 .flow__lane-body {
   max-width: 34rem;
-  padding: var(--space-1) 0 var(--space-3) var(--space-3);
+  padding: var(--space-1) 0 var(--space-4) var(--space-3);
   font-size: var(--text-sm);
   line-height: 1.45;
   color: var(--color-text-muted);
 }
 
 .flow__lane--out > .flow__lane-body {
-  padding-bottom: var(--space-4);
+  padding-bottom: var(--space-5);
 }
 
-.flow__lane-body code {
+/* The policy line on its own line under the sentence, so it never crowds the lane. */
+.flow__csp {
+  display: block;
+  width: fit-content;
+  margin-top: var(--space-2);
   color: var(--color-text);
   white-space: nowrap;
 }
 
-/* Connectors. Vertical by default (phones and tablets), horizontal at >= 64rem. */
+/* Connectors. Upright by default (phones and tablets), across at >= 64rem. */
 .flow__line {
   position: relative;
   justify-self: center;
   width: var(--flow-line);
-  border-radius: var(--radius-full);
-  background: var(--color-accent);
   transform-origin: top;
+}
+
+/* The code lane: an airmail band. */
+.flow__lane--in > .flow__line {
+  border-radius: 1px;
+  background: repeating-linear-gradient(-45deg, var(--airmail-a) 0 6px, var(--airmail-b) 6px 12px);
 }
 
 .flow__head {
   position: absolute;
   left: 50%;
-  bottom: -2px;
-  width: 1rem;
+  bottom: -0.625rem;
+  width: 1.125rem;
   height: 0.75rem;
   translate: -50% 0;
-  background: var(--color-accent);
+  background: var(--airmail-a);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
 
-/* The lane back: muted, starts at the device and stops halfway with a cap. No arrowhead. */
+/* The lane back: a dotted stub from the device that stops short, at the stamp. No arrowhead. */
 .flow__line--stop {
   align-self: end;
-  height: 58%;
-  background: var(--color-text-muted);
+  height: 62%;
+  background: repeating-linear-gradient(180deg, var(--color-border-strong) 0 6px, transparent 6px 12px);
   transform-origin: bottom;
 }
 
-.flow__cap {
+.flow__line .flow__stamp {
+  --stamp-tilt: var(--flow-stamp-turn); /* outranks the stamp's own data-tilt */
   position: absolute;
   top: 0;
   left: 50%;
-  width: 1.375rem;
-  height: var(--flow-line);
-  translate: -50% 0;
-  border-radius: var(--radius-full);
-  background: var(--color-text-muted);
+  translate: -50% -50%;
+  font-size: 0.625rem;
+  white-space: nowrap;
 }
 
-/* The pipeline inside the device: three wells joined by short sea lines. */
+.flow__stamp .stamp__ink {
+  background: var(--color-bg);
+}
+
+/* The pipeline inside the device: three paper slips joined by short sea lines. */
 .flow__steps {
   display: grid;
   gap: var(--space-5);
@@ -1313,8 +1341,8 @@ a.tool-index__row:focus-visible::after {
   align-content: start;
   gap: var(--space-1);
   padding: var(--space-3);
-  border-radius: var(--radius-lg);
-  background: var(--color-sunken);
+  border-radius: 3px;
+  background: var(--color-bg);
 }
 
 .flow__step-title {
@@ -1359,7 +1387,7 @@ a.tool-index__row:focus-visible::after {
 
 .flow__step + .flow__step::before {
   bottom: calc(100% + 0.375rem);
-  width: var(--flow-line);
+  width: 3px;
   height: calc(var(--space-5) - 0.75rem);
   translate: -50% 0;
   border-radius: var(--radius-full);
@@ -1387,20 +1415,14 @@ a.tool-index__row:focus-visible::after {
   color: var(--color-text-muted);
 }
 
-@media (prefers-color-scheme: dark) {
-  .flow__step {
-    background: var(--color-bg);
-  }
-}
-
-/* Tablet: device pipeline in a row, connectors horizontal; lanes stay vertical, side by side. */
+/* Tablet: device pipeline in a row, connectors across; lanes stay upright, side by side. */
 @media (min-width: 40rem) {
   .flow {
     --flow-link-draw: flow-draw-x;
   }
 
   .flow__grid {
-    grid-template-columns: 1.25rem 1.5rem minmax(0, 1fr) 1.5rem minmax(0, 1fr);
+    grid-template-columns: 1.25rem 1.75rem minmax(0, 1fr) 1.75rem minmax(0, 1fr);
     grid-template-areas:
       "a a a a a"
       ". l1 t1 l2 t2"
@@ -1427,7 +1449,7 @@ a.tool-index__row:focus-visible::after {
     left: auto;
     right: calc(100% + 0.375rem);
     width: calc(var(--space-5) - 0.75rem);
-    height: var(--flow-line);
+    height: 3px;
     translate: 0 -50%;
     transform-origin: left;
   }
@@ -1446,19 +1468,20 @@ a.tool-index__row:focus-visible::after {
 
 @media (min-width: 48rem) {
   .flow {
-    --flow-line: 4px;
+    --flow-line: 6px;
   }
 }
 
-/* Desktop: server | lanes | device, lanes centred on the device and drawn left to right. */
+/* Desktop: server | lanes | device, lanes centred on the device and drawn left to right. The stamp
+ * lies across the end of the stub, so the lane back gets more air above and below. */
 @media (min-width: 64rem) {
   .flow {
     --flow-lane-draw: flow-draw-x;
+    --flow-stamp-turn: -3deg;
   }
 
-  /* The code lane enters the device at the level of its title; the server sits at that level too. */
   .flow__grid {
-    /* The device gets the width its three chips need, so "Web Worker" holds to one line at 1440. */
+    /* The device gets the width its three slips need, so "Web Worker" holds to one line at 1440. */
     grid-template-columns: minmax(12.5rem, 0.8fr) minmax(14rem, 1.2fr) minmax(0, 2.8fr);
     grid-template-rows: repeat(6, auto) 1fr;
     grid-template-areas:
@@ -1471,7 +1494,8 @@ a.tool-index__row:focus-visible::after {
       ". . b";
   }
 
-  .flow__server {
+  .flow__server,
+  .flow__device {
     align-self: start;
   }
 
@@ -1487,7 +1511,8 @@ a.tool-index__row:focus-visible::after {
   }
 
   .flow__lane--out > .flow__lane-title {
-    padding-top: var(--space-5);
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-4);
   }
 
   .flow__lane-body {
@@ -1495,7 +1520,7 @@ a.tool-index__row:focus-visible::after {
   }
 
   .flow__lane--out > .flow__lane-body {
-    padding-top: var(--space-2);
+    padding-top: var(--space-4);
     padding-bottom: var(--space-4);
   }
 
@@ -1510,27 +1535,47 @@ a.tool-index__row:focus-visible::after {
   .flow__head {
     top: 50%;
     left: auto;
-    right: -2px;
+    right: -0.625rem;
     bottom: auto;
     width: 0.75rem;
-    height: 1rem;
+    height: 1.125rem;
     translate: 0 -50%;
     clip-path: polygon(0 0, 100% 50%, 0 100%);
   }
 
   .flow__line--stop {
     justify-self: end;
-    width: 58%;
-    height: var(--flow-line);
+    width: 64%;
+    height: 3px;
+    background: repeating-linear-gradient(90deg, var(--color-border-strong) 0 6px, transparent 6px 12px);
     transform-origin: right;
   }
 
-  .flow__cap {
+  .flow__line .flow__stamp {
     top: 50%;
     left: 0;
-    width: var(--flow-line);
-    height: 1.375rem;
-    translate: 0 -50%;
+    translate: -70% -50%;
+  }
+}
+
+/* Narrow desktops: the three slips are tight, so their titles step down and the device's padding
+ * with them, keeping "Your file" beside its glyph on one line. */
+@media (min-width: 64rem) and (max-width: 79.99rem) {
+  .flow__device {
+    padding: var(--space-4);
+  }
+
+  .flow__step-title {
+    font-size: var(--text-base);
+  }
+
+  .flow__glyph {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .flow__glyph + .flow__step-title {
+    padding-right: 1.5rem;
   }
 }
 
@@ -1577,8 +1622,9 @@ a.tool-index__row:focus-visible::after {
     animation: var(--flow-lane-draw) 400ms 2600ms var(--ease-out) backwards;
   }
 
-  .flow[data-reveal="in"] .flow__cap {
-    animation: flow-stop 300ms 2950ms var(--ease-out) backwards;
+  /* The stub stops, then the stamp is pressed on its end (the cap's old moment). */
+  .flow[data-reveal="in"] .flow__stamp {
+    animation: flow-stamp 180ms 3000ms var(--ease-out) backwards;
   }
 }
 
@@ -1629,10 +1675,10 @@ a.tool-index__row:focus-visible::after {
   }
 }
 
-@keyframes flow-stop {
+@keyframes flow-stamp {
   from {
     opacity: 0;
-    scale: 0.9;
+    scale: 1.15;
   }
 }
 
@@ -1807,9 +1853,49 @@ a.tool-index__row:focus-visible::after {
   margin-top: var(--space-2);
 }
 
+/* Side by side, the two read as one block: the same height, the maker's first line level with the
+ * tile's heading (the column takes the tile's padding), and the "About" link level with the waitlist
+ * button along the bottom. The tile keeps a reading width; the maker takes the rest. */
 @media (min-width: 48rem) {
   .closing__row {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-columns: minmax(0, 1fr) minmax(19rem, 27rem);
+    column-gap: clamp(2.5rem, 1rem + 3.5vw, 4.5rem);
+    align-items: stretch;
+  }
+
+  .closing__maker p {
+    max-width: 40rem;
+  }
+
+  /* The maker leads: its paragraph at the lead size fills the shared height instead of floating. */
+  .closing__maker p:first-child {
+    font-size: var(--text-xl);
+    line-height: 1.45;
+  }
+
+  .closing__maker {
+    display: flex;
+    flex-direction: column;
+    padding-block: var(--space-5);
+  }
+
+  .closing__maker p:last-child {
+    margin-top: auto;
+    padding-top: var(--space-4);
+  }
+
+  .closing__maker p:last-child a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+  }
+
+  .closing__pro {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .closing__pro .btn {
+    align-self: end;
   }
 }
 
