@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { filterFiles, formatBytes, matchesAccept, renameExtension } from "./tool-ui";
+import { describe, expect, it, vi } from "vitest";
+import { ENTER_MS, filterFiles, formatBytes, markEnter, matchesAccept, renameExtension } from "./tool-ui";
 
 const file = (name: string, type: string, size = 10) => new File([new Uint8Array(size)], name, { type });
 const ctx = {
@@ -36,5 +36,18 @@ describe("tool-ui", () => {
     expect(formatBytes(1536)).toBe("1.5 KB");
     expect(renameExtension("photo.HEIC", "jpg")).toBe("photo.jpg");
     expect(renameExtension("noext", ".png")).toBe("noext.png");
+  });
+
+  it("marks a new element for its entry transition, then clears the mark", () => {
+    vi.useFakeTimers();
+    try {
+      const el = document.createElement("li");
+      markEnter(el);
+      expect(el.hasAttribute("data-enter")).toBe(true);
+      vi.advanceTimersByTime(ENTER_MS);
+      expect(el.hasAttribute("data-enter")).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

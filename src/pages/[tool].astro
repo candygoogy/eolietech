@@ -84,7 +84,10 @@ const strings = { ...siteToolStrings, ...baseEntry.data.ui, ...(variant ? entry.
           data-limits={JSON.stringify(tool.limits.free)}
           data-strings={JSON.stringify(strings)}
         >
-          <p>{t(locale, "tool.loading")}</p>
+          {/* Loading shell: the drop well's shape plus a reserved height (tool.css), so mounting shifts nothing. */}
+          <div class="tool-shell__well">
+            <p class="tool-shell__status">{t(locale, "tool.loading")}</p>
+          </div>
         </div>
         <noscript><p class="tool-note">{t(locale, "tool.noscript")}</p></noscript>
       </div>
@@ -95,53 +98,57 @@ const strings = { ...siteToolStrings, ...baseEntry.data.ui, ...(variant ? entry.
     </div>
 
     <div class="tool-page__body container">
-      <div class="prose">
-        <Content />
+      <div class="tool-page__main">
+        <div class="prose">
+          <Content />
+        </div>
+
+        {
+          faq.length > 0 && (
+            <section class="tool-page__section">
+              <h2>{t(locale, "tool.faq")}</h2>
+              <div class="faq">
+                {faq.map((item) => (
+                  <details>
+                    <summary>{item.q}</summary>
+                    <p>{item.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )
+        }
       </div>
 
       {
-        howTo.length > 0 && (
-          <section class="tool-page__section">
-            <h2>{t(locale, "tool.howTo")}</h2>
-            <ol class="tool-page__steps">
-              {howTo.map((step) => (
-                <li>{step}</li>
-              ))}
-            </ol>
-          </section>
-        )
-      }
+        (howTo.length > 0 || related.length > 0) && (
+          <aside class="tool-page__aside">
+            {howTo.length > 0 && (
+              <section class="tool-page__section">
+                <h2>{t(locale, "tool.howTo")}</h2>
+                <ol class="tool-page__steps">
+                  {howTo.map((step) => (
+                    <li>{step}</li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
-      {
-        faq.length > 0 && (
-          <section class="tool-page__section">
-            <h2>{t(locale, "tool.faq")}</h2>
-            <div class="faq">
-              {faq.map((item) => (
-                <details>
-                  <summary>{item.q}</summary>
-                  <p>{item.a}</p>
-                </details>
-              ))}
-            </div>
-          </section>
-        )
-      }
-
-      {
-        related.length > 0 && (
-          <nav class="tool-page__section" aria-label={t(locale, "tool.related")}>
-            <h2>{t(locale, "tool.related")}</h2>
-            <ul class="related-list">
-              {related.map((r) => (
-                <li>
-                  <a class="btn" href={r.href}>
-                    {r.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+            {related.length > 0 && (
+              <nav class="tool-page__section" aria-label={t(locale, "tool.related")}>
+                <h2>{t(locale, "tool.related")}</h2>
+                <ul class="related-list">
+                  {related.map((r) => (
+                    <li>
+                      <a class="btn" href={r.href}>
+                        {r.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+          </aside>
         )
       }
     </div>

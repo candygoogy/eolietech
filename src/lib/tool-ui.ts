@@ -15,9 +15,24 @@
  *   .tool-actions          button row
  *   .btn / .btn--primary / .btn--ghost
  *   .tool-error            inline error message (role="alert")
- *   .tool-note             small helper text (e.g. "processed on your device")
+ *   .tool-note             small helper text; a direct child of .tool with role="status" is the
+ *                          result summary and is set large
+ *   [data-enter]           one-shot entry transition on a newly inserted row or thumbnail (markEnter)
  */
 import type { ToolCtx } from "../tools/types";
+
+/** How long [data-enter] stays on an element: longer than its transition (--duration-base, 200ms). */
+export const ENTER_MS = 400;
+
+/**
+ * Play the one-shot entry transition on a newly inserted element (styled in tool.css with
+ * @starting-style). Call it once, on first insertion: the attribute is removed afterwards so a
+ * later re-insertion of the same node (a re-rendered list) does not replay it.
+ */
+export function markEnter(el: HTMLElement): void {
+  el.dataset.enter = "";
+  setTimeout(() => delete el.dataset.enter, ENTER_MS);
+}
 
 export interface FileIntake {
   ok: File[];

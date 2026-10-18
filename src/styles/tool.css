@@ -6,6 +6,10 @@
  *   li.tool-item > img.tool-item__thumb? + div(p.tool-item__name, p.tool-item__meta) + div.tool-actions
  *   li.tool-item > .tool-item__thumb? + span.tool-item__name + span.tool-item__meta + span.tool-actions
  *   .tool-options > div(label + select | label + input[range] + output | input[radio] + label) + p.tool-note
+ *
+ * Surfaces: the panel is one --color-surface tile; inside it, wells and rows sit on --tool-well
+ * (sunken in light, the page ground in dark, which reads as inset) and are separated by space or a
+ * 2px gap, never by outlines. The only lines are form-field borders and the drag-over ring.
  */
 
 /* The hidden attribute always wins over the display rules below. */
@@ -13,42 +17,78 @@
   display: none !important;
 }
 
-/* ---------- page template ---------- */
+/* ---------- page head ---------- */
 .tool-page__head {
-  padding-block: var(--space-5) var(--space-4);
+  padding-block: var(--space-6) var(--space-5);
 }
 
 .tool-page__back {
   display: inline-flex;
   align-items: center;
+  gap: 0.375rem;
   min-height: var(--target-min);
   margin-bottom: var(--space-2);
   font-size: var(--text-sm);
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+/* Leading chevron, drawn with a mask so it follows the link colour. */
+.tool-page__back::before {
+  content: "";
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.5 2 3.5 6l4 4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.5 2 3.5 6l4 4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tool-page__back:hover {
+    color: var(--color-accent);
+  }
 }
 
 .tool-page__head h1 {
-  max-width: 22ch;
-  font-size: clamp(2rem, 1.5rem + 2.4vw, 3.25rem);
+  max-width: 20ch;
 }
 
 .tool-page__head .lede {
+  max-width: 40ch;
   margin-top: var(--space-3);
 }
 
+/* ---------- panel ---------- */
 .tool-panel {
-  padding: clamp(var(--space-3), 3vw, var(--space-5));
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
+  /* Wells and rows inside the panel: sunken in light; the darker page ground in dark reads as inset. */
+  --tool-well: var(--color-sunken);
+  --tool-well-hover: color-mix(in srgb, var(--color-text) 8%, var(--tool-well));
+  --tool-field: var(--color-bg);
+  /* Drop zone height; the loading shell reserves the same value so mount does not move the page. */
+  /* 12rem floor (not 11): a two-line hint at tablet widths still fits, so the well's height is this
+     value at every width >= 48rem and the shell can reserve it exactly. */
+  --drop-min: clamp(12rem, 18vw, 15rem);
+  padding: clamp(1rem, 3vw, 2.5rem);
+  border-radius: var(--radius-xl);
   background: var(--color-surface);
-  box-shadow: var(--shadow-panel);
 }
 
-[data-tool-root]:not([data-mounted]) {
-  display: grid;
-  place-items: center;
-  min-height: 15rem;
-  color: var(--color-text-muted);
+@media (prefers-color-scheme: dark) {
+  .tool-panel {
+    --tool-well: var(--color-bg);
+    --tool-field: var(--color-sunken);
+  }
+}
+
+@media (max-width: 36rem) {
+  .tool-panel {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+  }
 }
 
 .tool-page__private {
@@ -67,138 +107,153 @@
   min-height: var(--target-min);
 }
 
-.tool-page__body {
+/* ---------- loading shell ----------
+ * Server-rendered inside [data-tool-root] until the tool's client chunk mounts. It has the tool's
+ * shape (the drop well) and reserves the mounted tool's measured height, so mounting shifts nothing
+ * below the panel. Heights were measured at 375px and 1280px on the production build; e2e/tool-shell.spec.ts
+ * fails if a tool's first render stops matching. Wide layouts reserve the drop well (--drop-min,
+ * which scales with the viewport) plus the rest of the tool, so the value holds at any width >= 48rem.
+ * Re-measure after changing anything that alters a tool's initial height. */
+[data-tool-root]:not([data-mounted]) {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-6);
-  padding-top: var(--space-6);
+  align-content: start;
+  min-height: var(--tool-shell, var(--drop-min));
 }
 
-.tool-page__section h2 {
-  margin-bottom: var(--space-3);
-  font-size: var(--text-xl);
-  font-stretch: 112%;
+@media (min-width: 48rem) {
+  [data-tool-root]:not([data-mounted]) {
+    min-height: calc(var(--drop-min) + var(--tool-shell-rest, 0rem));
+  }
 }
 
-.tool-page__steps {
-  display: grid;
-  gap: var(--space-3);
-  max-width: var(--measure);
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
+/* --tool-shell: whole mounted height at 375px. --tool-shell-rest: mounted height minus the drop well
+ * at 1280px. Measured values (px / 16), not rounded guesses. */
+[data-tool-id="image-compress"] {
+  --tool-shell: 46.6094rem;
+  --tool-shell-rest: 17.0625rem;
 }
 
-.tool-page__steps li {
-  display: grid;
-  grid-template-columns: 2.25rem minmax(0, 1fr);
-  gap: var(--space-3);
-  align-items: baseline;
-  counter-increment: step;
+[data-tool-id="heic-to-jpg"] {
+  --tool-shell: 29.5938rem;
+  --tool-shell-rest: 9.0313rem;
 }
 
-.tool-page__steps li::before {
-  content: counter(step);
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-stretch: 125%;
-  font-weight: 760;
-  color: var(--color-accent);
+[data-tool-id="pdf-merge"] {
+  --tool-shell: 25.1406rem;
+  --tool-shell-rest: 9.2031rem;
 }
 
-.faq {
-  max-width: var(--measure);
-  border-top: var(--border-width) solid var(--color-border);
+[data-tool-id="pdf-split"],
+[data-tool-id="pdf-organize"],
+[data-tool-id="pdf-compress"] {
+  --tool-shell: 13.0313rem;
+  --tool-shell-rest: 0rem;
 }
 
-.faq details {
-  border-bottom: var(--border-width) solid var(--color-border);
+[data-tool-id="background-remover"] {
+  --tool-shell: 21.3438rem;
+  --tool-shell-rest: 5.4063rem;
 }
 
-.faq summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  min-height: var(--target-min);
-  padding-block: var(--space-3);
-  font-weight: 700;
-  cursor: pointer;
-  list-style: none;
+[data-tool-id="audio-transcribe"] {
+  --tool-shell: 21.3438rem;
+  --tool-shell-rest: 3.9531rem;
 }
 
-.faq summary::-webkit-details-marker {
-  display: none;
+/* Narrow screens: the real well grows with its two-line label and hint; match its usual height. */
+@media (max-width: 47.99rem) {
+  .tool-shell__well {
+    min-height: 13rem;
+  }
 }
 
-.faq summary::after {
-  content: "+";
-  flex: none;
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  line-height: 1;
-  color: var(--color-accent);
-  transition: rotate var(--duration-base) var(--ease-out);
-}
-
-.faq details[open] summary::after {
-  rotate: 45deg;
-}
-
-.faq details p {
-  padding-bottom: var(--space-3);
+.tool-shell__status {
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
+  /* Fast mounts never show it: it fades in only if loading takes longer than 400ms. */
+  animation: tool-fade-in var(--duration-base) var(--ease-out) 400ms both;
 }
 
-.related-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: 0;
-  list-style: none;
+@keyframes tool-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Mount: the well is already on screen (the shell drew it), so only what is new fades in. The fade is
+ * scoped to the first moments after mount; tool-mount.ts sets data-settled once it has finished. */
+[data-tool-root]:not([data-settled]) > .tool > :not(.tool-drop),
+[data-tool-root]:not([data-settled]) > .tool > .tool-drop > *,
+[data-tool-root]:not([data-settled]) > .tool > .tool-drop::before {
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  [data-tool-root]:not([data-settled]) > .tool > :not(.tool-drop),
+  [data-tool-root]:not([data-settled]) > .tool > .tool-drop > *,
+  [data-tool-root]:not([data-settled]) > .tool > .tool-drop::before {
+    opacity: 0;
+  }
 }
 
 /* ---------- .tool ---------- */
 .tool {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
-/* ---------- .tool-drop ---------- */
-.tool-drop {
+/* Empty per-file info lines (split, organize) would still take a grid gap. */
+.tool > .tool-item__meta:empty {
+  display: none;
+}
+
+/* Pairs that belong together sit closer than the main groups. */
+.tool > .tool-progress:not([hidden]) + .tool-note[role="status"],
+.tool > .tool-note[role="status"]:not(:empty) + .tool-list,
+.tool > .tool-list:not([hidden], :empty) + .tool-actions {
+  margin-top: calc(var(--space-3) - var(--space-5));
+}
+
+/* ---------- .tool-drop (and the shell's well) ---------- */
+.tool-drop,
+.tool-shell__well {
   position: relative;
   display: grid;
   justify-items: center;
   align-content: center;
   gap: var(--space-1);
-  min-height: 12rem;
-  padding: var(--space-5) var(--space-4);
-  border: 2px dashed var(--color-border-strong);
+  min-height: var(--drop-min, 12rem);
+  padding: var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--color-bg);
+  background: var(--tool-well, var(--color-sunken));
   text-align: center;
+}
+
+.tool-drop {
   cursor: pointer;
   transition:
-    background-color var(--duration-base) var(--ease-out),
-    border-color var(--duration-base) var(--ease-out);
+    background-color var(--duration-fast) var(--ease-color),
+    box-shadow var(--duration-fast) var(--ease-color);
 }
 
 /* A document with a plus: "add a file". Drawn with a mask so it follows the theme colour. */
 .tool-drop::before {
   content: "";
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   margin-bottom: var(--space-2);
   background: var(--color-accent);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23000' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M10 4h14l8 8v24H10z'/%3E%3Cpath d='M24 4v8h8M21 19v11M15.5 24.5h11'/%3E%3C/svg%3E")
     center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23000' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M10 4h14l8 8v24H10z'/%3E%3Cpath d='M24 4v8h8M21 19v11M15.5 24.5h11'/%3E%3C/svg%3E")
     center / contain no-repeat;
+  transition: translate var(--duration-base) var(--ease-out);
 }
 
-.tool-drop:hover {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
+@media (hover: hover) and (pointer: fine) {
+  .tool-drop:hover {
+    background: var(--tool-well-hover, var(--color-fill-hover));
+  }
 }
 
 .tool-drop:has(input:focus-visible) {
@@ -206,10 +261,19 @@
   outline-offset: 3px;
 }
 
+/* Files dragged over it: a ring (not elevation) and the icon lifts toward the pointer. */
 .tool-drop[data-active] {
-  border-style: solid;
-  border-color: var(--color-accent);
   background: var(--color-accent-soft);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.tool-drop[data-active]::before {
+  translate: 0 calc(-1 * var(--enter-rise));
+}
+
+/* Children would fire dragleave on the zone as the pointer crosses them and make the ring flicker. */
+.tool-drop[data-active] > * {
+  pointer-events: none;
 }
 
 .tool-drop__label {
@@ -217,27 +281,35 @@
   font-size: var(--text-lg);
   font-stretch: 112%;
   font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
   color: var(--color-text);
 }
 
 .tool-drop__hint {
+  max-width: 60ch;
+  text-wrap: balance;
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
+@media (min-width: 48rem) {
+  .tool-drop__label {
+    font-size: var(--text-xl);
+  }
+}
+
 /* ---------- .tool-options ---------- */
+/* No box: the settings sit on the panel surface, separated from the well by space. */
 .tool-options {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-3) var(--space-4);
-  padding: var(--space-3) var(--space-4) var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  align-items: end;
+  gap: var(--space-4) var(--space-5);
 }
 
 fieldset.tool-options {
+  display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-2);
@@ -246,12 +318,15 @@ fieldset.tool-options {
 .tool-options legend {
   float: left;
   width: 100%;
-  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
   font-weight: 700;
 }
 
+/* Label row + a control row of fixed height, so labels line up across columns. */
 .tool-options > div {
   display: grid;
+  grid-template-rows: auto var(--target-min);
+  align-items: center;
   gap: 0.375rem;
   min-width: 0;
 }
@@ -262,8 +337,7 @@ fieldset.tool-options {
 }
 
 .tool-options > div:has(> input[type="range"]) {
-  grid-template-columns: minmax(10rem, 1fr) auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
   column-gap: var(--space-3);
 }
 
@@ -273,8 +347,10 @@ fieldset.tool-options {
 
 .tool-options output {
   min-width: 3ch;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display);
+  font-stretch: 112%;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
@@ -300,9 +376,19 @@ fieldset.tool-options {
   display: block;
 }
 
+/* A note explains the control above it: full width, pulled up toward it. */
 .tool-options > .tool-note {
-  flex-basis: 100%;
-  margin-top: calc(-1 * var(--space-2));
+  grid-column: 1 / -1;
+  margin-top: calc(-1 * var(--space-3));
+}
+
+fieldset.tool-options > .tool-note {
+  margin-top: 0;
+}
+
+div.tool-options input[type="number"],
+div.tool-options select {
+  width: 100%;
 }
 
 .tool-options input[type="number"] {
@@ -313,18 +399,54 @@ fieldset.tool-options {
   width: min(100%, 22rem);
 }
 
+/* ---------- fields inside a tool ---------- */
+.tool input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]),
+.tool select,
+.tool textarea {
+  background-color: var(--tool-field, var(--color-bg));
+}
+
+/* Chevron: two hard-stop triangles in the muted text token (a select has no pseudo-elements to mask,
+ * and a data-URI SVG would hard-code a colour). It follows the theme with no per-theme copy. */
+.tool select {
+  padding-right: 2.5rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+    linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+  background-position:
+    right 1.1875rem center,
+    right 0.875rem center;
+  background-repeat: no-repeat;
+  background-size: 0.3125rem 0.3125rem;
+  appearance: none;
+}
+
+/* ---------- summary (the payoff line) ---------- */
+.tool > .tool-note[role="status"] {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-stretch: 112%;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
 /* ---------- .tool-list / .tool-item ---------- */
+/* Rows are wells; the 2px gap shows the panel surface between them: separation without a line. */
 .tool-list {
+  display: grid;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
-  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
   overflow: clip;
 }
 
-.tool-list:empty {
+/* Specific enough to beat tool layouts that make the list a grid (organize.css). */
+.tool > .tool-list:empty {
   display: none;
 }
 
@@ -334,15 +456,12 @@ fieldset.tool-options {
   align-items: center;
   gap: 0.125rem var(--space-3);
   padding: var(--space-3) var(--space-4);
-  transition: background-color var(--duration-base) var(--ease-out);
+  background: var(--tool-well, var(--color-sunken));
+  transition: background-color var(--duration-base) var(--ease-color);
 }
 
 .tool-item:not(:has(> .tool-item__thumb)) {
   grid-template-columns: [body] minmax(0, 1fr) [actions] auto;
-}
-
-.tool-item + .tool-item {
-  border-top: var(--border-width) solid var(--color-border);
 }
 
 .tool-item > .tool-item__thumb {
@@ -406,6 +525,7 @@ fieldset.tool-options {
 
 .tool-item[data-state="done"] .tool-item__meta {
   color: var(--color-success);
+  font-weight: 700;
 }
 
 .tool-item[data-state="error"] {
@@ -415,6 +535,18 @@ fieldset.tool-options {
 .tool-item[data-state="error"] .tool-item__meta {
   color: var(--color-danger);
   font-weight: 700;
+}
+
+/* Secondary row actions (Remove, Move) step back so the result and its Download lead. */
+.tool-item .btn--ghost {
+  color: var(--color-text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tool-item .btn--ghost:hover {
+    background: var(--tool-well-hover, var(--color-fill-hover));
+    color: var(--color-text);
+  }
 }
 
 /* Pointer reordering (pdf-shared/dom.ts enableDragSort). */
@@ -431,22 +563,15 @@ fieldset.tool-options {
   outline-offset: -4px;
 }
 
-/* Page grids (e.g. Organize PDF): each item is a card instead of a row. */
+/* Page grids (e.g. Organize PDF): each item is a tile instead of a row. */
 .tool-list--pages {
-  border: 0;
-  background: none;
+  border-radius: 0;
   overflow: visible;
 }
 
 .tool-list--pages .tool-item {
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
   padding: var(--space-3);
-}
-
-.tool-list--pages .tool-item + .tool-item {
-  border-top: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
 }
 
 @media (max-width: 36rem) {
@@ -467,9 +592,9 @@ fieldset.tool-options {
 .tool-progress {
   display: block;
   width: 100%;
-  height: 0.5rem;
+  height: 6px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-sunken);
   color: var(--color-accent);
   accent-color: var(--color-accent);
@@ -478,19 +603,54 @@ fieldset.tool-options {
 }
 
 .tool-progress::-webkit-progress-bar {
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-sunken);
 }
 
 .tool-progress::-webkit-progress-value {
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-accent);
-  transition: width var(--duration-base) var(--ease-out);
+  /* Values arrive continuously; linear avoids a pulse on every update. */
+  transition: width var(--duration-base) linear;
 }
 
 .tool-progress::-moz-progress-bar {
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-accent);
+}
+
+/* Indeterminate ("starting the model", "decoding"): appearance:none hides the native animation, so
+ * draw a moving segment; otherwise the bar shows an empty track and looks stuck. Hard colour stops
+ * only, so it reads as a bar, not a gradient. */
+.tool-progress:indeterminate {
+  background: linear-gradient(90deg, transparent 0 35%, var(--color-accent) 35% 65%, transparent 65%) var(--color-sunken) 0 0 / 250% 100%;
+  animation: tool-progress-busy 1.2s linear infinite;
+}
+
+.tool-progress:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+/* Separate rule: a mixed vendor selector list would invalidate the whole rule. */
+.tool-progress:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes tool-progress-busy {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -150% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-progress:indeterminate {
+    background: color-mix(in srgb, var(--color-accent) 35%, var(--color-sunken));
+    animation: none;
+  }
 }
 
 /* ---------- .tool-actions ---------- */
@@ -503,15 +663,33 @@ fieldset.tool-options {
 
 /* ---------- messages ---------- */
 .tool-error {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-1) var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border: var(--border-width) solid var(--color-danger);
   border-radius: var(--radius-md);
   background: var(--color-danger-soft);
   color: var(--color-text);
 }
 
-.tool-error > * + * {
-  margin-top: var(--space-1);
+/* A circled "!" in the danger colour marks the message; the fill carries the state, no outline. */
+.tool-error::before {
+  content: "";
+  grid-column: 1;
+  grid-row: 1;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.2rem;
+  background: var(--color-danger);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8.25' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M10 5.75v5' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='14' r='1.25'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8.25' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M10 5.75v5' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='14' r='1.25'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.tool-error > * {
+  grid-column: 2;
 }
 
 .tool-note {
@@ -521,4 +699,270 @@ fieldset.tool-options {
 
 .tool-note:empty {
   display: none;
+}
+
+/* ---------- entry motion (feedback only: no entrances on page load, no stagger) ----------
+ * Panels that appear from [hidden] fade and settle 6px; errors drop in toward their message.
+ * Scoped to [data-settled] so nothing replays while the tool first mounts. Reduced motion zeroes
+ * --enter-rise, leaving the fade. */
+[data-settled] .tool-options,
+[data-settled] .tool-progress,
+[data-settled] .tool > .tool-actions,
+[data-settled] .asr-result {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+[data-settled] .tool-error {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+[data-settled] .tool > .tool-list {
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  [data-settled] .tool-options,
+  [data-settled] .tool-progress,
+  [data-settled] .tool > .tool-actions,
+  [data-settled] .asr-result {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
+
+  [data-settled] .tool-error {
+    opacity: 0;
+    translate: 0 calc(-1 * var(--enter-rise));
+  }
+
+  [data-settled] .tool > .tool-list {
+    opacity: 0;
+  }
+}
+
+/* One-shot entry for newly inserted rows and thumbnails (markEnter() in src/lib/tool-ui.ts). */
+[data-enter] {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+.tool-item[data-enter] {
+  transition:
+    background-color var(--duration-base) var(--ease-color),
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+.tool-item__thumb[data-enter] {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    scale var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  [data-enter] {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
+
+  .tool-item__thumb[data-enter] {
+    translate: none;
+    scale: 0.96;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-drop::before {
+    transition: none;
+  }
+
+  @starting-style {
+    .tool-item__thumb[data-enter] {
+      scale: 1;
+    }
+  }
+}
+
+/* ---------- below the fold ---------- */
+.tool-page__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  padding-top: var(--space-7);
+}
+
+.tool-page__main > * + * {
+  margin-top: var(--space-6);
+}
+
+.tool-page__aside {
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+}
+
+@media (min-width: 64rem) {
+  .tool-page__body {
+    grid-template-columns: minmax(0, 64ch) minmax(16rem, 1fr);
+    align-items: start;
+    column-gap: var(--space-6);
+  }
+
+  /* Instructions and related tools stay beside the long read. */
+  .tool-page__aside {
+    position: sticky;
+    top: var(--space-5);
+    gap: var(--space-5);
+  }
+
+  .tool-page__aside h2 {
+    font-size: var(--text-xl);
+    font-stretch: 112%;
+    font-weight: 700;
+    letter-spacing: var(--track-h3);
+  }
+}
+
+.tool-page__section h2 {
+  margin-bottom: var(--space-4);
+}
+
+.tool-page .prose h2 {
+  margin-top: var(--space-6);
+  font-size: var(--text-2xl);
+  font-stretch: 118%;
+  font-weight: 750;
+}
+
+.tool-page .prose h2 + * {
+  margin-top: var(--stack-tight);
+}
+
+.tool-page .prose > :first-child {
+  margin-top: 0;
+}
+
+/* How to use it: a real ordered list, quiet numerals. */
+.tool-page__steps {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--measure);
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.tool-page__steps li {
+  padding-left: var(--space-1);
+}
+
+.tool-page__steps li::marker {
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+/* FAQ: each question is a surface tile; space separates them, no rules. */
+.faq {
+  display: grid;
+  gap: var(--space-2);
+  max-width: var(--measure);
+}
+
+.faq details {
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::after {
+  content: "+";
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-text-muted);
+  transition:
+    rotate var(--duration-base) var(--ease-in-out),
+    color var(--duration-fast) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .faq summary:hover::after {
+    color: var(--color-accent);
+  }
+}
+
+.faq details[open] summary::after {
+  rotate: 45deg;
+  color: var(--color-accent);
+}
+
+.faq details p {
+  padding: 0 var(--space-4) var(--space-4);
+  color: var(--color-text);
+}
+
+/* The answer opens instead of snapping (Chromium 131+; elsewhere it snaps, as before). */
+@supports selector(::details-content) {
+  .faq details {
+    interpolate-size: allow-keywords;
+  }
+
+  .faq details::details-content {
+    block-size: 0;
+    overflow: clip;
+    opacity: 0;
+    transition:
+      block-size var(--duration-base) var(--ease-out),
+      opacity var(--duration-base) var(--ease-color),
+      content-visibility var(--duration-base) allow-discrete;
+  }
+
+  .faq details[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Rotation counts as motion: the + turns to × instantly; the colour change still marks the open state. */
+  .faq summary::after {
+    transition: none;
+  }
+
+  @supports selector(::details-content) {
+    .faq details::details-content {
+      transition:
+        opacity var(--duration-base) var(--ease-color),
+        content-visibility var(--duration-base) allow-discrete;
+    }
+  }
+}
+
+.related-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
 }

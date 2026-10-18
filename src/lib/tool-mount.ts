@@ -10,6 +10,9 @@ export type MountFn = (el: HTMLElement, ctx: ToolCtx) => void | (() => void) | P
 
 const loaders = import.meta.glob<{ mount: MountFn }>("../tools/*/client.ts");
 
+/** Longer than the mount fade (--duration-base, 200ms). */
+const SETTLE_MS = 300;
+
 const readJson = <T>(value: string | undefined, fallback: T): T => {
   if (!value) return fallback;
   try {
@@ -38,8 +41,12 @@ export async function mountTools(root: ParentNode = document): Promise<void> {
       limits: readJson<ToolLimits>(el.dataset.limits, { maxBytes: 0, maxFiles: 0 }),
     };
     const { mount } = await load();
+    // Replaces the server-rendered loading shell (same reserved height, see tool.css).
     el.replaceChildren();
     await mount(el, ctx);
     el.dataset.mounted = "true";
+    // The mount fade (tool.css) runs while data-settled is absent; after it, panels that appear
+    // from [hidden] get their own entry transition. Set later so the two never overlap.
+    setTimeout(() => (el.dataset.settled = ""), SETTLE_MS);
   }
 }

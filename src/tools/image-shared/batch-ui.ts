@@ -3,7 +3,7 @@
  * downloads, "Download all (.zip)", progress and an aria-live summary. Uses the CSS class contract
  * from src/lib/tool-ui.ts. All strings come from ctx.t (the tools' `ui:` frontmatter, keys "img.*").
  */
-import { createDropzone, downloadBlob, downloadZip, formatBytes, type FileIntake } from "../../lib/tool-ui";
+import { createDropzone, downloadBlob, downloadZip, formatBytes, markEnter, type FileIntake } from "../../lib/tool-ui";
 import type { ToolCtx } from "../types";
 import { MIME, outputName, percentSaved, uniqueNames, type InputFormat, type RasterFormat } from "./formats";
 import { WorkerPool, defaultPoolSize } from "./pool";
@@ -99,11 +99,8 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
   actions.append(zipBtn, resetBtn);
   actions.hidden = true;
 
-  const privacy = document.createElement("p");
-  privacy.className = "tool-note";
-  privacy.textContent = t("img.privacy");
-
-  tool.append(drop, opts.options, error, progress, status, list, actions, privacy);
+  // No in-tool privacy line: the drop hint and the page line under the panel already say it.
+  tool.append(drop, opts.options, error, progress, status, list, actions);
   root.append(tool);
 
   zipBtn.addEventListener("click", async () => {
@@ -145,6 +142,7 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
     for (const file of files) {
       const item: Item = { id: nextId++, file, state: "pending", gen, li: document.createElement("li") };
       item.li.className = "tool-item";
+      markEnter(item.li);
       items.push(item);
       list.append(item.li);
       renderItem(item);
@@ -242,6 +240,8 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
       img.src = item.thumbUrl;
       img.decoding = "async";
       img.loading = "lazy";
+      // Rows are re-rendered in place; a done row renders its thumbnail once, so it enters once.
+      markEnter(img);
       li.append(img);
     }
 
