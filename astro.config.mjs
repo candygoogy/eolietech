@@ -2,9 +2,17 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import { fileURLToPath } from "node:url";
+import { publishedTools, toolPages } from "./src/tools/registry.ts";
+
+const site = "https://eolietech.com";
+
+/** Sitemap lastmod for tool pages (base + variants), from ToolDef.updated. Other pages get none. */
+const toolLastmod = new Map(
+  publishedTools().flatMap((tool) => toolPages(tool, "en").map(({ slug }) => [`${site}/${slug}/`, tool.updated])),
+);
 
 export default defineConfig({
-  site: "https://eolietech.com",
+  site,
   output: "static",
   trailingSlash: "always",
   build: {
@@ -20,6 +28,10 @@ export default defineConfig({
   integrations: [
     sitemap({
       i18n: { defaultLocale: "en", locales: { en: "en", it: "it" } },
+      serialize(item) {
+        const lastmod = toolLastmod.get(item.url);
+        return lastmod ? { ...item, lastmod } : item;
+      },
     }),
   ],
   devToolbar: { enabled: false },
