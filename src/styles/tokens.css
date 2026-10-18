@@ -100,6 +100,10 @@
   --ink-sea: var(--sea-700); /* 7.8:1 on white */
   --ink-ochre: #7a6000; /* 6.0:1 on white, 5.5:1 on surface */
   --ink-on-dark: var(--sulphur-400); /* stamps on the dark verify field: 11:1 or more */
+  /* The postcard's stamps get a paper backing (desk-post.css), so they read on its drawing or on any
+   * photo, in either theme. Ink on --postage-paper: ember 6.7:1 light / 5.5:1 dark, ochre 5.9 / 4.8. */
+  --ink-ember-paper: #9e3a17;
+  --ink-ochre-paper: #7a6000;
   --color-stamp: var(--neutral-700); /* postmark ink */
   --contour: var(--neutral-100); /* sea-depth lines behind the hero */
   --contour-coast: var(--neutral-200);

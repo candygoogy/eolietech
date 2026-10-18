@@ -640,7 +640,7 @@ hr {
   position: absolute;
   z-index: 1;
   top: 1.5rem;
-  right: 2.4rem;
+  right: calc(100% - 0.9rem); /* only the ring crosses the stamp: its words stay on the card */
   font-size: 0.6875rem;
 }
 
@@ -775,7 +775,7 @@ hr {
 
   .postcard-back__postmark {
     top: 0.4rem;
-    right: 2.1rem;
+    right: calc(100% - 0.7rem);
     font-size: 0.5625rem;
   }
 

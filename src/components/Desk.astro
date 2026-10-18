@@ -216,9 +216,8 @@ const pageName = (id: string) => t(locale, `home.play.pdf.name.${id}`);
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9.5 6 6 6-6 6"></path></svg>
       </button>
     </div>
-    <span id="desk-pdf-example"><Stamp as="span" class="obj__stamp obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={-3} land="load" /></span>
     <p class="obj__label">
-      <strong>{t(locale, "home.desk.pdf.file")}</strong>
+      <strong>{t(locale, "home.desk.pdf.file")} <span id="desk-pdf-example"><Stamp as="span" class="obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={-3} land="load" /></span></strong>
       {t(locale, "home.desk.pdf")}
       {
         (organizeHref || mergeHref) && (
@@ -267,9 +266,8 @@ const pageName = (id: string) => t(locale, `home.play.pdf.name.${id}`);
         </svg>
       </button>
     </div>
-    <span id="desk-memo-example"><Stamp as="span" class="obj__stamp obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={2} land="load" /></span>
     <div class="obj__label memo__notes">
-      <strong>{t(locale, "home.desk.memo.file")}</strong>
+      <strong>{t(locale, "home.desk.memo.file")} <span id="desk-memo-example"><Stamp as="span" class="obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={2} land="load" /></span></strong>
       <span class="memo__desc">{t(locale, "home.desk.memo")}</span>
       {/* Played, the memo is typed up: the transcript takes the place of the line about it. */}
       <ol class="memo__transcript" aria-label={t(locale, "home.play.memo.transcript")} aria-live="polite">
@@ -338,9 +336,8 @@ const pageName = (id: string) => t(locale, `home.play.pdf.name.${id}`);
         />
       </div>
     </div>
-    <span id="desk-lemon-example"><Stamp as="span" class="obj__stamp obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={-2} land="load" /></span>
     <p class="obj__label">
-      <strong>{t(locale, "home.desk.lemon.file")}</strong>
+      <strong>{t(locale, "home.desk.lemon.file")} <span id="desk-lemon-example"><Stamp as="span" class="obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={-2} land="load" /></span></strong>
       {t(locale, "home.desk.lemon")}
       {removeHref && <span class="obj__links"><a href={removeHref}>{t(locale, "home.play.lemon.link")}</a></span>}
     </p>

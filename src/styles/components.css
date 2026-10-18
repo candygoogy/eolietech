@@ -130,7 +130,7 @@
 .pile {
   --label-size: clamp(0.75rem, 3.3cqi, 0.875rem);
   position: relative;
-  aspect-ratio: 360 / 480; /* the bottom 40/480 is room for the memo's transcript (desk-play.css) */
+  aspect-ratio: 360 / 510; /* the bottom ~50/510 is room for the memo's transcript (desk-play.css) */
   margin: var(--space-6) 0 0;
   padding: 0;
   list-style: none;
@@ -239,7 +239,7 @@
 
 .obj--memo {
   --x: 34%;
-  --y: 51.5%;
+  --y: 55%;
   --w: 62%;
   --tilt: 2.5deg;
   --i: 2;
@@ -247,7 +247,7 @@
 
 .obj--lemon {
   --x: 3%;
-  --y: 47.5%;
+  --y: 49%;
   --w: 27%;
   --tilt: -7deg;
   --i: 3;
@@ -315,7 +315,7 @@
   }
 
   .obj--lemon .obj__label {
-    max-width: 7em;
+    max-width: 9em;
   }
 }
 
@@ -359,7 +359,7 @@
     top: 106%;
     right: auto;
     left: 0;
-    max-width: 10em;
+    max-width: 16em;
     text-align: left;
   }
 
@@ -374,7 +374,7 @@
   .obj--lemon .obj__label {
     top: 34%;
     left: 114%;
-    max-width: 8em;
+    max-width: 11em;
   }
 }
 

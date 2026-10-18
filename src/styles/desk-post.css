@@ -102,6 +102,25 @@
   pointer-events: none;
 }
 
+/* The card's stamps land on a picture (the drawing's sea and sky, or the visitor's photo, which
+ * could be anything from snow to night sky), so they are struck on a scrap of paper: opaque backing,
+ * a deeper ink, no blending. AA on any picture, in both themes (tokens.css, --ink-*-paper). */
+.obj--postcard .obj__stamp {
+  mix-blend-mode: normal;
+}
+
+.obj--postcard .obj__stamp .stamp__ink {
+  background: var(--postage-paper);
+}
+
+.obj--postcard .obj__stamp[data-ink="ember"] {
+  --stamp-ink: var(--ink-ember-paper);
+}
+
+.obj--postcard .obj__stamp[data-ink="ochre"] {
+  --stamp-ink: var(--ink-ochre-paper);
+}
+
 .post__returned {
   display: none;
 }

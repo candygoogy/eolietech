@@ -85,12 +85,21 @@
   white-space: nowrap;
 }
 
-/* The small "example" stamps (Stamp.astro), pressed on after the objects land. */
+/* The small "example" stamps (Stamp.astro): struck on the file label, beside the name, after the
+ * objects land. On the label rather than on the drawing, so the desk itself carries only the
+ * postcard's two marks and nothing lands on a neighbour when the pile is tight. */
 .pile .obj__example {
   --land-delay: 1250ms;
-  z-index: 20;
-  font-size: clamp(0.5625rem, 1.9cqi, 0.6875rem);
+  display: inline-block;
+  margin-inline-start: 0.35em;
+  vertical-align: 0.15em;
+  font-size: 0.5625rem;
   pointer-events: none;
+}
+
+.pile .obj__example .stamp__ink {
+  padding: 0.45em 0.6em 0.4em;
+  outline-offset: -4px;
 }
 
 /* ---------- lemon: the original photo wiped away to the cut-out ---------- */
@@ -167,11 +176,6 @@
 .wipe:has(.wipe__range:focus-visible) {
   outline: 3px solid var(--color-focus);
   outline-offset: 3px;
-}
-
-.pile .obj--lemon .obj__example {
-  top: -5%;
-  left: -9%;
 }
 
 /* The "photo" the lemon was cut from: on a terracotta table by the sea. */
@@ -280,11 +284,6 @@
   }
 }
 
-.pile .obj--memo .obj__example {
-  top: 7%;
-  right: 5%;
-}
-
 .memo__desc {
   display: block;
 }
@@ -295,7 +294,7 @@
     top: 12%;
     right: 106%;
     left: auto;
-    max-width: 14em;
+    max-width: 12em;
     text-align: right;
   }
 }
@@ -542,21 +541,6 @@
 /* While the pages are spread out, the controls take the label's place. */
 .obj--pdf[data-open] .obj__label {
   visibility: hidden;
-}
-
-.pile .obj--pdf .obj__example {
-  bottom: 9%;
-  left: -6%;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .pile .obj--pdf .obj__example {
-    transition: opacity var(--duration-base) var(--ease-out);
-  }
-}
-
-.pile .obj--pdf[data-open] .obj__example {
-  opacity: 0;
 }
 
 /* Page drawings (the figures and signature reuse the doc-* fills in components.css). */
