@@ -5,7 +5,7 @@
 import type { PDFDocument } from "pdf-lib";
 import { createDropzone, downloadBlob, formatBytes } from "../../lib/tool-ui";
 import type { ToolCtx } from "../types";
-import { button, enableDragSort, setDisabled, errorMessage, errorRegion, h, moveItem, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
+import { button, enableDragSort, entryTracker, setDisabled, errorMessage, errorRegion, h, moveItem, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
 
 const ACCEPT = "application/pdf,.pdf";
 
@@ -25,6 +25,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   let busy = false;
   let result: { blob: Blob; pages: number } | null = null;
   const ops = () => import("../pdf-shared/pdf-ops");
+  // render() rebuilds the list (also on every move): only rows shown for the first time play the entry.
+  const enterRow = entryTracker();
 
   const errors = errorRegion();
   const status = statusRegion();
@@ -159,7 +161,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
         });
         rm.dataset.remove = "";
         setDisabled(rm, busy);
-        return h(
+        const li = h(
           "li",
           {
             className: "tool-item",
@@ -172,6 +174,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
           h("span", { className: "tool-item__meta", text: meta }),
           h("span", { className: "tool-actions" }, up, down, rm),
         );
+        enterRow(entry.id, li);
+        return li;
       }),
     );
     list.hidden = entries.length === 0;

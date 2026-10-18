@@ -38,10 +38,6 @@ ui:
   merge.done: "Done: one PDF with {pages} pages ({size})."
   merge.download: "Download merged PDF ({pages} pages, {size})"
   merge.outputName: "merged.pdf"
-  pdf.error.encrypted: "{name} is password-protected or encrypted. Save an unprotected copy and try again."
-  pdf.error.invalid: "{name} could not be read as a PDF. It may be damaged or not a PDF at all."
-  pdf.error.empty: "{name} has no pages."
-  pdf.error.failed: "Something went wrong while processing {name}."
 ---
 
 ## Why merge PDFs in the browser

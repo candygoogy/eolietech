@@ -249,6 +249,10 @@
   "tool.error.tooLarge": "{name} is larger than {max}.",
   "tool.error.tooMany": "You can add up to {max} files at once.",
   "tool.error.generic": "Something went wrong while processing this file.",
+  "tool.pdf.error.encrypted": "{name} is password-protected or encrypted. Save an unprotected copy and try again.",
+  "tool.pdf.error.invalid": "{name} could not be read as a PDF. It may be damaged or not a PDF at all.",
+  "tool.pdf.error.empty": "{name} has no pages.",
+  "tool.pdf.error.failed": "Something went wrong while processing {name}.",
 
   "footer.label": "Site",
   "footer.privacy": "Privacy",

@@ -1,15 +1,23 @@
-/* Audio transcription only: the transcript panel. Colours and spacing come from the design tokens. */
+/* Audio transcription only: the transcript is a well on the panel (--tool-well: sunken in light, the
+ * page ground in dark), separated by tone, not by an outline. */
 .tool--audio-transcribe .asr-result {
   display: grid;
   gap: var(--space-3);
 }
 
+/* "Transcript ready." belongs to the transcript under it, not to the controls above. */
+.tool--audio-transcribe > .tool-note[role="status"]:not(:empty) + .asr-result {
+  margin-top: calc(var(--space-3) - var(--space-5));
+}
+
 .tool--audio-transcribe .asr-transcript {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
   max-height: 28rem;
-  padding: var(--space-3) var(--space-4);
-  border: var(--border-width) solid var(--color-border);
+  padding: var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--tool-well, var(--color-sunken));
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -24,11 +32,23 @@
   grid-template-columns: 4.5rem minmax(0, 1fr);
   gap: var(--space-2);
   max-width: var(--measure);
-  padding-block: 0.3rem;
 }
 
 .tool--audio-transcribe .asr-time {
+  /* Baseline-ish alignment with the larger transcript text beside it. */
+  padding-top: 0.1em;
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
+}
+
+/* Phones: the longest stamp ("1:02:05") needs about 3.25rem, so the text gets the rest of the width. */
+@media (max-width: 36rem) {
+  .tool--audio-transcribe .asr-transcript {
+    padding: var(--space-3);
+  }
+
+  .tool--audio-transcribe .asr-transcript p {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+  }
 }

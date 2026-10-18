@@ -4,7 +4,7 @@
  */
 import type { PDFDocument } from "pdf-lib";
 import type { PDFDocumentProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
-import { createDropzone, downloadBlob, formatBytes } from "../../lib/tool-ui";
+import { createDropzone, downloadBlob, formatBytes, markEnter } from "../../lib/tool-ui";
 import type { ToolCtx } from "../types";
 import {
   baseName,
@@ -128,12 +128,18 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         if (!state) continue;
         state.thumb = canvas;
         const slot = list.querySelector<HTMLElement>(`[data-page="${i}"] .tool-item__thumb`);
-        if (slot) slot.replaceChildren(thumbFor(state));
+        if (slot) slot.replaceChildren(arrived(thumbFor(state)));
       } catch (err) {
         // A page that fails to render keeps its placeholder; it can still be moved and saved.
         console.warn(err);
       }
     }
+  }
+
+  /** A thumbnail that has just been drawn replaces its "Loading preview" text with an entry (re-renders never replay it). */
+  function arrived(thumb: HTMLElement): HTMLElement {
+    markEnter(thumb);
+    return thumb;
   }
 
   /** A canvas showing the thumbnail with the user's extra rotation applied. */
@@ -263,7 +269,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         const page = await viewer.getPage(p.index + 1);
         p.thumb = await renderThumbnail(page, THUMB_CSS_PX);
         const slot = list.querySelector<HTMLElement>(`[data-page="${p.index}"] .tool-item__thumb`);
-        if (slot) slot.replaceChildren(thumbFor(p));
+        if (slot) slot.replaceChildren(arrived(thumbFor(p)));
       } catch (err) {
         console.warn(err);
       }

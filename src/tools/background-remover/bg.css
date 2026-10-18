@@ -1,13 +1,41 @@
-/* Background remover only: larger result previews (the checkerboard comes from .tool-item__thumb). */
-.tool--bg-remover .tool-item__thumb {
-  width: 6.5rem;
-  height: 6.5rem;
+/* Background remover only: the cut-out is the product, so its preview is large. The checkerboard
+ * (transparent pixels) and the 1px ring come from .tool-item__thumb in tool.css. Name and meta sit
+ * together, centred beside the tall preview, instead of drifting to its top and bottom edges. */
+.tool--bg-remover .tool-item {
+  grid-template-rows: 1fr auto auto 1fr;
+}
+
+.tool--bg-remover .tool-item > .tool-item__thumb {
+  grid-row: 1 / 5;
+  width: 5rem;
+  height: 5rem;
+  border-radius: var(--radius-md);
   object-fit: contain;
 }
 
+.tool--bg-remover .tool-item > .tool-item__name {
+  grid-row: 2;
+}
+
+.tool--bg-remover .tool-item > .tool-item__meta {
+  grid-row: 3;
+}
+
+.tool--bg-remover .tool-item > .tool-actions {
+  grid-row: 1 / 5;
+}
+
+@media (min-width: 48rem) {
+  .tool--bg-remover .tool-item > .tool-item__thumb {
+    width: 8rem;
+    height: 8rem;
+  }
+}
+
+/* Phones: actions wrap to their own row under the preview (as in tool.css, one row further down). */
 @media (max-width: 36rem) {
-  .tool--bg-remover .tool-item__thumb {
-    width: 4.5rem;
-    height: 4.5rem;
+  .tool--bg-remover .tool-item > .tool-actions {
+    grid-column: 1 / -1;
+    grid-row: 5;
   }
 }

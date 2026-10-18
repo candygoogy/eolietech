@@ -3,7 +3,7 @@
  * Output: one PDF (single part or "combine" ranges) or several PDFs (individually or as a .zip).
  */
 import type { PDFDocument } from "pdf-lib";
-import { createDropzone, downloadBlob, downloadZip, formatBytes } from "../../lib/tool-ui";
+import { createDropzone, downloadBlob, downloadZip, formatBytes, markEnter } from "../../lib/tool-ui";
 import type { ToolCtx } from "../types";
 import { baseName, button, errorMessage, errorRegion, h, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
 import { planSplit, type SplitMode, type SplitPlan } from "./plan";
@@ -220,12 +220,18 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
           className: "tool-item__meta",
           text: `${t("split.pages", { count: o.pages })} · ${formatBytes(o.blob.size)}`,
         }),
-        button(t("tool.download"), {
-          ariaLabel: t("split.downloadLabel", { name: o.name }),
-          onClick: () => downloadBlob(o.blob, o.name),
-        }),
+        h(
+          "span",
+          { className: "tool-actions" },
+          button(t("tool.download"), {
+            ariaLabel: t("split.downloadLabel", { name: o.name }),
+            onClick: () => downloadBlob(o.blob, o.name),
+          }),
+        ),
       ),
     );
+    // Each split builds a fresh list, so every result row is new.
+    for (const li of items) markEnter(li);
     resultList.replaceChildren(...items);
     resultList.hidden = false;
     let main: HTMLButtonElement;

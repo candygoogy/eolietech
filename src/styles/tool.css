@@ -210,8 +210,21 @@
 /* Pairs that belong together sit closer than the main groups. */
 .tool > .tool-progress:not([hidden]) + .tool-note[role="status"],
 .tool > .tool-note[role="status"]:not(:empty) + .tool-list,
-.tool > .tool-list:not([hidden], :empty) + .tool-actions {
+.tool > .tool-note[role="status"]:not(:empty) + .tool-actions:not([hidden]),
+.tool > .tool-actions:not([hidden]) + .tool-list,
+.tool > .tool-list:not([hidden], :empty) + .tool-actions,
+.tool > .tool-list:not([hidden], :empty) + .tool-note {
   margin-top: calc(var(--space-3) - var(--space-5));
+}
+
+/* The loaded file of a one-file tool (split, organize) reads like a file row: a well, full ink. */
+.tool > .tool-item__meta:not(:empty) {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--tool-well, var(--color-sunken));
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 /* ---------- .tool-drop (and the shell's well) ---------- */
@@ -374,6 +387,25 @@ fieldset.tool-options {
 
 .tool-options label .tool-note {
   display: block;
+}
+
+/* Settings that belong to one choice of a fieldset (split: the ranges box under "By page ranges")
+ * are indented to its label, and a checkbox inside them gets the same row as the radios. */
+fieldset.tool-options > div:not(:has(> input[type="radio"], > input[type="checkbox"])) {
+  padding-left: 2.25rem;
+}
+
+.tool-options > div > div:has(> input[type="checkbox"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding-top: var(--space-2);
+}
+
+.tool-options > div > div:has(> input[type="checkbox"]) > input {
+  flex: none;
+  margin-top: 0.15rem;
 }
 
 /* A note explains the control above it: full width, pulled up toward it. */
@@ -585,6 +617,17 @@ div.tool-options select {
     grid-row: 3;
     justify-content: flex-start;
     margin-top: var(--space-2);
+  }
+
+  /* Compact row buttons so a row's actions (Move up, Move down, Remove) fit one line at 390px. */
+  .tool-item > .tool-actions .btn {
+    padding-inline: 0.875rem;
+    font-size: var(--text-sm);
+  }
+
+  /* Text-only ghost buttons hug their label, so one that wraps lines up with the text above. */
+  .tool .tool-actions .btn--ghost {
+    padding-inline: 0.25rem;
   }
 }
 

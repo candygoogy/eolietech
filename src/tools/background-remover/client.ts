@@ -7,6 +7,7 @@ import { createDropzone, downloadBlob, downloadZip, formatBytes } from "../../li
 import { detectDevice, type Device } from "../ai-shared/backend";
 import { button, errorRegion, h, statusRegion } from "../ai-shared/dom";
 import { firstDownloadBytes } from "../ai-shared/model-files";
+import { entryTracker } from "../pdf-shared/dom";
 import type { ToolCtx } from "../types";
 import { outputName } from "./mask";
 import type { BgRequest, BgResponse } from "./worker";
@@ -36,6 +37,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   let modelLoaded = false;
   const jobs = new Map<number, { resolve: (m: BgResponse) => void }>();
   let onLoadMessage: ((m: BgResponse) => void) | null = null;
+  // render() rebuilds the list: only rows and cut-outs shown for the first time play the entry.
+  const enterRow = entryTracker();
+  const enterPreview = entryTracker();
 
   const errors = errorRegion();
   const status = statusRegion();
@@ -109,7 +113,6 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           const name = outputName(e.file.name);
           controls.push(
             button(t("tool.download"), {
-              variant: "primary",
               ariaLabel: t("bg.downloadLabel", { name }),
               onClick: () => downloadBlob(blob, name),
             }),
@@ -133,7 +136,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         const thumb = e.preview
           ? h("img", { className: "tool-item__thumb", src: e.preview, alt: t("bg.previewAlt", { name: e.file.name }), decoding: "async" })
           : h("span", { className: "tool-item__thumb", "aria-hidden": "true" });
-        return h(
+        if (e.preview) enterPreview(e.id, thumb);
+        const li = h(
           "li",
           { className: "tool-item", "data-state": e.state },
           thumb,
@@ -141,6 +145,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           h("span", { className: "tool-item__meta", text: meta }),
           h("span", { className: "tool-actions" }, ...controls),
         );
+        enterRow(e.id, li);
+        return li;
       }),
     );
     const done = entries.filter((e) => e.state === "done" && e.output);
@@ -279,7 +285,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     status.set(t("bg.done", { count: entries.filter((e) => e.state === "done").length }));
     if (failures.length) errors.show(failures);
     render();
-    list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .btn--primary")?.focus();
+    list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .tool-actions .btn:not(.btn--ghost)")?.focus();
   }
 
   async function downloadAllZip() {

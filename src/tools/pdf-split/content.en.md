@@ -46,10 +46,6 @@ ui:
   split.error.outOfRange: "“{part}” is outside the document, which has {pages} pages."
   split.error.reversed: "“{part}” goes backwards. Write the lower page number first."
   split.error.size: "Pages per file must be a whole number from 1 to {pages}."
-  pdf.error.encrypted: "{name} is password-protected or encrypted. Save an unprotected copy and try again."
-  pdf.error.invalid: "{name} could not be read as a PDF. It may be damaged or not a PDF at all."
-  pdf.error.empty: "{name} has no pages."
-  pdf.error.failed: "Something went wrong while processing {name}."
 ---
 
 ## Three ways to split

@@ -1,8 +1,15 @@
-/* Organize PDF only: lay pages out as a thumbnail grid. Scoped to this tool; colours/spacing come from tokens. */
+/*
+ * Organize PDF only: pages laid out as a grid of tiles. Each tile is a well (--tool-well, radius and
+ * padding from .tool-list--pages in tool.css); the page itself is a sheet of white paper with a 1px
+ * ring, because it is paper, in both themes. The dashed drop-target outline is functional and stays.
+ * Phones: each page becomes a row (paper left, name beside it, actions below) so five pages do not
+ * stack into five screen-tall tiles.
+ */
 .tool--pdf-organize .tool-list--pages {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: var(--space-3, 1rem);
+  /* 13.5rem: the widest pair of actions ("Rotate left" + "Rotate right") fits side by side. */
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  gap: var(--space-3);
   padding: 0;
   list-style: none;
 }
@@ -11,7 +18,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1, 0.25rem);
+  gap: var(--space-1);
   text-align: center;
 }
 
@@ -24,27 +31,117 @@
 }
 
 .tool--pdf-organize .tool-list--pages .tool-item[data-drop-target] {
-  outline: 2px dashed var(--color-focus, currentColor);
+  outline: 2px dashed var(--color-focus);
   outline-offset: 2px;
 }
 
+/* The loaded file and the drag hint read as one line of context. */
+.tool--pdf-organize > .tool-item__meta:not(:empty) + .tool-note:not([hidden]) {
+  margin-top: calc(var(--space-2) - var(--space-5));
+}
+
+/* The slot only centres the page; the shared thumb's checkerboard and ring belong to images. */
 .tool--pdf-organize .tool-item__thumb {
   display: grid;
+  /* One track the size of the slot, so the canvas's max-width/height resolve against it. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
   width: 9rem;
   height: 9rem;
+  margin-bottom: var(--space-1);
+  background: none;
+  box-shadow: none;
 }
 
 .tool--pdf-organize .tool-item__thumb canvas {
   max-width: 100%;
   max-height: 100%;
-  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 25%, transparent);
   background: #fff;
+  box-shadow: 0 0 0 1px var(--color-border);
 }
 
-.tool--pdf-organize .tool-list--pages .tool-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-1, 0.25rem);
+/* A page drawn while the list is on screen settles in (markEnter in client.ts): fade and a slight scale. */
+.tool--pdf-organize .tool-item__thumb > [data-enter] {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    scale var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  .tool--pdf-organize .tool-item__thumb > [data-enter] {
+    translate: none;
+    scale: 0.96;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @starting-style {
+    .tool--pdf-organize .tool-item__thumb > [data-enter] {
+      scale: 1;
+    }
+  }
+}
+
+/* Actions in pairs (Earlier | Later, Rotate left | Rotate right), Delete below as a quiet text
+ * button: destructive and secondary, like Remove in the other tools. */
+.tool--pdf-organize .tool-list--pages .tool-item > .tool-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.tool--pdf-organize .tool-list--pages .tool-actions .btn {
+  padding-inline: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.tool--pdf-organize .tool-list--pages .tool-item [data-act="delete"] {
+  grid-column: 1 / -1;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tool--pdf-organize .tool-list--pages .tool-item [data-act="delete"]:hover:not(:disabled) {
+    background: var(--tool-well-hover, var(--color-fill-hover));
+    color: var(--color-text);
+  }
+}
+
+@media (max-width: 36rem) {
+  .tool--pdf-organize .tool-list--pages .tool-item {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto 1fr;
+    align-items: center;
+    gap: 0.125rem var(--space-3);
+    text-align: start;
+  }
+
+  .tool--pdf-organize .tool-list--pages .tool-item > .tool-item__thumb {
+    grid-column: 1;
+    grid-row: 1 / 5;
+    width: 5.5rem;
+    height: 5.5rem;
+    margin-bottom: 0;
+  }
+
+  .tool--pdf-organize .tool-list--pages .tool-item > .tool-item__name {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .tool--pdf-organize .tool-list--pages .tool-item > .tool-item__meta {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .tool--pdf-organize .tool-list--pages .tool-item > .tool-actions {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    margin-top: var(--space-3);
+  }
 }

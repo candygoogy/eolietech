@@ -48,9 +48,6 @@ ui:
   compress.zipName: "compressed_pdfs.zip"
   compress.error.engine: "The compression engine could not be loaded. Check your connection and try again."
   compress.error.failed: "{name} could not be compressed. The file may be damaged or use features the engine does not support."
-  pdf.error.encrypted: "{name} is password-protected or encrypted. Save an unprotected copy and try again."
-  pdf.error.invalid: "{name} could not be read as a PDF. It may be damaged or not a PDF at all."
-  pdf.error.failed: "Something went wrong while processing {name}."
 ---
 
 ## How it works

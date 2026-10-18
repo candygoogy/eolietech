@@ -2,7 +2,7 @@
 
 export type PdfErrorCode = "encrypted" | "invalid" | "empty";
 
-/** A load/processing failure with a code the UI maps to a friendly, translated message (ui key pdf.error.<code>). */
+/** A load/processing failure with a code the UI maps to a friendly, translated message (shared string tool.pdf.error.<code> in src/i18n/en.json). */
 export class PdfToolError extends Error {
   constructor(public readonly code: PdfErrorCode) {
     super(`pdf: ${code}`);

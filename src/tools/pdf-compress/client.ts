@@ -6,7 +6,7 @@
 import gsWasmUrl from "@okathira/ghostpdl-wasm/gs.wasm?url";
 import { createDropzone, downloadBlob, downloadZip, formatBytes, renameExtension } from "../../lib/tool-ui";
 import type { ToolCtx } from "../types";
-import { baseName, button, errorRegion, h, readFile, statusRegion } from "../pdf-shared/dom";
+import { baseName, button, entryTracker, errorRegion, h, readFile, statusRegion } from "../pdf-shared/dom";
 import { looksLikePdf } from "../pdf-shared/pdf-errors";
 import type { GsRequest, GsResponse } from "./gs.worker";
 import { DEFAULT_PRESET, GS_WASM_BYTES, gsArgs, isPreset, PRESETS, type Preset } from "./presets";
@@ -120,6 +120,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   let nextId = 1;
   let busy = false;
   let engineReady = false;
+  // render() rebuilds the list: only rows shown for the first time play the entry.
+  const enterRow = entryTracker();
 
   const errors = errorRegion();
   const status = statusRegion();
@@ -227,7 +229,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       ...entries.map((e) => {
         let meta = formatBytes(e.file.size);
         if (e.state === "working") meta = e.message ?? t("compress.working");
-        if (e.state === "error") meta = e.message ?? t("pdf.error.failed", { name: e.file.name });
+        if (e.state === "error") meta = e.message ?? t("tool.pdf.error.failed", { name: e.file.name });
         if (e.state === "done" && e.output) meta = e.message ?? "";
         const controls: HTMLElement[] = [];
         if (e.state === "done" && e.output) {
@@ -235,7 +237,6 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
           const name = outputName(e);
           controls.push(
             button(e.keptOriginal ? t("compress.downloadOriginal") : t("tool.download"), {
-              variant: "primary",
               ariaLabel: t(e.keptOriginal ? "compress.downloadOriginalLabel" : "compress.downloadLabel", { name }),
               onClick: () => downloadBlob(blob, name),
             }),
@@ -255,13 +256,15 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
             }),
           );
         }
-        return h(
+        const li = h(
           "li",
           { className: "tool-item", "data-state": e.state },
           h("span", { className: "tool-item__name", text: e.file.name }),
           h("span", { className: "tool-item__meta", text: meta }),
           h("span", { className: "tool-actions" }, ...controls),
         );
+        enterRow(e.id, li);
+        return li;
       }),
     );
     const done = entries.filter((e) => e.state === "done" && e.output);
@@ -345,9 +348,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
         if (!(err instanceof GsRunError)) console.error(err);
         e.state = "error";
         e.message = /password|encrypt/i.test(log)
-          ? t("pdf.error.encrypted", { name: e.file.name })
+          ? t("tool.pdf.error.encrypted", { name: e.file.name })
           : /not a pdf/.test(log)
-            ? t("pdf.error.invalid", { name: e.file.name })
+            ? t("tool.pdf.error.invalid", { name: e.file.name })
             : t("compress.error.failed", { name: e.file.name });
         failures.push(e.message);
       }
@@ -359,7 +362,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     status.set(t("compress.done", { count: done.length }));
     if (failures.length) errors.show(failures);
     render();
-    list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .btn--primary")?.focus();
+    list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .tool-actions .btn:not(.btn--ghost)")?.focus();
   }
 
   async function downloadAllZip() {

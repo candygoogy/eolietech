@@ -2,6 +2,7 @@
  * Small DOM helpers for the PDF tool islands. No inline style attributes (CSP: style-src 'self');
  * everything uses the class contract from src/lib/tool-ui.ts.
  */
+import { ENTER_MS, markEnter } from "../../lib/tool-ui";
 import type { ToolCtx } from "../types";
 import { PdfToolError } from "./pdf-errors";
 
@@ -45,6 +46,34 @@ export function setDisabled(b: HTMLButtonElement, disabled: boolean): void {
   b.style.pointerEvents = disabled ? "none" : "";
 }
 
+/**
+ * markEnter for lists that render() rebuilds from scratch (also used by the AI tools). Call it with
+ * a stable key (entry id) and the freshly built element: the key's element plays the entry once.
+ * If the list is rebuilt while that entry is still running (a file finished loading a few ms after
+ * its row appeared), the new element carries on from the same point instead of restarting or
+ * snapping to the end: a negative transition-delay, set through the CSSOM like setDisabled above.
+ * Later rebuilds never replay it.
+ */
+export function entryTracker(): (key: number | string, el: HTMLElement) => void {
+  const firstShown = new Map<number | string, number>();
+  return (key, el) => {
+    const now = performance.now();
+    const start = firstShown.get(key);
+    if (start === undefined) {
+      firstShown.set(key, now);
+      markEnter(el);
+      return;
+    }
+    const elapsed = Math.round(now - start);
+    if (elapsed >= ENTER_MS) return;
+    markEnter(el);
+    if (elapsed > 0) {
+      el.style.transitionDelay = `${-elapsed}ms`;
+      setTimeout(() => el.style.removeProperty("transition-delay"), ENTER_MS);
+    }
+  };
+}
+
 /** Polite live region for progress / results. */
 export function statusRegion(): { el: HTMLParagraphElement; set: (msg: string) => void } {
   const el = h("p", { className: "tool-note", role: "status", "aria-live": "polite" });
@@ -68,11 +97,11 @@ export function errorRegion(): { el: HTMLDivElement; show: (msg: string | string
   };
 }
 
-/** Translate any processing failure into a friendly message (keys live in each tool's `ui`). */
+/** Translate any processing failure into a friendly message (shared tool.pdf.error.* strings in src/i18n/en.json). */
 export function errorMessage(err: unknown, ctx: Pick<ToolCtx, "t">, name: string): string {
-  if (err instanceof PdfToolError) return ctx.t(`pdf.error.${err.code}`, { name });
+  if (err instanceof PdfToolError) return ctx.t(`tool.pdf.error.${err.code}`, { name });
   console.error(err);
-  return ctx.t("pdf.error.failed", { name });
+  return ctx.t("tool.pdf.error.failed", { name });
 }
 
 export async function readFile(file: File): Promise<Uint8Array> {

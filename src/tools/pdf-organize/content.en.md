@@ -50,10 +50,6 @@ ui:
   organize.done: "Done: new PDF with {pages} pages."
   organize.download: "Download PDF ({pages} pages, {size})"
   organize.outputName: "{name}_organized.pdf"
-  pdf.error.encrypted: "{name} is password-protected or encrypted. Save an unprotected copy and try again."
-  pdf.error.invalid: "{name} could not be read as a PDF. It may be damaged or not a PDF at all."
-  pdf.error.empty: "{name} has no pages."
-  pdf.error.failed: "Something went wrong while processing {name}."
 ---
 
 ## A page sorter that stays on your computer
