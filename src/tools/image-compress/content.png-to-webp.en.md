@@ -5,7 +5,7 @@ h1: "PNG to WebP converter"
 intro: "Make PNG images lighter for your website by converting them to WebP. Transparency is preserved, you control the quality, and the conversion runs in your browser without uploading anything."
 howTo:
   - "Choose your .png files, or drop them on the box above."
-  - "WebP is preselected. Adjust the quality slider: 75 suits most images, 85–90 is safer for text and fine lines."
+  - "WebP is preselected. Adjust the quality slider: 75 suits most images, 85 to 90 is safer for text and fine lines."
   - "Optionally set a maximum width or height so oversized images are scaled down."
   - "Compare the sizes in the list, then download the WebP files or the whole batch as a .zip."
 faq:
@@ -28,7 +28,7 @@ PNG is a lossless format, which is ideal for editing but expensive for the web: 
 
 ## Choosing a quality
 
-The slider sets how much detail WebP may discard. Photos and illustrations with soft gradients look fine at 70–80. Images with sharp text, thin lines or flat UI elements can show faint smudging around edges at low settings, so use 85–90 for screenshots and diagrams. Moving the slider re-converts the whole batch so you can compare sizes immediately.
+The slider sets how much detail WebP may discard. Photos and illustrations with soft gradients look fine at 70 to 80. Images with sharp text, thin lines or flat UI elements can show faint smudging around edges at low settings, so use 85 to 90 for screenshots and diagrams. Moving the slider re-converts the whole batch so you can compare sizes immediately.
 
 If a simple graphic, such as a logo with a few flat colors, comes out larger as WebP, keep it as PNG. PNG's compression is very effective for that kind of image.
 

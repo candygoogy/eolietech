@@ -10,9 +10,9 @@ howTo:
   - "Download each WebP or the whole batch as a .zip, then upload them to your site."
 faq:
   - q: "How much smaller is WebP than JPG?"
-    a: "Google's own comparisons found lossy WebP files about 25–34% smaller than JPGs of similar visual quality. Photos straight from a camera, saved at very high JPG quality, often shrink far more because they are also being compressed harder."
+    a: "Google's own comparisons found lossy WebP files about 25 to 34% smaller than JPGs of similar visual quality. Photos straight from a camera, saved at very high JPG quality, often shrink far more because they are also being compressed harder."
   - q: "Do I lose quality converting JPG to WebP?"
-    a: "A little, as with any re-encoding of a lossy image. At quality 75–85 the difference is very hard to see at normal viewing size. Always keep your original JPGs as the master copies."
+    a: "A little, as with any re-encoding of a lossy image. At quality 75 to 85 the difference is very hard to see at normal viewing size. Always keep your original JPGs as the master copies."
   - q: "Are my photos rotated correctly?"
     a: "Yes. The orientation stored in the JPG's EXIF data is applied before encoding, so portrait photos stay upright. The rest of the EXIF data, including GPS location, is not copied to the WebP."
   - q: "Should I still keep JPGs for my website?"
@@ -28,9 +28,9 @@ JPG has been the default photo format for over thirty years, but its compression
 
 ## Getting good results
 
-Start with the default quality of 75 and look at the size reduction in the list. For portfolio images or product photos where detail matters, 80–85 is a safer choice. Lowering the quality below 60 tends to produce visible blurring in skies and skin tones.
+Start with the default quality of 75 and look at the size reduction in the list. For portfolio images or product photos where detail matters, 80 to 85 is a safer choice. Lowering the quality below 60 tends to produce visible blurring in skies and skin tones.
 
-Resizing often saves more than compression. A 12-megapixel phone photo is 4000 pixels wide, while most page layouts show images at 1200–2000 pixels. Set a maximum width and the photo is scaled down with a Lanczos filter before encoding, which can cut the file size by another 70% or more.
+Resizing often saves more than compression. A 12-megapixel phone photo is 4000 pixels wide, while most page layouts show images at 1200 to 2000 pixels. Set a maximum width and the photo is scaled down with a Lanczos filter before encoding, which can cut the file size by another 70% or more.
 
 ## What is not carried over
 

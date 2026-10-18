@@ -24,13 +24,13 @@ ui:
 
 ## Why AVIF
 
-AVIF stores still images using AV1, the royalty-free video codec developed by the Alliance for Open Media. Compared with older formats it handles gradients, fine texture and transparency very efficiently, and photographic PNGs often shrink by 80–90%. For a website, that can turn a multi-megabyte hero image into something that loads almost instantly.
+AVIF stores still images using AV1, the royalty-free video codec developed by the Alliance for Open Media. Compared with older formats it handles gradients, fine texture and transparency very efficiently, and photographic PNGs often shrink by 80 to 90%. For a website, that can turn a multi-megabyte hero image into something that loads almost instantly.
 
 Unlike JPG, AVIF keeps the alpha channel, so it can stand in for transparent PNGs such as product cut-outs and illustrations.
 
 ## Choosing settings
 
-The quality slider uses the same 1–100 scale as the other formats on this site and is mapped onto AVIF's own scale, so 75 gives roughly the visual quality you would expect from a JPG at 75, in a much smaller file. For images with sharp text or line art, start at 85–90. Combining a moderate quality with a maximum width saves the most space.
+The quality slider uses the same 1 to 100 scale as the other formats on this site and is mapped onto AVIF's own scale, so 75 gives roughly the visual quality you would expect from a JPG at 75, in a much smaller file. For images with sharp text or line art, start at 85 to 90. Combining a moderate quality with a maximum width saves the most space.
 
 AVIF encoding is CPU-intensive. It runs in background workers so the page does not freeze, but converting dozens of large images can take a few minutes on an older laptop. The list updates as each file finishes.
 

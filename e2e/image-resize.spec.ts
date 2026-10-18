@@ -126,7 +126,7 @@ test("/it/ridimensionare-immagini/ works in Italian at 360px without sideways sc
   const row = page.locator(".tool-item").first();
   await done(row);
   await expect(row).toContainText("64 × 48 → 32 × 24 px");
-  await expect(page.locator(".tool-note[role=status]")).toContainText("1 file su 1");
+  await expect(page.locator(".tool-note[role=status]")).toContainText("File ridimensionati: 1 su 1");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
   w.assertPrivate();
 });

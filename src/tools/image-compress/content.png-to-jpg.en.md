@@ -12,7 +12,7 @@ faq:
   - q: "What happens to a transparent background?"
     a: "JPG has no transparency, so transparent and partly transparent pixels are blended onto white. The list notes every file where this happened. If you need to keep the transparency, try PNG to WebP instead."
   - q: "Will text in screenshots stay sharp?"
-    a: "JPG is designed for photos, so sharp edges such as text can pick up faint halos at lower quality. For screenshots, use quality 85–90, or keep them as PNG if they need to stay crisp."
+    a: "JPG is designed for photos, so sharp edges such as text can pick up faint halos at lower quality. For screenshots, use quality 85 to 90, or keep them as PNG if they need to stay crisp."
   - q: "Why is my JPG not much smaller?"
     a: "Simple graphics with large flat areas, like diagrams or logos, are already stored efficiently as PNG. JPG gives the biggest savings on photos and detailed images."
   - q: "Is anything uploaded?"
@@ -26,7 +26,7 @@ ui:
 
 PNG stores every pixel exactly, which is ideal for editing but makes photos and detailed screenshots large. A photo saved as PNG is often five to ten times bigger than the same photo as a JPG. That matters when an email bounces for being too large, when a form caps uploads at 2 MB, or when you need to fit many images into a document.
 
-JPG is accepted practically everywhere, from word processors to online shops, and at quality 75–85 most people cannot tell it apart from the original PNG.
+JPG is accepted practically everywhere, from word processors to online shops, and at quality 75 to 85 most people cannot tell it apart from the original PNG.
 
 ## Photos versus graphics
 

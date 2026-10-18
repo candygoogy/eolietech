@@ -58,7 +58,7 @@ ui:
 
 **Every page as its own PDF** turns a 20-page file into 20 one-page files. That is handy for scanned batches where each page is a separate receipt, form or letter.
 
-**Every N pages** cuts the document into equal chunks. With a 30-page file and N = 10 you get pages 1–10, 11–20 and 21–30. If the page count does not divide evenly, the last file is shorter.
+**Every N pages** cuts the document into equal chunks. With a 30-page file and N = 10 you get pages 1 to 10, 11 to 20 and 21 to 30. If the page count does not divide evenly, the last file is shorter.
 
 When there is more than one result you can download the parts one by one or all together as a .zip archive, which is also built in your browser.
 

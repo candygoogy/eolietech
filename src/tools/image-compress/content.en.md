@@ -70,11 +70,11 @@ With **Keep original format** selected, each file is compressed in its own forma
 
 - **JPG** works everywhere and is the safe choice for photos you email or upload to other services. It has no transparency.
 - **PNG** is lossless: every pixel is kept exactly. It suits screenshots, diagrams and logos, but it is a poor fit for photos, which come out several times larger than a JPG.
-- **WebP** is usually 25–35% smaller than a JPG of similar quality and supports transparency. Every current browser displays it, though some older desktop software does not.
+- **WebP** is usually 25 to 35% smaller than a JPG of similar quality and supports transparency. Every current browser displays it, though some older desktop software does not.
 - **AVIF** usually gives the smallest files, often around half the size of a comparable JPG. Encoding is slower, so a large batch takes a while. Chrome, Edge, Firefox and Safari 16 or newer can display it.
 
 ## How much smaller will my files get?
 
-It depends on the source. Photos straight from a phone or camera are often saved at a very high quality and shrink a lot, sometimes by 60–80% at quality 75. Images that were already optimized for the web may barely change. PNG compression is lossless, so typical savings there are smaller, around 10–40%. Each result shows the before and after size, so you can compare before you download.
+It depends on the source. Photos straight from a phone or camera are often saved at a very high quality and shrink a lot, sometimes by 60 to 80% at quality 75. Images that were already optimized for the web may barely change. PNG compression is lossless, so typical savings there are smaller, around 10 to 40%. Each result shows the before and after size, so you can compare before you download.
 
 If you only need smaller files for a website, combining a moderate quality setting with a maximum width (1600 or 2000 pixels covers most layouts) usually saves more than lowering the quality alone.

@@ -28,7 +28,7 @@ Images are usually the heaviest part of a web page. AVIF, based on the AV1 video
 
 ## Picking a quality
 
-The 1–100 slider is mapped onto AVIF's own quality scale, so 75 here looks roughly like a JPG at 75 but takes far fewer bytes. Lower values degrade gracefully: instead of JPG's blocky artifacts, AVIF tends to smooth out fine texture. For portraits and product photos, 75–85 is a good range; 60 is often fine for large background images.
+The 1 to 100 slider is mapped onto AVIF's own quality scale, so 75 here looks roughly like a JPG at 75 but takes far fewer bytes. Lower values degrade gracefully: instead of JPG's blocky artifacts, AVIF tends to smooth out fine texture. For portraits and product photos, 75 to 85 is a good range; 60 is often fine for large background images.
 
 If your photos come straight from a phone, also set a maximum width. A 4000-pixel photo shown at 1600 pixels wastes most of its bytes, and resizing before encoding makes AVIF both faster and smaller.
 

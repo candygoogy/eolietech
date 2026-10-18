@@ -5,7 +5,7 @@ h1: "AVIF to JPG converter"
 intro: "Got an .avif file that your editor, phone or upload form will not open? Convert it to a regular JPG here. You pick the quality, and the conversion happens on your own device."
 howTo:
   - "Choose your .avif files, or drop them on the box above."
-  - "JPG is preselected. Set the quality: 80–90 keeps the result close to the AVIF."
+  - "JPG is preselected. Set the quality: 80 to 90 keeps the result close to the AVIF."
   - "Optionally enter a maximum width or height to make the images smaller."
   - "Download each JPG or the whole batch as a .zip."
 faq:
@@ -28,7 +28,7 @@ AVIF is increasingly common on the web: sites serve it to browsers that support 
 
 ## Quality settings
 
-Both formats are lossy. Because AVIF is so efficient, a JPG needs a relatively high quality to look the same, so 80–90 is a good starting point. If the size matters more, try 75 and compare. The list shows the before and after sizes, and moving the slider re-converts the batch so you can find the balance quickly.
+Both formats are lossy. Because AVIF is so efficient, a JPG needs a relatively high quality to look the same, so 80 to 90 is a good starting point. If the size matters more, try 75 and compare. The list shows the before and after sizes, and moving the slider re-converts the batch so you can find the balance quickly.
 
 ## Transparency and limits
 
