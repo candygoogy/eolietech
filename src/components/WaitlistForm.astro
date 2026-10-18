@@ -89,6 +89,10 @@ const messages = {
 
   const win = window as Window & { turnstile?: Turnstile };
 
+  /** Below 360px the normal widget (a fixed 300px) can't fit with padding: use the compact one (150 × 140).
+   * Same query as the compact rules in components.css, which reserve its height. */
+  const COMPACT_CHECK = "(max-width: 22.49rem)";
+
   let loading: Promise<Turnstile> | undefined;
   function loadTurnstile(src: string): Promise<Turnstile> {
     if (win.turnstile) return Promise.resolve(win.turnstile);
@@ -135,7 +139,7 @@ const messages = {
           widgetId = ts.render(checkEl, {
             sitekey: form.dataset.sitekey,
             theme: "auto",
-            size: "flexible",
+            size: matchMedia(COMPACT_CHECK).matches ? "compact" : "flexible",
             language: form.dataset.locale ?? "auto",
             action: "waitlist",
             callback: (value: string) => {

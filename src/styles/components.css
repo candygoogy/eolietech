@@ -2237,6 +2237,18 @@ a.tool-index__row:focus-visible::after {
   margin-top: var(--space-2);
 }
 
+/* Below 360px the form script renders Turnstile's compact widget (150 × 140; same query as COMPACT_CHECK
+   in WaitlistForm.astro), so the floor drops to its width and the slot reserves its height. */
+@media (max-width: 22.49rem) {
+  .waitlist-form {
+    min-width: calc(150px + 2 * var(--form-pad));
+  }
+
+  .waitlist-form__check {
+    min-height: 140px;
+  }
+}
+
 .waitlist-form__status {
   font-weight: 700;
   transition:
