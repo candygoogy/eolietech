@@ -25,11 +25,17 @@ interface Props {
   noindex?: boolean;
   /** Tool pages: a smaller postcard at the end, so the tool stays the page. */
   compactFooter?: boolean;
+  /** Site-relative Open Graph image (1200x630, made by scripts/og.mjs). Defaults to the site-wide card. */
+  ogImage?: string;
+  /** What the OG image says; it shows the page's name on a postcard. Defaults to the home headline. */
+  ogImageName?: string;
 }
 
 const { locale = DEFAULT_LOCALE, title, description, path, noindex = false, compactFooter = false } = Astro.props;
 const site = Astro.site ?? new URL("https://eolietech.com");
 const abs = (p: string) => new URL(p, site).href;
+const ogImage = abs(Astro.props.ogImage ?? "/og/default.png");
+const ogImageAlt = t(locale, "og.alt", { name: Astro.props.ogImageName ?? t(locale, "home.h1") });
 const alternates: Alternate[] = Astro.props.alternates ?? (path ? [{ locale, path }] : []);
 const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
 ---
@@ -59,6 +65,12 @@ const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {path && <meta property="og:url" content={abs(path)} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
     <slot name="head" />
   </head>
   <body>

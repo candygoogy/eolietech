@@ -7,7 +7,9 @@
  */
 import { getEntry, render } from "astro:content";
 import Base from "../layouts/Base.astro";
+import JsonLd from "../components/JsonLd.astro";
 import { getDictionary, localePath, t } from "../i18n";
+import { breadcrumbs, graph, webApplication } from "../lib/structured-data";
 import { getTool, publishedTools, toolPages } from "../tools/registry";
 import { contentEntryId } from "../tools/content-files";
 import type { Locale } from "../tools/types";
@@ -63,9 +65,34 @@ const related = (
 // Strings shipped to the island: shared `tool.*` site strings, then the tool's own `ui` strings.
 const siteToolStrings = Object.fromEntries(Object.entries(getDictionary(locale)).filter(([k]) => k.startsWith("tool.")));
 const strings = { ...siteToolStrings, ...baseEntry.data.ui, ...(variant ? entry.data.ui : {}) };
+
+// Open Graph card (public/og/<slug>.png, made by `npm run og`) and schema.org data. Variants sit
+// under their tool in the breadcrumb trail (Home > Tools > Compress images > WebP to PNG converter).
+const path = localePath(locale, slug);
+const ogImage = `/og/${slug}.png`;
+const site = Astro.site!;
+const structuredData = graph([
+  webApplication({
+    site,
+    name: h1,
+    description,
+    path,
+    category: tool.category,
+    inLanguage: locale,
+    imagePath: ogImage,
+    publisherName: t(locale, "site.name"),
+  }),
+  breadcrumbs(site, [
+    { name: t(locale, "nav.home"), path: localePath(locale) },
+    { name: t(locale, "nav.tools"), path: localePath(locale, "tools") },
+    ...(variant ? [{ name: baseEntry.data.h1, path: localePath(locale, tool.slug[locale]!) }] : []),
+    { name: h1, path },
+  ]),
+]);
 ---
 
-<Base locale={locale} {title} {description} path={localePath(locale, slug)} {alternates} compactFooter>
+<Base locale={locale} {title} {description} {path} {alternates} {ogImage} ogImageName={h1} compactFooter>
+  <JsonLd slot="head" data={structuredData} />
   <article class="tool-page">
     <header class="tool-page__head container">
       <a class="tool-page__back" href={localePath(locale, "tools")}>{t(locale, "toolPage.allTools")}</a>

@@ -459,5 +459,8 @@
   "footer.postmark": "not sent",
   "footer.postmark.place": "Isole Eolie",
   "footer.made": "made in the Isole Eolie, by candygoogy",
-  "footer.copyright": "© {year} candygoogy. Code licensed under AGPL-3.0."
+  "footer.copyright": "© {year} candygoogy. Code licensed under AGPL-3.0.",
+  "og.alt": "A postcard on a desk that reads “{name}”, from eolietech.com",
+  "og.line": "Runs in your browser. Nothing is uploaded.",
+  "og.default.line": "Free tools for images, PDFs and audio."
 }
