@@ -1,0 +1,10 @@
+---
+import ToolPage from "../../views/ToolPage.astro";
+import { toolStaticPaths } from "../../lib/tool-paths";
+
+export const getStaticPaths = () => toolStaticPaths("it");
+
+const { toolId, variantId, locale } = Astro.props;
+---
+
+<ToolPage toolId={toolId} variantId={variantId} locale={locale} />

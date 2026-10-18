@@ -1,6 +1,6 @@
 /**
- * Every published tool and variant page links /og/<slug>.png (src/pages/[tool].astro), and every
- * other page /og/default.png (Base.astro). A new tool or variant without its image fails here:
+ * Every published tool and variant page links /og/<slug>.png (/og/it/<slug>.png in Italian;
+ * src/views/ToolPage.astro), and every other page /og/default.png or /og/it/default.png (Base.astro). A new tool or variant without its image fails here:
  * run `npm run og` (scripts/og.mjs) and commit public/og/.
  */
 import fs from "node:fs";
@@ -10,10 +10,11 @@ import { publishedTools, toolPages } from "../tools/registry";
 import { LOCALES } from "../tools/types";
 
 const ogDir = path.resolve(__dirname, "../../public/og");
-const files = [
-  "default.png",
-  ...new Set(LOCALES.flatMap((locale) => publishedTools().flatMap((tool) => toolPages(tool, locale).map((p) => `${p.slug}.png`)))),
-];
+const prefix = (locale: string) => (locale === "en" ? "" : `${locale}/`);
+const files = LOCALES.flatMap((locale) => [
+  `${prefix(locale)}default.png`,
+  ...publishedTools().flatMap((tool) => toolPages(tool, locale).map((p) => `${prefix(locale)}${p.slug}.png`)),
+]);
 
 /** Width and height from a PNG's IHDR chunk. */
 function pngSize(buf: Buffer): { width: number; height: number } {

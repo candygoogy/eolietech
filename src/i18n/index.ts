@@ -1,13 +1,14 @@
 import type { Locale } from "../tools/types";
 import { DEFAULT_LOCALE } from "../tools/types";
 import en from "./en.json";
+import it from "./it.json";
 import { interpolate } from "./interpolate";
 
 export { interpolate };
 export type Dict = Record<string, string>;
 
-/** Add `it` here once src/i18n/it.json exists. */
-const dictionaries: Partial<Record<Locale, Dict>> = { en };
+/** One dictionary per locale; missing keys fall back to English (t below). */
+const dictionaries: Partial<Record<Locale, Dict>> = { en, it };
 
 /** Look up a site string; falls back to English, then to the key itself. */
 export function t(locale: Locale, key: string, vars?: Record<string, string | number>): string {

@@ -77,7 +77,12 @@ export function filterFiles(files: File[], accept: string, ctx: Pick<ToolCtx, "l
   return result;
 }
 
-export function formatBytes(bytes: number): string {
+/**
+ * "1.5 MB" / "1,5 MB". The number follows the page's language: pass it on the server; in the browser
+ * it defaults to <html lang>, so tool code doesn't have to thread the locale through.
+ */
+export function formatBytes(bytes: number, locale?: string): string {
+  const lang = locale || globalThis.document?.documentElement.lang || "en";
   if (bytes < 1024) return `${bytes} B`;
   const units = ["KB", "MB", "GB"];
   let value = bytes / 1024;
@@ -86,7 +91,9 @@ export function formatBytes(bytes: number): string {
     value /= 1024;
     i++;
   }
-  return `${value.toFixed(value < 10 ? 1 : 0)} ${units[i]}`;
+  const digits = value < 10 ? 1 : 0;
+  const number = new Intl.NumberFormat(lang, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+  return `${number} ${units[i]}`;
 }
 
 export interface DropzoneOptions {

@@ -1,0 +1,180 @@
+---
+/**
+ * Generic tool page, driven by the registry. One page per published tool and per variant
+ * (variants live at the top level too, e.g. /webp-to-png/).
+ * Copy: src/tools/<id>/content[.<variantId>].en.md. UI: src/tools/<id>/client.ts (lazy island).
+ * Rendered by src/pages/[tool].astro (en) and src/pages/it/[tool].astro (it); paths: src/lib/tool-paths.ts.
+ */
+import { getEntry, render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import JsonLd from "../components/JsonLd.astro";
+import { getDictionary, localePath, t } from "../i18n";
+import { pagePath } from "../i18n/routes";
+import { breadcrumbs, graph, webApplication } from "../lib/structured-data";
+import { getTool, publishedTools } from "../tools/registry";
+import { contentEntryId } from "../tools/content-files";
+import type { Locale } from "../tools/types";
+
+interface Props {
+  toolId: string;
+  variantId?: string;
+  locale: Locale;
+}
+
+const { toolId, variantId, locale } = Astro.props;
+const tool = getTool(toolId)!;
+const variant = tool.variants?.find((v) => v.id === variantId);
+const slug = variant ? variant.slug[locale]! : tool.slug[locale]!;
+
+const baseEntry = await getEntry("tools", contentEntryId(toolId, locale));
+const entry = variant ? await getEntry("tools", contentEntryId(toolId, locale, variant.id)) : baseEntry;
+if (!entry || !baseEntry) {
+  throw new Error(`Missing content for ${toolId}${variant ? `/${variant.id}` : ""} (${locale})`);
+}
+const { Content } = await render(entry);
+const { title, description, h1, intro, howTo, faq } = entry.data;
+
+// Translations of this page: only locales that have reviewed content (no hreflang otherwise).
+const alternates = tool.locales.flatMap((l) => {
+  const s = variant ? variant.slug[l] : tool.slug[l];
+  return s ? [{ locale: l, path: localePath(l, s) }] : [];
+});
+
+const published = new Set(publishedTools().map((t) => t.id));
+const related = (
+  await Promise.all(
+    tool.related
+      .filter((id) => published.has(id))
+      .map(async (id) => {
+        const r = getTool(id)!;
+        const copy = await getEntry("tools", contentEntryId(id, locale));
+        return r.slug[locale] && copy ? { href: localePath(locale, r.slug[locale]), label: copy.data.h1 } : null;
+      }),
+  )
+).filter((r) => r !== null);
+
+// Strings shipped to the island: shared `tool.*` site strings, then the tool's own `ui` strings.
+const siteToolStrings = Object.fromEntries(Object.entries(getDictionary(locale)).filter(([k]) => k.startsWith("tool.")));
+const strings = { ...siteToolStrings, ...baseEntry.data.ui, ...(variant ? entry.data.ui : {}) };
+
+// Open Graph card (public/og/<slug>.png, made by `npm run og`) and schema.org data. Variants sit
+// under their tool in the breadcrumb trail (Home > Tools > Compress images > WebP to PNG converter).
+const path = localePath(locale, slug);
+const ogImage = `/og/${locale === "en" ? "" : `${locale}/`}${slug}.png`;
+const site = Astro.site!;
+const structuredData = graph([
+  webApplication({
+    site,
+    name: h1,
+    description,
+    path,
+    category: tool.category,
+    inLanguage: locale,
+    imagePath: ogImage,
+    publisherName: t(locale, "site.name"),
+    browserRequirements: t(locale, "schema.browserRequirements"),
+  }),
+  breadcrumbs(site, [
+    { name: t(locale, "nav.home"), path: localePath(locale) },
+    { name: t(locale, "nav.tools"), path: pagePath(locale, "tools") },
+    ...(variant ? [{ name: baseEntry.data.h1, path: localePath(locale, tool.slug[locale]!) }] : []),
+    { name: h1, path },
+  ]),
+]);
+---
+
+<Base locale={locale} {title} {description} {path} {alternates} {ogImage} ogImageName={h1} compactFooter>
+  <JsonLd slot="head" data={structuredData} />
+  <article class="tool-page">
+    <header class="tool-page__head container">
+      <a class="tool-page__back" href={pagePath(locale, "tools")}>{t(locale, "toolPage.allTools")}</a>
+      <h1>{h1}</h1>
+      {intro && <p class="lede">{intro}</p>}
+    </header>
+
+    <div class="container">
+      <div class="tool-panel">
+        <div
+          data-tool-root
+          data-tool-id={tool.id}
+          data-variant-id={variant?.id ?? ""}
+          data-locale={locale}
+          data-preset={JSON.stringify(variant?.preset ?? {})}
+          data-limits={JSON.stringify(tool.limits.free)}
+          data-strings={JSON.stringify(strings)}
+        >
+          {/* Loading shell: the drop well's shape plus a reserved height (tool.css), so mounting shifts nothing. */}
+          <div class="tool-shell__well">
+            <p class="tool-shell__status">{t(locale, "tool.loading")}</p>
+          </div>
+        </div>
+        <noscript><p class="tool-note">{t(locale, "tool.noscript")}</p></noscript>
+      </div>
+      <p class="tool-page__private">
+        <span>{t(locale, "toolPage.private")}</span>
+        <a href={pagePath(locale, "security")}>{t(locale, "toolPage.verify")}</a>
+      </p>
+    </div>
+
+    <div class="tool-page__body container">
+      <div class="tool-page__main">
+        <div class="prose">
+          <Content />
+        </div>
+
+        {
+          faq.length > 0 && (
+            <section class="tool-page__section">
+              <h2>{t(locale, "tool.faq")}</h2>
+              <div class="faq">
+                {faq.map((item) => (
+                  <details>
+                    <summary>{item.q}</summary>
+                    <p>{item.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )
+        }
+      </div>
+
+      {
+        (howTo.length > 0 || related.length > 0) && (
+          <aside class="tool-page__aside">
+            {howTo.length > 0 && (
+              <section class="tool-page__section">
+                <h2>{t(locale, "tool.howTo")}</h2>
+                <ol class="tool-page__steps">
+                  {howTo.map((step) => (
+                    <li>{step}</li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
+            {related.length > 0 && (
+              <nav class="tool-page__section" aria-label={t(locale, "tool.related")}>
+                <h2>{t(locale, "tool.related")}</h2>
+                <ul class="related-list">
+                  {related.map((r) => (
+                    <li>
+                      <a class="btn" href={r.href}>
+                        {r.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+          </aside>
+        )
+      }
+    </div>
+  </article>
+</Base>
+
+<script>
+  import { mountTools } from "../lib/tool-mount";
+  void mountTools();
+</script>

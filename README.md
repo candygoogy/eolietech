@@ -73,6 +73,10 @@ credits and licences are in [NOTICE](NOTICE).
 - [Astro](https://astro.build) static site with plain-TypeScript tool islands (`src/tools/<id>/client.ts`)
 - One [Hono](https://hono.dev) Worker for `/api/*` (`src/worker/`), deployed with static assets on Cloudflare Workers
 - Tool registry: `src/tools/registry.ts`. Page copy: `src/tools/<id>/content[.<variant>].<locale>.md`
+- English at the root, Italian under `/it/`: site strings in `src/i18n/<locale>.json`, page slugs in
+  `src/i18n/routes.ts`, page layouts in `src/views/` (each rendered by a thin file per locale in `src/pages/`).
+  A new tool needs its slug and content file in both languages, a `public/_headers` entry for both paths
+  and `npm run og`; the unit tests fail until all of them exist.
 
 ## Development
 

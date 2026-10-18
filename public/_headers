@@ -24,7 +24,7 @@
 
 # Cross-origin isolation (SharedArrayBuffer for multi-threaded WASM: AVIF encoder, ONNX Runtime)
 # on tool pages ONLY. Not site-wide: COEP would break the Turnstile iframe on the waitlist page.
-# Every tool and variant slug in src/tools/registry.ts must be listed (the registry test checks).
+# Every tool and variant page in every locale must be listed (the registry test checks).
 /compress-image/
   Cross-Origin-Embedder-Policy: credentialless
 /webp-to-png/
@@ -60,4 +60,40 @@
 /remove-background/
   Cross-Origin-Embedder-Policy: credentialless
 /transcribe-audio/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-immagini/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/webp-in-png/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/webp-in-jpg/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/png-in-webp/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/jpg-in-webp/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/png-in-jpg/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/jpg-in-png/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/png-in-avif/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/jpg-in-avif/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/avif-in-jpg/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/avif-in-png/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/heic-in-jpg/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/unire-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/dividere-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/organizzare-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/rimuovere-sfondo/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/trascrivere-audio/
   Cross-Origin-Embedder-Policy: credentialless

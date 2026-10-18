@@ -1,7 +1,8 @@
 /**
  * Open Graph images: `npm run og` writes 1200x630 PNGs to public/og/ (commit them).
  *   default.png    site-wide card (home and every page without its own)
- *   <slug>.png     one per published tool and variant page (src/pages/[tool].astro links /og/<slug>.png)
+ *   <slug>.png     one per published tool and variant page (src/views/ToolPage.astro links /og/<slug>.png)
+ *   it/...         the same for Italian pages (/og/it/default.png, /og/it/<slug>.png)
  * A vitest (src/lib/og-images.test.ts) fails when a published page has no image: run this again
  * after adding a tool or variant, or after changing an H1.
  *
@@ -21,34 +22,37 @@ import { chromium } from "playwright";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = path.join(root, "public", "og");
 const MAX_BYTES = 150 * 1024;
-const locale = "en";
 
 const { publishedTools, toolPages } = await import(new URL("../src/tools/registry.ts", import.meta.url).href);
-const dict = JSON.parse(fs.readFileSync(path.join(root, "src/i18n/en.json"), "utf8"));
-const t = (key) => {
-  if (!(key in dict)) throw new Error(`Missing string ${key} in src/i18n/en.json`);
-  return dict[key];
+const LOCALES = ["en", "it"];
+/** English lives at the root of public/og/ and of the site; other locales in a folder of their own. */
+const prefix = (locale) => (locale === "en" ? "" : `${locale}/`);
+const dicts = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(fs.readFileSync(path.join(root, `src/i18n/${l}.json`), "utf8"))]));
+const t = (locale, key) => {
+  if (!(key in dicts[locale])) throw new Error(`Missing string ${key} in src/i18n/${locale}.json`);
+  return dicts[locale][key];
 };
 
 /** The H1 from a content file's frontmatter (always a double-quoted YAML string in this repo). */
-function contentH1(toolId, variantId) {
+function contentH1(toolId, variantId, locale) {
   const file = path.join(root, "src/tools", toolId, variantId ? `content.${variantId}.${locale}.md` : `content.${locale}.md`);
   const m = /^h1:\s*("(?:[^"\\]|\\.)*")\s*$/m.exec(fs.readFileSync(file, "utf8"));
   if (!m) throw new Error(`No double-quoted h1 in ${path.relative(root, file)}`);
   return JSON.parse(m[1]);
 }
 
-const cards = [
-  { file: "default.png", name: t("home.h1"), line: t("og.default.line"), address: [] },
+const cards = LOCALES.flatMap((locale) => [
+  { locale, file: `${prefix(locale)}default.png`, name: t(locale, "home.h1"), line: t(locale, "og.default.line"), address: [] },
   ...publishedTools().flatMap((tool) =>
     toolPages(tool, locale).map((page) => ({
-      file: `${page.slug}.png`,
-      name: contentH1(tool.id, page.variant?.id),
-      line: t("og.line"),
-      address: [`/${page.slug}/`],
+      locale,
+      file: `${prefix(locale)}${page.slug}.png`,
+      name: contentH1(tool.id, page.variant?.id, locale),
+      line: t(locale, "og.line"),
+      address: [`/${prefix(locale)}${page.slug}/`],
     })),
   ),
-];
+]);
 
 const font = (file) => `data:font/woff2;base64,${fs.readFileSync(path.join(root, "public/fonts", file)).toString("base64")}`;
 const logo = fs.readFileSync(path.join(root, "public/logo.svg"), "utf8").replace(/<svg /, '<svg class="logo" aria-hidden="true" ');
@@ -84,7 +88,7 @@ const mark = `
 </svg>`;
 
 const page = (card) => `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><style>
+<html lang="${card.locale}"><head><meta charset="utf-8"><style>
 @font-face { font-family: "Archivo"; src: url(${font("archivo-var-latin.woff2")}) format("woff2"); font-weight: 500 800; font-stretch: 100% 125%; }
 @font-face { font-family: "Atkinson"; src: url(${font("atkinson-hyperlegible-next-var-latin.woff2")}) format("woff2"); font-weight: 400 700; }
 * { box-sizing: border-box; margin: 0; }
@@ -164,7 +168,7 @@ body {
     <div class="divider"></div>
     <div class="address">
       <span class="postage">${mark}</span>
-      <p class="postmark"><b>${esc(t("footer.postmark"))}</b><small>${esc(t("footer.postmark.place"))}</small></p>
+      <p class="postmark"><b>${esc(t(card.locale, "footer.postmark"))}</b><small>${esc(t(card.locale, "footer.postmark.place"))}</small></p>
       <div class="lines">
         <p>eolietech.com</p>
         ${[...card.address, "", ""].slice(0, 2).map((a) => `<p>${esc(a)}</p>`).join("")}
@@ -192,7 +196,7 @@ async function fitName(tab) {
   });
 }
 
-fs.mkdirSync(outDir, { recursive: true });
+for (const l of LOCALES) fs.mkdirSync(path.join(outDir, prefix(l)), { recursive: true });
 const browser = await chromium.launch();
 const tab = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
 const report = [];
@@ -213,10 +217,13 @@ try {
 
 // Images for pages that no longer exist would otherwise linger in public/ and ship.
 const keep = new Set(cards.map((c) => c.file));
-for (const f of fs.readdirSync(outDir)) {
-  if (f.endsWith(".png") && !keep.has(f)) {
-    fs.rmSync(path.join(outDir, f));
-    console.log(`removed stale public/og/${f}`);
+for (const l of LOCALES) {
+  for (const name of fs.readdirSync(path.join(outDir, prefix(l)))) {
+    const f = `${prefix(l)}${name}`;
+    if (f.endsWith(".png") && !keep.has(f)) {
+      fs.rmSync(path.join(outDir, f));
+      console.log(`removed stale public/og/${f}`);
+    }
   }
 }
 

@@ -19,7 +19,7 @@ const APPLICATION_CATEGORY: Record<Category, string> = {
   audio: "MultimediaApplication",
 };
 
-/** Data, not page copy: what a browser needs to run any tool here. */
+/** What a browser needs to run any tool here. Pages pass the translated sentence (schema.browserRequirements). */
 export const BROWSER_REQUIREMENTS = "Requires JavaScript and WebAssembly in a current browser.";
 
 const abs = (site: URL | string, path: string): string => new URL(path, site).href;
@@ -76,10 +76,12 @@ export interface WebApplicationInput {
   /** Site-relative path of the page's Open Graph image. */
   imagePath?: string;
   publisherName: string;
+  /** Defaults to the English BROWSER_REQUIREMENTS. */
+  browserRequirements?: string;
 }
 
 export function webApplication(input: WebApplicationInput): Node {
-  const { site, name, description, path, category, inLanguage, imagePath, publisherName } = input;
+  const { site, name, description, path, category, inLanguage, imagePath, publisherName, browserRequirements = BROWSER_REQUIREMENTS } = input;
   return {
     "@type": "WebApplication",
     name,
@@ -89,7 +91,7 @@ export function webApplication(input: WebApplicationInput): Node {
     inLanguage,
     applicationCategory: APPLICATION_CATEGORY[category],
     operatingSystem: "Any",
-    browserRequirements: BROWSER_REQUIREMENTS,
+    browserRequirements,
     isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
     publisher: { "@type": "Organization", "@id": orgId(site), name: publisherName, url: abs(site, "/") },

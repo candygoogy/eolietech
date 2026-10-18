@@ -1,0 +1,109 @@
+---
+import Base from "../layouts/Base.astro";
+import SeaContours from "../components/SeaContours.astro";
+import Stamp from "../components/Stamp.astro";
+import { CSP_DIRECTIVES, directive } from "../components/csp";
+import { localePath, t } from "../i18n";
+import { pageAlternates, pagePath } from "../i18n/routes";
+import { siteConfig } from "../site.config";
+import type { Locale } from "../tools/types";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const site = (Astro.site ?? new URL("https://eolietech.com")).href;
+const curl = `curl -sI ${site} | grep -i content-security-policy`;
+const policy = CSP_DIRECTIVES.join(";\n");
+const toc = ["how", "csp", "network", "offline", "code", "never", "others"];
+const rules = ["script", "worker", "media", "frame", "form"];
+---
+
+<Base locale={locale} title={t(locale, "security.title")} description={t(locale, "security.description")} path={pagePath(locale, "security")} alternates={pageAlternates("security")}>
+  <header class="page-head container">
+    <h1>{t(locale, "security.h1")}</h1>
+    <p class="lede">{t(locale, "security.lede")}</p>
+    <Stamp class="page-head__stamp" text={t(locale, "security.stamp")} ink="sea" tilt={-2} land="load" />
+    <SeaContours />
+  </header>
+
+  <div class="container doc">
+    <nav class="doc__aside" aria-labelledby="toc-h">
+      <h2 id="toc-h">{t(locale, "security.toc")}</h2>
+      <ol>
+        {
+          toc.map((id) => (
+            <li>
+              <a href={`#${id}`}>{t(locale, `security.${id}.h2`)}</a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <div class="doc__body">
+      <section aria-labelledby="how">
+        <h2 id="how">{t(locale, "security.how.h2")}</h2>
+        <p>{t(locale, "security.how.p1")}</p>
+        <p>{t(locale, "security.guide")}</p>
+        <ul class="links">
+          <li><a href={pagePath(locale, "guide")}>{t(locale, "security.guide.link")}</a></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="csp">
+        <h2 id="csp">{t(locale, "security.csp.h2")}</h2>
+        <p>{t(locale, "security.csp.p1")}</p>
+        <pre class="code-block code-block--lead"><code>{directive("connect-src")}</code></pre>
+        <p>{t(locale, "security.csp.p2")}</p>
+        <p class="note">{t(locale, "security.csp.caveat")}</p>
+        <p>{t(locale, "security.csp.view")}</p>
+        <pre class="code-block"><code>{curl}</code></pre>
+        <p>{t(locale, "security.csp.full")}</p>
+        <pre class="code-block"><code>{policy}</code></pre>
+        <p>{t(locale, "security.csp.rules")}</p>
+        <ul>
+          {rules.map((r) => <li>{t(locale, `security.csp.rule.${r}`)}</li>)}
+        </ul>
+      </section>
+
+      <section aria-labelledby="network">
+        <h2 id="network">{t(locale, "security.network.h2")}</h2>
+        <ol class="steps">
+          {["s1", "s2", "s3", "s4"].map((s) => <li>{t(locale, `security.network.${s}`)}</li>)}
+        </ol>
+        <p class="note">{t(locale, "security.network.tip")}</p>
+      </section>
+
+      <section aria-labelledby="offline">
+        <h2 id="offline">{t(locale, "security.offline.h2")}</h2>
+        <ol class="steps">
+          {["s1", "s2", "s3"].map((s) => <li>{t(locale, `security.offline.${s}`)}</li>)}
+        </ol>
+      </section>
+
+      <section aria-labelledby="code">
+        <h2 id="code">{t(locale, "security.code.h2")}</h2>
+        <p>{t(locale, "security.code.p1")}</p>
+        <ul class="links">
+          <li><a href={siteConfig.sourceUrl}>{t(locale, "security.code.source")}</a></li>
+          <li><a href={siteConfig.licenseUrl}>{t(locale, "security.code.license")}</a></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="never">
+        <h2 id="never">{t(locale, "security.never.h2")}</h2>
+        <ul class="never">
+          {["1", "2", "3", "4"].map((n) => <li>{t(locale, `security.never.${n}`)}</li>)}
+        </ul>
+      </section>
+
+      <section aria-labelledby="others">
+        <h2 id="others">{t(locale, "security.others.h2")}</h2>
+        <p>{t(locale, "security.others.p1")}</p>
+        <p>{t(locale, "security.others.p2")}</p>
+      </section>
+    </div>
+  </div>
+</Base>

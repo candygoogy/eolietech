@@ -34,6 +34,7 @@ describe("tool-ui", () => {
   it("formats sizes and renames extensions", () => {
     expect(formatBytes(512)).toBe("512 B");
     expect(formatBytes(1536)).toBe("1.5 KB");
+    expect(formatBytes(1536, "it")).toBe("1,5 KB");
     expect(renameExtension("photo.HEIC", "jpg")).toBe("photo.jpg");
     expect(renameExtension("noext", ".png")).toBe("noext.png");
   });

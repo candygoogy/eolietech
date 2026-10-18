@@ -1,0 +1,27 @@
+---
+import Base from "../layouts/Base.astro";
+import SeaContours from "../components/SeaContours.astro";
+import Stamp from "../components/Stamp.astro";
+import ToolIndex from "../components/ToolIndex.astro";
+import { localePath, t } from "../i18n";
+import { pageAlternates, pagePath } from "../i18n/routes";
+import type { Locale } from "../tools/types";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<Base locale={locale} title={t(locale, "tools.title")} description={t(locale, "tools.description")} path={pagePath(locale, "tools")} alternates={pageAlternates("tools")}>
+  <header class="page-head container">
+    <h1>{t(locale, "tools.h1")}</h1>
+    <p class="lede">{t(locale, "tools.lede")}</p>
+    <Stamp class="page-head__stamp" text={t(locale, "tools.stamp")} ink="sea" tilt={-3} land="load" />
+    <SeaContours />
+  </header>
+  <div class="container">
+    <ToolIndex locale={locale} level={2} detailed />
+  </div>
+</Base>

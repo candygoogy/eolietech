@@ -13,11 +13,11 @@ export const siteConfig = {
   waitlistEndpoint: "/api/v1/waitlist",
   sourceUrl: "https://github.com/candygoogy/eolietech",
   licenseUrl: "https://www.gnu.org/licenses/agpl-3.0.html",
-  /** Header navigation: i18n key + slug (localePath() builds the URL). */
+  /** Header navigation: i18n key + page id (pagePath() in src/i18n/routes.ts builds the URL per locale). */
   nav: [
-    { key: "nav.tools", slug: "tools" },
-    { key: "nav.pricing", slug: "pricing" },
-    { key: "nav.about", slug: "about" },
-    { key: "nav.security", slug: "security" },
+    { key: "nav.tools", page: "tools" },
+    { key: "nav.pricing", page: "pricing" },
+    { key: "nav.about", page: "about" },
+    { key: "nav.security", page: "security" },
   ],
 } as const;

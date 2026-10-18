@@ -1,15 +1,35 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { localePath } from "./src/i18n/index.ts";
 import { publishedTools, toolPages } from "./src/tools/registry.ts";
 
 const site = "https://eolietech.com";
 
-/** Sitemap lastmod for tool pages (base + variants), from ToolDef.updated. Other pages get none. */
+/** Sitemap lastmod for tool pages (base + variants, every locale), from ToolDef.updated. Other pages get none. */
 const toolLastmod = new Map(
-  publishedTools().flatMap((tool) => toolPages(tool, "en").map(({ slug }) => [`${site}/${slug}/`, tool.updated])),
+  publishedTools().flatMap((tool) =>
+    tool.locales.flatMap((locale) => toolPages(tool, locale).map(({ slug }) => [`${site}${localePath(locale, slug)}`, tool.updated])),
+  ),
 );
+
+/**
+ * Cloudflare serves the nearest 404.html for a missing asset. Astro only writes the root 404 as a file
+ * (dist/404.html); the Italian one comes out as dist/it/404/index.html, so move it next to the pages.
+ */
+const localized404 = {
+  name: "localized-404",
+  hooks: {
+    "astro:build:done": ({ dir }) => {
+      const from = new URL("it/404/index.html", dir);
+      if (!fs.existsSync(from)) return;
+      fs.renameSync(from, new URL("it/404.html", dir));
+      fs.rmSync(new URL("it/404/", dir), { recursive: true });
+    },
+  },
+};
 
 export default defineConfig({
   site,
@@ -26,6 +46,7 @@ export default defineConfig({
     routing: { prefixDefaultLocale: false },
   },
   integrations: [
+    localized404,
     sitemap({
       i18n: { defaultLocale: "en", locales: { en: "en", it: "it" } },
       serialize(item) {

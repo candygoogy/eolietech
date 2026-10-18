@@ -1,0 +1,93 @@
+---
+import Base from "../layouts/Base.astro";
+import Handwriting from "../components/Handwriting.astro";
+import SeaContours from "../components/SeaContours.astro";
+import Stamp from "../components/Stamp.astro";
+import WaitlistForm from "../components/WaitlistForm.astro";
+import { localePath, t } from "../i18n";
+import { pageAlternates, pagePath } from "../i18n/routes";
+import type { Locale } from "../tools/types";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const free = ["pricing.free.f1", "pricing.free.f2", "pricing.free.f3", "pricing.free.f4"];
+const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
+/* The waitlist postcard's address lines: what joining means, as stored by src/worker/routes/waitlist.ts. */
+const card = ["waitlist.card.to", "waitlist.card.sent", "waitlist.card.kept"];
+---
+
+<Base locale={locale} title={t(locale, "pricing.title")} description={t(locale, "pricing.description")} path={pagePath(locale, "pricing")} alternates={pageAlternates("pricing")}>
+  <header class="page-head container">
+    <h1>{t(locale, "pricing.h1")}</h1>
+    <p class="lede">{t(locale, "pricing.lede")}</p>
+    <Stamp class="page-head__stamp" text={t(locale, "pricing.stamp")} ink="ember" tilt={2} land="load" />
+    <SeaContours />
+  </header>
+
+  <div class="container plans">
+    <section class="plan" aria-labelledby="plan-free">
+      <div class="plan__head">
+        <h2 id="plan-free">{t(locale, "pricing.free.name")}</h2>
+        <p class="plan__price">
+          <span class="plan__amount">{t(locale, "pricing.free.price")}</span>
+          <span class="plan__period">{t(locale, "pricing.free.period")}</span>
+        </p>
+      </div>
+      <ul>
+        {free.map((key) => <li>{t(locale, key)}</li>)}
+      </ul>
+      <a class="btn btn--primary" href={pagePath(locale, "tools")}>{t(locale, "pricing.free.cta")}</a>
+    </section>
+
+    <section class="plan plan--later" aria-labelledby="plan-pro">
+      <div class="plan__head">
+        <h2 id="plan-pro">{t(locale, "pricing.pro.name")}</h2>
+        <p class="plan__price">
+          <Stamp as="span" class="plan__stamp" text={t(locale, "pricing.pro.price")} ink="ochre" tilt={-3} />
+          <span class="plan__period">{t(locale, "pricing.pro.period")}</span>
+        </p>
+      </div>
+      <ul>
+        {pro.map((key) => <li>{t(locale, key)}</li>)}
+      </ul>
+      <a class="btn" href="#waitlist">{t(locale, "home.pro.link")}</a>
+    </section>
+  </div>
+
+  <section id="waitlist" class="section container waitlist" aria-labelledby="waitlist-h" data-reveal data-reveal-stagger>
+    <div class="waitlist__intro">
+      <h2 id="waitlist-h">{t(locale, "waitlist.h2")}</h2>
+      <p>{t(locale, "waitlist.lede")}</p>
+    </div>
+    {/* The promise, as the postcard it will be: the footer's postcard back (global.css), smaller. */}
+    <div class="postcard-back waitlist-card" role="group" aria-label={t(locale, "waitlist.card.label")}>
+      <div class="postcard-back__message">
+        <Handwriting
+          class="waitlist-card__hand"
+          text={t(locale, "waitlist.card.hand")}
+          label={t(locale, "waitlist.card.hand.label")}
+        />
+        <p class="waitlist-card__note">{t(locale, "waitlist.card.note")}</p>
+      </div>
+      <dl class="postcard-back__address waitlist-card__lines">
+        {
+          card.map((key) => (
+            <div>
+              <dt>{t(locale, key)}</dt>
+              <dd>{t(locale, `${key}.value`)}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <WaitlistForm locale={locale} />
+  </section>
+
+  <section class="section container statement" aria-labelledby="why-h" data-reveal>
+    <h2 id="why-h">{t(locale, "pricing.why.h2")}</h2>
+    <p>{t(locale, "pricing.why.body")}</p>
+  </section>
+</Base>

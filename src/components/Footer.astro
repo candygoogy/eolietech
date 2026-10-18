@@ -11,6 +11,7 @@ import Handwriting from "./Handwriting.astro";
 import Logo from "./Logo.astro";
 import Stamp from "./Stamp.astro";
 import { localePath, t } from "../i18n";
+import { pagePath } from "../i18n/routes";
 import { siteConfig } from "../site.config";
 import type { Locale } from "../tools/types";
 
@@ -22,9 +23,9 @@ interface Props {
 const { locale, compact = false } = Astro.props;
 const year = new Date().getFullYear();
 const links = [
-  { href: localePath(locale, "security"), label: t(locale, "footer.security") },
-  { href: localePath(locale, "privacy"), label: t(locale, "footer.privacy") },
-  { href: localePath(locale, "terms"), label: t(locale, "footer.terms") },
+  { href: pagePath(locale, "security"), label: t(locale, "footer.security") },
+  { href: pagePath(locale, "privacy"), label: t(locale, "footer.privacy") },
+  { href: pagePath(locale, "terms"), label: t(locale, "footer.terms") },
   { href: siteConfig.sourceUrl, label: t(locale, "footer.source") },
 ];
 ---

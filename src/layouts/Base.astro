@@ -34,10 +34,11 @@ interface Props {
 const { locale = DEFAULT_LOCALE, title, description, path, noindex = false, compactFooter = false } = Astro.props;
 const site = Astro.site ?? new URL("https://eolietech.com");
 const abs = (p: string) => new URL(p, site).href;
-const ogImage = abs(Astro.props.ogImage ?? "/og/default.png");
+const ogImage = abs(Astro.props.ogImage ?? (locale === DEFAULT_LOCALE ? "/og/default.png" : `/og/${locale}/default.png`));
 const ogImageAlt = t(locale, "og.alt", { name: Astro.props.ogImageName ?? t(locale, "home.h1") });
 const alternates: Alternate[] = Astro.props.alternates ?? (path ? [{ locale, path }] : []);
 const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
+const OG_LOCALE: Record<Locale, string> = { en: "en_GB", it: "it_IT" };
 ---
 
 <!doctype html>
@@ -62,6 +63,8 @@ const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
     <link rel="manifest" href="/site.webmanifest" />
     <meta property="og:site_name" content={t(locale, "site.name")} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={OG_LOCALE[locale]} />
+    {alternates.filter((x) => x.locale !== locale).map((x) => <meta property="og:locale:alternate" content={OG_LOCALE[x.locale]} />)}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {path && <meta property="og:url" content={abs(path)} />}
@@ -86,7 +89,7 @@ const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
       </filter>
     </svg>
     <a class="skip-link" href="#main">{t(locale, "a11y.skipToContent")}</a>
-    <Header locale={locale} />
+    <Header locale={locale} alternates={alternates} />
     <main id="main" tabindex="-1">
       <slot />
     </main>

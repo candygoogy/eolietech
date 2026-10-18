@@ -3,7 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { contentFileName } from "./content-files";
-import { tools } from "./registry";
+import { localePath } from "../i18n";
+import { toolPages, tools } from "./registry";
 import { LOCALES } from "./types";
 
 const toolsDir = path.resolve(__dirname);
@@ -84,12 +85,15 @@ describe("tool registry", () => {
     }
   });
 
-  it("gives every English tool and variant page cross-origin isolation in public/_headers", () => {
+  it("gives every tool and variant page, in every locale, cross-origin isolation in public/_headers", () => {
     for (const tool of tools) {
-      for (const slug of [tool.slug.en, ...(tool.variants ?? []).map((v) => v.slug.en)]) {
-        expect(headers, `/${slug}/ missing in public/_headers`).toMatch(
-          new RegExp(String.raw`^/${slug}/\r?\n\s+Cross-Origin-Embedder-Policy: credentialless`, "m"),
-        );
+      for (const locale of tool.locales) {
+        for (const { slug } of toolPages(tool, locale)) {
+          const p = localePath(locale, slug);
+          expect(headers, `${p} missing in public/_headers`).toMatch(
+            new RegExp(String.raw`^${p}\r?\n\s+Cross-Origin-Embedder-Policy: credentialless`, "m"),
+          );
+        }
       }
     }
   });

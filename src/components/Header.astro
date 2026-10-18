@@ -1,19 +1,30 @@
 ---
 import Logo from "./Logo.astro";
 import { localePath, t } from "../i18n";
+import { pagePath } from "../i18n/routes";
 import { siteConfig } from "../site.config";
-import type { Locale } from "../tools/types";
+import { LOCALES, type Locale } from "../tools/types";
 
 interface Props {
   locale: Locale;
+  /** This page in each locale (Base.astro). Locales without a translation link to their home page. */
+  alternates?: { locale: Locale; path: string }[];
 }
 
-const { locale } = Astro.props;
+/** Each language named in itself, so a reader finds theirs whatever the page's language. */
+const ENDONYMS: Record<Locale, string> = { en: "English", it: "Italiano" };
+
+const { locale, alternates = [] } = Astro.props;
 const current = Astro.url.pathname;
 const links = siteConfig.nav.map((item) => {
-  const href = localePath(locale, item.slug);
+  const href = pagePath(locale, item.page);
   return { href, label: t(locale, item.key), current: current === href || current.startsWith(href) };
 });
+const languages = LOCALES.filter((l) => l !== locale).map((l) => ({
+  locale: l,
+  label: ENDONYMS[l],
+  href: alternates.find((a) => a.locale === l)?.path ?? localePath(l),
+}));
 ---
 
 <header class="site-header">
@@ -34,5 +45,12 @@ const links = siteConfig.nav.map((item) => {
         }
       </ul>
     </nav>
+    {
+      languages.map((lang) => (
+        <a class="site-lang" href={lang.href} hreflang={lang.locale} lang={lang.locale}>
+          {lang.label}
+        </a>
+      ))
+    }
   </div>
 </header>

@@ -35,7 +35,7 @@ const groups = categories
         const slug = tool.slug[locale];
         const live = published.has(tool.id) && Boolean(slug) && tool.locales.includes(locale);
         const { maxFiles, maxBytes } = tool.limits.free;
-        const size = formatBytes(maxBytes);
+        const size = formatBytes(maxBytes, locale);
         return {
           id: tool.id,
           name: t(locale, `tools.${tool.id}.name`),

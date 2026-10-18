@@ -6,6 +6,7 @@
  * put the email address in a URL.
  */
 import { localePath, t } from "../i18n";
+import { pagePath } from "../i18n/routes";
 import { siteConfig } from "../site.config";
 import type { Locale } from "../tools/types";
 
@@ -61,7 +62,7 @@ const messages = {
   <p class="waitlist-form__status" id="waitlist-status" role="status" aria-live="polite" data-status></p>
   <p class="waitlist-form__privacy" id="waitlist-privacy">
     {t(locale, "waitlist.privacy")}{" "}
-    <a href={localePath(locale, "privacy")}>{t(locale, "waitlist.privacyLink")}</a>
+    <a href={pagePath(locale, "privacy")}>{t(locale, "waitlist.privacyLink")}</a>
   </p>
   <noscript><p class="waitlist-form__privacy">{t(locale, "waitlist.noscript")}</p></noscript>
 </form>

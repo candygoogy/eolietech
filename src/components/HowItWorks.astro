@@ -11,6 +11,7 @@
 import Stamp from "./Stamp.astro";
 import { directive } from "./csp";
 import { localePath, t } from "../i18n";
+import { pagePath } from "../i18n/routes";
 import type { Locale } from "../tools/types";
 
 interface Props {
@@ -81,7 +82,7 @@ const steps = [
 
     <figcaption class="flow__caption">
       {t(locale, "home.flow.caption")}{" "}
-      <a href={localePath(locale, "security")}>{t(locale, "home.flow.check")}</a>
+      <a href={pagePath(locale, "security")}>{t(locale, "home.flow.check")}</a>
     </figcaption>
   </figure>
 </section>
