@@ -160,6 +160,22 @@
   --tool-shell-rest: 3.9531rem;
 }
 
+[data-tool-id="image-resize"] {
+  --tool-shell: 51.9551rem;
+  --tool-shell-rest: 18.0625rem;
+}
+
+/* Only the drop well until an image is open. */
+[data-tool-id="image-crop"] {
+  --tool-shell: 13.0313rem;
+  --tool-shell-rest: 0rem;
+}
+
+/* Resizer: an image too small to enlarge is finished but unchanged in size, so plain ink, not success green. */
+[data-tool-id="image-resize"] .tool-item[data-state="done"][data-outcome="not-enlarged"] .tool-item__meta {
+  color: var(--color-text);
+}
+
 /* Narrow screens: the real well grows with its two-line label and hint; match its usual height. */
 @media (max-width: 47.99rem) {
   .tool-shell__well {

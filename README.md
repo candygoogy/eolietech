@@ -34,6 +34,8 @@ The registry is `src/tools/registry.ts`. Every tool below has `status: "live"`.
 |---|---|---|
 | Compress images | `/compress-image/` | jSquash codecs (`@jsquash/jpeg` MozJPEG, `@jsquash/png`, `@jsquash/oxipng`, `@jsquash/webp`, `@jsquash/avif`, `@jsquash/resize`) |
 | HEIC to JPG | `/heic-to-jpg/` | `heic-to` (libheif, its CSP build), then jSquash MozJPEG or OxiPNG to encode |
+| Resize images | `/resize-image/` | jSquash codecs and `@jsquash/resize` (Lanczos3), shared with Compress images |
+| Crop image | `/crop-image/` | jSquash codecs to decode and encode; the crop is a plain pixel copy in a Web Worker |
 | Merge PDF | `/merge-pdf/` | `pdf-lib` |
 | Split PDF | `/split-pdf/` | `pdf-lib` |
 | Organize PDF | `/organize-pdf/` | `pdf-lib`, plus `pdfjs-dist` for page thumbnails |

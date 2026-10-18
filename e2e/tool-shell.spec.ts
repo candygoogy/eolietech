@@ -12,6 +12,8 @@ import { expect, test, type Page } from "@playwright/test";
 const TOOLS = {
   "image-compress": "compress-image",
   "heic-to-jpg": "heic-to-jpg",
+  "image-resize": "resize-image",
+  "image-crop": "crop-image",
   "pdf-merge": "merge-pdf",
   "pdf-split": "split-pdf",
   "pdf-organize": "organize-pdf",

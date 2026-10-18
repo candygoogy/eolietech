@@ -49,6 +49,18 @@
   Cross-Origin-Embedder-Policy: credentialless
 /heic-to-jpg/
   Cross-Origin-Embedder-Policy: credentialless
+/resize-image/
+  Cross-Origin-Embedder-Policy: credentialless
+/resize-image-for-email/
+  Cross-Origin-Embedder-Policy: credentialless
+/resize-image-for-instagram/
+  Cross-Origin-Embedder-Policy: credentialless
+/crop-image/
+  Cross-Origin-Embedder-Policy: credentialless
+/crop-image-square/
+  Cross-Origin-Embedder-Policy: credentialless
+/crop-image-16-9/
+  Cross-Origin-Embedder-Policy: credentialless
 /merge-pdf/
   Cross-Origin-Embedder-Policy: credentialless
 /split-pdf/
@@ -84,6 +96,18 @@
 /it/avif-in-png/
   Cross-Origin-Embedder-Policy: credentialless
 /it/heic-in-jpg/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ridimensionare-immagini/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ridimensionare-immagini-per-email/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ridimensionare-immagini-per-instagram/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ritagliare-immagini/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ritagliare-immagine-quadrata/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ritagliare-immagine-16-9/
   Cross-Origin-Embedder-Policy: credentialless
 /it/unire-pdf/
   Cross-Origin-Embedder-Policy: credentialless

@@ -31,7 +31,7 @@ export const tools: ToolDef[] = [
       convert("avif", "jpg"),
       convert("avif", "png"),
     ],
-    related: ["heic-to-jpg", "background-remover"],
+    related: ["image-resize", "image-crop", "heic-to-jpg", "background-remover"],
     updated: "2026-10-17",
   },
   {
@@ -45,6 +45,54 @@ export const tools: ToolDef[] = [
     limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
     related: ["image-compress"],
     updated: "2026-10-17",
+  },
+  {
+    id: "image-resize",
+    slug: { en: "resize-image", it: "ridimensionare-immagini" },
+    category: "image",
+    runtime: "client",
+    status: "live",
+    wave: 1,
+    locales: ["en", "it"],
+    limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
+    variants: [
+      {
+        id: "for-email",
+        slug: { en: "resize-image-for-email", it: "ridimensionare-immagini-per-email" },
+        preset: { maxSide: 1600, output: "jpg" },
+      },
+      {
+        id: "for-instagram",
+        slug: { en: "resize-image-for-instagram", it: "ridimensionare-immagini-per-instagram" },
+        preset: { width: 1080 },
+      },
+    ],
+    related: ["image-crop", "image-compress"],
+    updated: "2026-10-18",
+  },
+  {
+    id: "image-crop",
+    slug: { en: "crop-image", it: "ritagliare-immagini" },
+    category: "image",
+    runtime: "client",
+    status: "live",
+    wave: 1,
+    locales: ["en", "it"],
+    limits: { free: { maxBytes: 100 * MiB, maxFiles: 1 } },
+    variants: [
+      {
+        id: "square",
+        slug: { en: "crop-image-square", it: "ritagliare-immagine-quadrata" },
+        preset: { aspect: "1:1" },
+      },
+      {
+        id: "16-9",
+        slug: { en: "crop-image-16-9", it: "ritagliare-immagine-16-9" },
+        preset: { aspect: "16:9" },
+      },
+    ],
+    related: ["image-resize", "image-compress"],
+    updated: "2026-10-18",
   },
   {
     id: "pdf-merge",
