@@ -573,14 +573,17 @@
   display: none;
 }
 
+/* Wide screens: its own row under the pile, never in the stack cell where it would land on an object. */
 @media (min-width: 75rem) {
+  .desk__body {
+    grid-template-areas: "stack" "tidy";
+  }
+
   .desk-tidy {
     position: relative;
     z-index: 3;
-    grid-area: stack;
-    align-self: end;
+    grid-area: tidy;
     justify-self: end;
-    margin: 0;
   }
 }
 
