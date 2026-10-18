@@ -2128,7 +2128,9 @@ a.tool-index__row:focus-visible::after {
   }
 }
 
-/* Waitlist: the intro reads left, the form tile sits under the Pro column it belongs to. */
+/* Waitlist: the intro reads left; below it the postcard (under Free's column) and the form tile
+   (under the Pro column it belongs to) share one row, so their tops and bottoms line up. Phones stack
+   intro, postcard, form: the promise is read before the ask. */
 .waitlist {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -2136,11 +2138,61 @@ a.tool-index__row:focus-visible::after {
   align-items: start;
 }
 
-.waitlist__intro p {
+.waitlist__intro > p {
   max-width: 34rem;
   margin-top: var(--space-3);
   font-size: var(--text-lg);
   line-height: 1.5;
+}
+
+/* What joining means, as the postcard it will be: the footer's postcard back (.postcard-back,
+   global.css) at the compact footer's scale. Message left (the handwritten email, in sea ink, 7:1 on
+   the card in both themes), address side right with the three facts on its ruled lines. Flat like the
+   footer: only the home desk's paper casts shadows. Phones get the footer's one-column card. */
+.waitlist-card {
+  --airmail: 7px;
+}
+
+.waitlist-card .postcard-back__message,
+.waitlist-card .postcard-back__address {
+  padding: clamp(1.125rem, 0.9rem + 1.25vw, 2rem);
+}
+
+.waitlist-card__hand {
+  height: clamp(2.5rem, 1.25rem + 4.4vw, 5.75rem);
+  margin-left: -0.25rem;
+  color: var(--ink-sea);
+}
+
+/* Written at the foot of the message side, like the footer's "made in" line. */
+.waitlist-card__note {
+  max-width: 24ch;
+  margin-top: auto;
+  padding-top: var(--space-3);
+  font-size: var(--text-lg);
+  line-height: 1.35;
+}
+
+.waitlist-card__lines {
+  grid-template-rows: none;
+  align-content: end;
+  margin: 0;
+}
+
+.waitlist-card__lines > div {
+  padding: var(--space-3) 0.25rem 0.4rem;
+  border-bottom: 2px solid var(--postcard-rule);
+}
+
+.waitlist-card__lines dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.waitlist-card__lines dd {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .waitlist-form {
@@ -2222,6 +2274,45 @@ a.tool-index__row:focus-visible::after {
 @media (min-width: 48rem) {
   .waitlist {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: stretch;
+  }
+
+  .waitlist__intro {
+    grid-column: 1;
+  }
+
+  .waitlist-card {
+    grid-column: 1;
+  }
+
+  .waitlist-form {
+    grid-column: 2;
+    grid-row: 2;
+    align-content: start;
+  }
+}
+
+/* Small tablets: the 7fr column is too narrow for two sides, so the card takes the footer's phone
+   layout (one column, the divider across) beside the form. */
+@media (min-width: 48rem) and (max-width: 60rem) {
+  .waitlist-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .waitlist-card .postcard-back__address {
+    border-left: 0;
+    border-top: 2px solid var(--postcard-divider);
+  }
+}
+
+/* Phones: the card's note drops to body size so the promise stays short above the form. */
+@media (max-width: 30rem) {
+  .waitlist-card__note {
+    font-size: var(--text-base);
+  }
+
+  .waitlist-card__lines > div {
+    padding-top: var(--space-2);
   }
 }
 
