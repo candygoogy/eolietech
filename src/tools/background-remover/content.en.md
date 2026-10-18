@@ -22,7 +22,7 @@ faq:
   - q: "Which AI model is this, and can I use the results commercially?"
     a: "It is BiRefNet lite, a segmentation model by Peng Zheng and co-authors, in a 512 × 512 ONNX export by Studio Ludens. Both the model and the export are released under the MIT licence, which allows commercial use. The images you make are yours."
 ui:
-  bg.modelNote: "Removing backgrounds uses an AI model that your browser downloads once from this site ({size}) when you press Remove background. It then runs on your device."
+  bg.modelNote: "Removing backgrounds uses an AI model and its engine, downloaded once from this site ({size}) when you press Remove background. They then run on your device."
   bg.listLabel: "Photos"
   bg.action: "Remove background"
   bg.added.one: "Added {count} photo."

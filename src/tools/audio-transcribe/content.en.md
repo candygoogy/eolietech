@@ -22,7 +22,7 @@ faq:
   - q: "Can it record from my microphone?"
     a: "No, this tool only works with files. Record with your phone's voice memo app or any recorder, then choose the file here."
 ui:
-  asr.modelNote: "Transcribing uses a speech recognition model that your browser downloads once from this site ({size}) when you press Transcribe. It then runs on your device."
+  asr.modelNote: "Transcribing uses a speech model and its engine, downloaded once from this site ({size}) when you press Transcribe. They then run on your device."
   asr.listLabel: "Recording"
   asr.added: "Added {name}."
   asr.language.label: "Spoken language"
