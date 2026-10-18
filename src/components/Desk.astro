@@ -10,6 +10,10 @@
  */
 import Handwriting from "./Handwriting.astro";
 import Stamp from "./Stamp.astro";
+import { postData } from "./post-data";
+import { localePath } from "../i18n";
+import { getTool, publishedTools } from "../tools/registry";
+import "../styles/desk-play.css";
 import { t } from "../i18n";
 import type { Locale } from "../tools/types";
 
@@ -18,6 +22,8 @@ interface Props {
 }
 
 const { locale } = Astro.props;
+/* The postcard is a real compressor (src/scripts/desk-post.ts, loaded by index.astro). */
+const post = postData(locale);
 
 /* Stamp perforations: hole centres along each edge of a 56 x 66 stamp. */
 const W = 56;
@@ -32,11 +38,35 @@ const holes = [
 
 /* Voice memo waveform: bar heights (data for the drawing, not copy). */
 const wave = [10, 18, 26, 14, 34, 44, 30, 52, 40, 24, 46, 58, 36, 20, 30, 48, 62, 44, 28, 38, 50, 32, 18, 26, 40, 22, 14, 24, 12, 8];
-const PLAYED = 11;
+const bars = (cls: string) => wave.map((h, i) => ({ cls, x: 70 + i * 6, y: 58 - h / 2, h }));
+
+/* The playable examples (src/scripts/desk-play.ts; drag and "tidy": desk-drag.ts; styles:
+ * desk-play.css). Each is labelled "example" and links to the real tool when its page is published. */
+const live = new Set(publishedTools().map((tool) => tool.id));
+const toolHref = (id: string) => {
+  const slug = getTool(id)?.slug[locale];
+  return live.has(id) && slug ? localePath(locale, slug) : undefined;
+};
+const removeHref = toolHref("background-remover");
+const transcribeHref = toolHref("audio-transcribe");
+const organizeHref = toolHref("pdf-organize");
+const mergeHref = toolHref("pdf-merge");
+const memoLines = ["line1", "line2", "line3"].map((k) => t(locale, `home.play.memo.${k}`));
+const pdfPages = ["cover", "figures", "notes", "signature"] as const;
+const pageName = (id: string) => t(locale, `home.play.pdf.name.${id}`);
 ---
 
 <ul class="pile" aria-label={t(locale, "home.desk.label")}>
-  <li class="obj obj--postcard">
+  <li
+    class="obj obj--postcard"
+    id="postcard"
+    data-post-root
+    data-post="idle"
+    data-strings={post.strings}
+    data-max-bytes={post.maxBytes}
+    data-more-href={post.moreHref}
+    data-heic-href={post.heicHref}
+  >
     <div class="obj__paper">
       <svg class="obj__art" viewBox="0 0 300 196" aria-hidden="true" focusable="false">
         <rect class="pc-sky" width="300" height="196"></rect>
@@ -55,6 +85,7 @@ const PLAYED = 11;
         <path class="pc-sail" d="M62 142v-24l14 22z"></path>
         <path class="pc-hull" d="M52 144h30l-4 6H56z"></path>
       </svg>
+      <img class="post__photo" alt="" decoding="async" />
       <Handwriting class="pc-hello" text={t(locale, "home.desk.hello")} label={t(locale, "home.desk.hello.label")} lang="it" />
       <svg class="pc-postage" viewBox={`-2 -2 ${W + 4} ${H + 4}`} aria-hidden="true" focusable="false">
         <defs>
@@ -79,90 +110,246 @@ const PLAYED = 11;
         <text class="postmark__arc"><textPath href="#postmark-arc" textLength="138" lengthAdjust="spacing">{t(locale, "home.desk.stamp")} ·</textPath></text>
         <text class="postmark__mid" x="114" y="43">EOLIE</text>
       </svg>
+      <button type="button" class="post__target" aria-describedby="post-label">
+        <span class="visually-hidden">{t(locale, "home.post.button")}</span>
+      </button>
+      <button type="button" class="btn btn--primary post__save" hidden>{t(locale, "home.post.download")}</button>
     </div>
-    <Stamp class="obj__stamp" text={t(locale, "home.desk.notsent")} ink="ember" tilt={-4} land="load" />
-    <p class="obj__label"><strong>{t(locale, "home.desk.photo.file")}</strong> {t(locale, "home.desk.photo")}</p>
+    <input class="post__input visually-hidden" type="file" accept={post.accept} tabindex="-1" aria-hidden="true" />
+    <Stamp class="obj__stamp post__notsent" text={t(locale, "home.desk.notsent")} ink="ember" tilt={-4} land="load" />
+    <Stamp class="obj__stamp post__returned" text={t(locale, "home.post.returned")} ink="ochre" tilt={3} land="none" />
+    <p class="obj__label post__label" id="post-label">
+      <strong class="post__name">{t(locale, "home.desk.photo.file")}</strong>
+      <span class="post__line">{t(locale, "home.desk.photo")}</span>
+      <span class="post__hint" aria-hidden="true"><span class="post__hint-drop">{t(locale, "home.post.hint.drop")}</span><span class="post__hint-tap">{t(locale, "home.post.hint.tap")}</span></span>
+    </p>
+    <p class="post__status visually-hidden" role="status"></p>
   </li>
 
-  <li class="obj obj--pdf">
-    <div class="obj__paper" aria-hidden="true">
-      <svg class="obj__art" viewBox="0 0 170 220" focusable="false">
-        <rect class="doc-tab" x="120" y="14" width="36" height="17" rx="3"></rect>
-        <text class="doc-tab__text" x="138" y="26.5">PDF</text>
-        <rect class="doc-ink" x="14" y="16" width="80" height="9" rx="2"></rect>
-        <rect class="doc-soft" x="14" y="31" width="52" height="5" rx="2"></rect>
-        <rect class="doc-line" x="14" y="52" width="142" height="4" rx="2"></rect>
-        <rect class="doc-line" x="14" y="61" width="128" height="4" rx="2"></rect>
-        <rect class="doc-line" x="14" y="70" width="138" height="4" rx="2"></rect>
-        <rect class="doc-line" x="14" y="79" width="92" height="4" rx="2"></rect>
-        <rect class="doc-row" x="14" y="98" width="142" height="13" rx="2"></rect>
-        <rect class="doc-row" x="14" y="124" width="142" height="13" rx="2"></rect>
-        <rect class="doc-soft" x="20" y="102.5" width="48" height="4" rx="2"></rect>
-        <rect class="doc-soft" x="20" y="115.5" width="60" height="4" rx="2"></rect>
-        <rect class="doc-soft" x="20" y="128.5" width="40" height="4" rx="2"></rect>
-        <rect class="doc-soft" x="20" y="141.5" width="54" height="4" rx="2"></rect>
-        <rect class="doc-ink" x="122" y="102.5" width="28" height="4" rx="2"></rect>
-        <rect class="doc-ink" x="128" y="115.5" width="22" height="4" rx="2"></rect>
-        <rect class="doc-ink" x="118" y="128.5" width="32" height="4" rx="2"></rect>
-        <rect class="doc-ink" x="126" y="141.5" width="24" height="4" rx="2"></rect>
-        <rect class="doc-line" x="14" y="162" width="136" height="4" rx="2"></rect>
-        <rect class="doc-line" x="14" y="171" width="104" height="4" rx="2"></rect>
-        <path class="doc-sign" d="M18 200c5-11 9 5 15-3s7-9 11-1 8-7 13 1 6-4 10-1"></path>
-        <path class="doc-clip" d="M22-8v30a7 7 0 0 0 14 0V0a4.5 4.5 0 0 0-9 0v20"></path>
-      </svg>
-    </div>
-    <p class="obj__label"><strong>{t(locale, "home.desk.pdf.file")}</strong> {t(locale, "home.desk.pdf")}</p>
-  </li>
-
-  <li class="obj obj--memo">
-    <div class="obj__paper" aria-hidden="true">
-      <svg class="obj__art" viewBox="0 0 260 130" focusable="false">
-        <circle class="memo-play" cx="36" cy="58" r="21"></circle>
-        <path class="memo-play__icon" d="M29 47v22l18-11z"></path>
+  <li
+    class="obj obj--pdf"
+    data-pdf
+    data-label-page={t(locale, "home.play.pdf.page")}
+    data-label-moved={t(locale, "home.play.pdf.moved")}
+  >
+    <div class="obj__paper pdf">
+      <ol class="pdf__pages" id="desk-pdf-pages" aria-label={t(locale, "home.play.pdf.pages")}>
         {
-          wave.map((h, i) => (
-            <rect
-              class={i < PLAYED ? "memo-bar memo-bar--played" : "memo-bar"}
-              x={70 + i * 6}
-              y={58 - h / 2}
-              width="3.2"
-              height={h}
-              rx="1.6"
-            ></rect>
+          pdfPages.map((id, i) => (
+            <li
+              class={`pdf__page pdf__page--${id}`}
+              data-page={id}
+              data-name={pageName(id)}
+              aria-label={t(locale, "home.play.pdf.page", { n: i + 1, total: pdfPages.length, name: pageName(id) })}
+              aria-describedby="desk-pdf-hint"
+            >
+              <svg class="pdf__art" viewBox="0 0 170 220" aria-hidden="true" focusable="false">
+                {id === "cover" && (
+                  <>
+                    <rect class="doc-tab" x="120" y="14" width="36" height="17" rx="3"></rect>
+                    <text class="doc-tab__text" x="138" y="26.5">PDF</text>
+                    <rect class="doc-ink" x="14" y="58" width="122" height="12" rx="2"></rect>
+                    <rect class="doc-ink" x="14" y="76" width="86" height="12" rx="2"></rect>
+                    <rect class="doc-soft" x="14" y="100" width="70" height="5" rx="2"></rect>
+                    <rect class="doc-band" x="14" y="150" width="142" height="44" rx="2"></rect>
+                    <rect class="doc-band-line" x="22" y="168" width="58" height="4" rx="2"></rect>
+                  </>
+                )}
+                {id === "figures" && (
+                  <>
+                    <rect class="doc-ink" x="14" y="16" width="70" height="8" rx="2"></rect>
+                    <rect class="doc-line" x="14" y="34" width="128" height="4" rx="2"></rect>
+                    <rect class="doc-row" x="14" y="52" width="142" height="13" rx="2"></rect>
+                    <rect class="doc-row" x="14" y="78" width="142" height="13" rx="2"></rect>
+                    <rect class="doc-row" x="14" y="104" width="142" height="13" rx="2"></rect>
+                    {[56.5, 69.5, 82.5, 95.5, 108.5, 121.5].map((y, k) => (
+                      <>
+                        <rect class="doc-soft" x="20" y={y} width={[48, 60, 40, 54, 44, 58][k]} height="4" rx="2"></rect>
+                        <rect class="doc-ink" x={[122, 128, 118, 126, 124, 120][k]} y={y} width={[28, 22, 32, 24, 26, 30][k]} height="4" rx="2"></rect>
+                      </>
+                    ))}
+                    <rect class="doc-ink" x="104" y="146" width="46" height="7" rx="2"></rect>
+                    <rect class="doc-line" x="14" y="172" width="136" height="4" rx="2"></rect>
+                    <rect class="doc-line" x="14" y="181" width="104" height="4" rx="2"></rect>
+                  </>
+                )}
+                {id === "notes" && (
+                  <>
+                    <rect class="doc-ink" x="14" y="16" width="56" height="8" rx="2"></rect>
+                    {[36, 45, 54, 63, 72, 92, 101, 110, 119, 139, 148, 157, 166, 175].map((y, k) => (
+                      <rect class="doc-line" x="14" y={y} width={[142, 136, 140, 128, 90, 142, 138, 132, 70, 140, 134, 142, 126, 84][k]} height="4" rx="2"></rect>
+                    ))}
+                  </>
+                )}
+                {id === "signature" && (
+                  <>
+                    <rect class="doc-line" x="14" y="18" width="140" height="4" rx="2"></rect>
+                    <rect class="doc-line" x="14" y="27" width="128" height="4" rx="2"></rect>
+                    <rect class="doc-line" x="14" y="36" width="134" height="4" rx="2"></rect>
+                    <rect class="doc-line" x="14" y="45" width="82" height="4" rx="2"></rect>
+                    <rect class="doc-soft" x="14" y="118" width="40" height="4" rx="2"></rect>
+                    <path class="doc-sign" d="M18 150c5-11 9 5 15-3s7-9 11-1 8-7 13 1 6-4 10-1"></path>
+                    <rect class="doc-soft" x="14" y="160" width="70" height="2" rx="1"></rect>
+                    <rect class="doc-soft" x="104" y="160" width="46" height="2" rx="1"></rect>
+                    <rect class="doc-ink" x="108" y="146" width="36" height="5" rx="2"></rect>
+                  </>
+                )}
+              </svg>
+              <span class="pdf__num" aria-hidden="true">{i + 1}</span>
+            </li>
           ))
         }
-        <rect class="memo-track" x="70" y="104" width="178" height="3" rx="1.5"></rect>
-        <rect class="memo-track memo-track--played" x="70" y="104" width="64" height="3" rx="1.5"></rect>
-        <circle class="memo-knob" cx="134" cy="105.5" r="5"></circle>
+      </ol>
+      <svg class="pdf__clip" viewBox="0 0 170 220" aria-hidden="true" focusable="false">
+        <path class="doc-clip" d="M22-8v30a7 7 0 0 0 14 0V0a4.5 4.5 0 0 0-9 0v20"></path>
       </svg>
+      <button type="button" class="pdf__open" aria-expanded="false" aria-controls="desk-pdf-pages" aria-describedby="desk-pdf-example" hidden>
+        <span class="visually-hidden">{t(locale, "home.play.pdf.open")}</span>
+      </button>
     </div>
-    <p class="obj__label"><strong>{t(locale, "home.desk.memo.file")}</strong> {t(locale, "home.desk.memo")}</p>
+    <div class="pdf__tools" hidden>
+      <button type="button" class="pdf__move" data-move="-1" aria-label={t(locale, "home.play.pdf.earlier")}>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6 8.5 12l6 6"></path></svg>
+      </button>
+      <button type="button" class="pdf__close">{t(locale, "home.play.pdf.close")}</button>
+      <button type="button" class="pdf__move" data-move="1" aria-label={t(locale, "home.play.pdf.later")}>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9.5 6 6 6-6 6"></path></svg>
+      </button>
+    </div>
+    <span id="desk-pdf-example"><Stamp as="span" class="obj__stamp obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={-3} land="load" /></span>
+    <p class="obj__label">
+      <strong>{t(locale, "home.desk.pdf.file")}</strong>
+      {t(locale, "home.desk.pdf")}
+      {
+        (organizeHref || mergeHref) && (
+          <span class="obj__links">
+            {organizeHref && <a href={organizeHref}>{t(locale, "home.play.pdf.organize")}</a>}
+            {organizeHref && mergeHref && " · "}
+            {mergeHref && <a href={mergeHref}>{t(locale, "home.play.pdf.merge")}</a>}
+          </span>
+        )
+      }
+    </p>
+    <p class="visually-hidden" id="desk-pdf-hint">{t(locale, "home.play.pdf.hint")}</p>
+    <p class="visually-hidden pdf__status" role="status"></p>
   </li>
 
-  <li class="obj obj--lemon">
-    <div class="obj__paper" aria-hidden="true">
-      <svg class="obj__art" viewBox="0 0 160 160" focusable="false">
-        <defs>
-          <pattern id="desk-checker" width="16" height="16" patternUnits="userSpaceOnUse">
-            <rect class="chk-a" width="16" height="16"></rect>
-            <rect class="chk-b" width="8" height="8"></rect>
-            <rect class="chk-b" x="8" y="8" width="8" height="8"></rect>
-          </pattern>
-        </defs>
-        <rect width="160" height="160" fill="url(#desk-checker)"></rect>
-        <g transform="rotate(-18 80 88)">
-          <ellipse class="lemon-cut" cx="80" cy="88" rx="58" ry="43"></ellipse>
-          <path class="lemon" d="M22 88q2-6 9-7 6-28 49-30 43 2 49 30 7 1 9 7-2 6-9 7-6 28-49 30-43-2-49-30-7-1-9-7z"></path>
-          <ellipse class="lemon-shine" cx="62" cy="72" rx="15" ry="6"></ellipse>
-          <circle class="lemon-pore" cx="96" cy="70" r="1.6"></circle>
-          <circle class="lemon-pore" cx="108" cy="92" r="1.6"></circle>
-          <circle class="lemon-pore" cx="84" cy="104" r="1.6"></circle>
-          <circle class="lemon-pore" cx="58" cy="96" r="1.6"></circle>
-        </g>
-        <path class="leaf" d="M84 42c10-20 34-25 48-18-6 17-27 27-48 18z"></path>
-        <path class="leaf-vein" d="M87 41c14-7 28-13 42-16"></path>
+  <li class="obj obj--memo" data-memo>
+    <div class="obj__paper memo">
+      <svg class="obj__art" viewBox="0 0 260 130" aria-hidden="true" focusable="false">
+        <circle class="memo-play" cx="36" cy="58" r="21"></circle>
+        <path class="memo-play__icon" d="M29 47v22l18-11z"></path>
+        {bars("memo-bar").map((b) => <rect class={b.cls} x={b.x} y={b.y} width="3.2" height={b.h} rx="1.6"></rect>)}
+        <rect class="memo-track" x="70" y="104" width="178" height="3" rx="1.5"></rect>
       </svg>
+      <div class="memo__played" aria-hidden="true">
+        <svg class="obj__art" viewBox="0 0 260 130" focusable="false">
+          {bars("memo-bar memo-bar--played").map((b) => <rect class={b.cls} x={b.x} y={b.y} width="3.2" height={b.h} rx="1.6"></rect>)}
+          <rect class="memo-track memo-track--played" x="70" y="104" width="178" height="3" rx="1.5"></rect>
+        </svg>
+      </div>
+      <span class="memo__run" aria-hidden="true"><span class="memo__knob"></span></span>
+      <button
+        type="button"
+        class="memo__play"
+        data-state="idle"
+        aria-label={t(locale, "home.play.memo.play")}
+        aria-describedby="desk-memo-example"
+        data-label-play={t(locale, "home.play.memo.play")}
+        data-label-pause={t(locale, "home.play.memo.pause")}
+        data-label-replay={t(locale, "home.play.memo.replay")}
+        hidden
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path class="memo__icon memo__icon--play" d="M8.5 5.5v13l10.5-6.5z"></path>
+          <path class="memo__icon memo__icon--pause" d="M7 5.5h3.6v13H7zm6.4 0H17v13h-3.6z"></path>
+          <path class="memo__icon memo__icon--replay" d="M12 5V2L7.5 6 12 10V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"></path>
+        </svg>
+      </button>
     </div>
-    <p class="obj__label"><strong>{t(locale, "home.desk.lemon.file")}</strong> {t(locale, "home.desk.lemon")}</p>
+    <span id="desk-memo-example"><Stamp as="span" class="obj__stamp obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={2} land="load" /></span>
+    <div class="obj__label memo__notes">
+      <strong>{t(locale, "home.desk.memo.file")}</strong>
+      <span class="memo__desc">{t(locale, "home.desk.memo")}</span>
+      {/* Played, the memo is typed up: the transcript takes the place of the line about it. */}
+      <ol class="memo__transcript" aria-label={t(locale, "home.play.memo.transcript")} aria-live="polite">
+        {memoLines.map((line) => <li hidden>{line}</li>)}
+      </ol>
+      {transcribeHref && <span class="obj__links"><a href={transcribeHref}>{t(locale, "home.play.memo.link")}</a></span>}
+    </div>
+  </li>
+
+  <li class="obj obj--lemon" data-lemon>
+    <div class="obj__paper">
+      <div class="wipe">
+        <svg class="obj__art" viewBox="0 0 160 160" aria-hidden="true" focusable="false">
+          <defs>
+            <pattern id="desk-checker" width="16" height="16" patternUnits="userSpaceOnUse">
+              <rect class="chk-a" width="16" height="16"></rect>
+              <rect class="chk-b" width="8" height="8"></rect>
+              <rect class="chk-b" x="8" y="8" width="8" height="8"></rect>
+            </pattern>
+          </defs>
+          <rect width="160" height="160" fill="url(#desk-checker)"></rect>
+          <g transform="rotate(-18 80 88)">
+            <ellipse class="lemon-cut" cx="80" cy="88" rx="58" ry="43"></ellipse>
+            <path class="lemon" d="M22 88q2-6 9-7 6-28 49-30 43 2 49 30 7 1 9 7-2 6-9 7-6 28-49 30-43-2-49-30-7-1-9-7z"></path>
+            <ellipse class="lemon-shine" cx="62" cy="72" rx="15" ry="6"></ellipse>
+            <circle class="lemon-pore" cx="96" cy="70" r="1.6"></circle>
+            <circle class="lemon-pore" cx="108" cy="92" r="1.6"></circle>
+            <circle class="lemon-pore" cx="84" cy="104" r="1.6"></circle>
+            <circle class="lemon-pore" cx="58" cy="96" r="1.6"></circle>
+          </g>
+          <path class="leaf" d="M84 42c10-20 34-25 48-18-6 17-27 27-48 18z"></path>
+          <path class="leaf-vein" d="M87 41c14-7 28-13 42-16"></path>
+        </svg>
+        <div class="wipe__before" aria-hidden="true">
+          <svg class="obj__art" viewBox="0 0 160 160" focusable="false">
+            <rect class="ph-sky" width="160" height="72"></rect>
+            <rect class="ph-sea" y="64" width="160" height="30"></rect>
+            <path class="ph-island" d="M104 64q14-16 26-14t30 14z"></path>
+            <rect class="ph-table" y="94" width="160" height="66"></rect>
+            <path class="ph-plank" d="M0 118h160M0 142h160M40 94v24M118 118v24M70 142v18"></path>
+            <ellipse class="ph-shadow" cx="86" cy="130" rx="50" ry="8"></ellipse>
+            <g transform="rotate(-18 80 88)">
+              <path class="lemon" d="M22 88q2-6 9-7 6-28 49-30 43 2 49 30 7 1 9 7-2 6-9 7-6 28-49 30-43-2-49-30-7-1-9-7z"></path>
+              <ellipse class="lemon-shine" cx="62" cy="72" rx="15" ry="6"></ellipse>
+              <circle class="lemon-pore" cx="96" cy="70" r="1.6"></circle>
+              <circle class="lemon-pore" cx="108" cy="92" r="1.6"></circle>
+              <circle class="lemon-pore" cx="84" cy="104" r="1.6"></circle>
+              <circle class="lemon-pore" cx="58" cy="96" r="1.6"></circle>
+            </g>
+            <path class="leaf" d="M84 42c10-20 34-25 48-18-6 17-27 27-48 18z"></path>
+            <path class="leaf-vein" d="M87 41c14-7 28-13 42-16"></path>
+          </svg>
+        </div>
+        <span class="wipe__line" aria-hidden="true"><span class="wipe__knob"><svg viewBox="0 0 24 24" focusable="false"><path d="M9.5 7.5 5 12l4.5 4.5M14.5 7.5 19 12l-4.5 4.5"></path></svg></span></span>
+        <input
+          class="wipe__range"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="50"
+          aria-label={t(locale, "home.play.lemon.range")}
+          aria-describedby="desk-lemon-example"
+          data-valuetext={t(locale, "home.play.lemon.valuetext")}
+          hidden
+        />
+      </div>
+    </div>
+    <span id="desk-lemon-example"><Stamp as="span" class="obj__stamp obj__example" text={t(locale, "home.play.example")} ink="sea" tilt={-2} land="load" /></span>
+    <p class="obj__label">
+      <strong>{t(locale, "home.desk.lemon.file")}</strong>
+      {t(locale, "home.desk.lemon")}
+      {removeHref && <span class="obj__links"><a href={removeHref}>{t(locale, "home.play.lemon.link")}</a></span>}
+    </p>
   </li>
 </ul>
+<button type="button" class="desk-tidy" hidden>{t(locale, "home.play.tidy")}</button>
+
+<script>
+  // Bundled to external modules (assetsInlineLimit: 0), so the CSP stays free of inline scripts.
+  import "../scripts/desk-play";
+  import "../scripts/desk-drag";
+</script>
