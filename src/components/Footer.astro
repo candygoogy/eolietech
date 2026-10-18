@@ -5,7 +5,7 @@
  * strokes, Handwriting.astro), one line, and where it was made. Right, the address side: a
  * perforated stamp with the logo mark and a postmark over it, the site links written on the address
  * lines, and the copyright. Tool pages get a compact card so the tool stays the page.
- * Styles: global.css, "site footer".
+ * Styles: global.css, "site footer"; the stamp face padding below.
  */
 import Handwriting from "./Handwriting.astro";
 import Logo from "./Logo.astro";
@@ -73,3 +73,10 @@ const links = [
     </div>
   </div>
 </footer>
+
+<style>
+  /* The mark is printed edge to edge on the stamp face, like a pictorial stamp. */
+  .postage__face {
+    padding: 0;
+  }
+</style>
