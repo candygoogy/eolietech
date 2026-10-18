@@ -14,9 +14,11 @@ interface Props {
   level?: 2 | 3;
   /** Show limits and format converters (the /tools/ page). */
   detailed?: boolean;
+  /** Reveal each group as it scrolls into view (home page only; see src/scripts/reveal.ts). */
+  reveal?: boolean;
 }
 
-const { locale, level = 2, detailed = false } = Astro.props;
+const { locale, level = 2, detailed = false, reveal = false } = Astro.props;
 const Heading = `h${level}` as "h2" | "h3";
 const published = new Set(publishedTools().map((tool) => tool.id));
 const categories: Category[] = ["image", "pdf", "audio"];
@@ -64,7 +66,7 @@ const groups = categories
 <div class:list={["tool-index", { "tool-index--detailed": detailed }]}>
   {
     groups.map((group) => (
-      <section class="tool-index__group" aria-labelledby={`cat-${group.category}`}>
+      <section class="tool-index__group" aria-labelledby={`cat-${group.category}`} data-reveal={reveal ? "" : undefined}>
         <div class="tool-index__head">
           <Heading id={`cat-${group.category}`}>{t(locale, `tools.category.${group.category}`)}</Heading>
           <p>{t(locale, `tools.category.${group.category}.lede`)}</p>

@@ -66,5 +66,9 @@ const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
       <slot />
     </main>
     <Footer locale={locale} />
+    <script>
+      // Bundled to an external module (assetsInlineLimit: 0), so the CSP stays free of inline scripts.
+      import "../scripts/reveal";
+    </script>
   </body>
 </html>

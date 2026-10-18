@@ -20,10 +20,7 @@ const links = [
 
 <footer class="site-footer">
   <div class="site-footer__inner">
-    <div class="site-footer__brand">
-      <Logo />
-      <p>{t(locale, "footer.made")}</p>
-    </div>
+    <p class="site-footer__made">{t(locale, "footer.made")}</p>
     <nav class="site-footer__nav" aria-label={t(locale, "footer.label")}>
       <ul>
         {
@@ -35,6 +32,9 @@ const links = [
         }
       </ul>
     </nav>
+    <div class="site-footer__logo">
+      <Logo />
+    </div>
     <p class="site-footer__legal">{t(locale, "footer.copyright", { year })}</p>
   </div>
 </footer>

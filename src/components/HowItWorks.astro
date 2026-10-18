@@ -1,0 +1,82 @@
+---
+/**
+ * Home diagram: what crosses the network when you use a tool, and what never does.
+ * HTML + CSS so the text is real, wraps and translates; connectors are CSS elements in the logo's
+ * sea-line style (styles and the one-shot draw animation: components.css, "home: flow diagram").
+ * DOM order is the story (server, code lane, device and its pipeline, the lane that stops); CSS grid
+ * areas place the two lanes side by side. Drawing parts are aria-hidden: every fact is in the text.
+ */
+import { directive } from "./csp";
+import { localePath, t } from "../i18n";
+import type { Locale } from "../tools/types";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const connectSrc = directive("connect-src");
+const steps = [
+  { id: "file", glyph: true },
+  { id: "worker", glyph: false },
+  { id: "result", glyph: false },
+];
+---
+
+<section class="section container flow-section" aria-labelledby="flow-h">
+  <div class="section__head" data-reveal>
+    <h2 id="flow-h">{t(locale, "home.flow.h2")}</h2>
+    <p>{t(locale, "home.flow.lede")}</p>
+  </div>
+
+  <figure class="flow" aria-labelledby="flow-h" data-reveal>
+    <div class="flow__grid">
+      <div class="flow__node flow__server">
+        <h3>{t(locale, "home.flow.server.title")}</h3>
+        <p>{t(locale, "home.flow.server.body")}</p>
+      </div>
+
+      <div class="flow__lane flow__lane--in">
+        <p class="flow__lane-title">{t(locale, "home.flow.in.title")}</p>
+        <span class="flow__line" aria-hidden="true"><span class="flow__head"></span></span>
+        <p class="flow__lane-body">{t(locale, "home.flow.in.body")}</p>
+      </div>
+
+      <div class="flow__node flow__device">
+        <h3>{t(locale, "home.flow.device.title")}</h3>
+        <p>{t(locale, "home.flow.device.body")}</p>
+        <ol class="flow__steps">
+          {
+            steps.map((step) => (
+              <li class={`flow__step flow__step--${step.id}`}>
+                {step.glyph && (
+                  <svg class="flow__glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M6 2.75h8.25L19 7.5v13.75H6z" />
+                    <path d="M14 2.75V7.75h5" />
+                  </svg>
+                )}
+                <span class="flow__step-title">{t(locale, `home.flow.${step.id}.title`)}</span>
+                <span class="flow__step-body">{t(locale, `home.flow.${step.id}.body`)}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="flow__note">{t(locale, "home.flow.offline")}</p>
+      </div>
+
+      <div class="flow__lane flow__lane--out">
+        <p class="flow__lane-title">{t(locale, "home.flow.out.title")}</p>
+        <span class="flow__line flow__line--stop" aria-hidden="true"><span class="flow__cap"></span></span>
+        <p class="flow__lane-body">
+          {t(locale, "home.flow.out.body")}
+          {connectSrc && <code>{connectSrc}</code>}
+        </p>
+      </div>
+    </div>
+
+    <figcaption class="flow__caption">
+      {t(locale, "home.flow.caption")}{" "}
+      <a href={localePath(locale, "security")}>{t(locale, "home.flow.check")}</a>
+    </figcaption>
+  </figure>
+</section>

@@ -73,6 +73,8 @@ pre {
 }
 
 /* ---------- typography ---------- */
+/* Archivo for headings, labels and figures; the width axis carries the hierarchy:
+   125% for h1 and figures, 118% for h2, 112% for h3 and UI labels. */
 h1,
 h2,
 h3,
@@ -80,28 +82,30 @@ h4 {
   font-family: var(--font-display);
   font-weight: 700;
   line-height: var(--leading-snug);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--track-h3);
   text-wrap: balance;
 }
 
 h1 {
   font-size: var(--text-3xl);
   font-stretch: 125%;
-  font-weight: 760;
+  font-weight: 800;
   line-height: var(--leading-tight);
-  letter-spacing: -0.025em;
+  letter-spacing: var(--track-h1);
 }
 
 h2 {
   font-size: var(--text-2xl);
   font-stretch: 118%;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: var(--track-h2);
 }
 
 h3 {
-  font-size: var(--text-lg);
-  font-stretch: 108%;
+  font-size: var(--text-xl);
+  font-stretch: 112%;
+  line-height: var(--leading-snug);
 }
 
 p,
@@ -118,16 +122,28 @@ b {
 a {
   color: var(--color-accent);
   text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.22em;
   transition:
-    color var(--duration-fast) var(--ease-out),
-    text-decoration-thickness var(--duration-fast) var(--ease-out);
+    color var(--duration-fast) var(--ease-color),
+    text-decoration-color var(--duration-fast) var(--ease-color);
 }
 
-a:hover {
-  color: var(--color-accent-hover);
-  text-decoration-thickness: 2px;
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    color: var(--color-accent-hover);
+    text-decoration-color: currentColor;
+  }
+}
+
+/* A standalone link that is an action (hero, section ends): bold, no button chrome, 44px target. */
+.link-strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  font-size: var(--text-base);
+  font-weight: 700;
 }
 
 code,
@@ -169,7 +185,6 @@ hr {
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
 }
 
 .skip-link {
@@ -217,10 +232,10 @@ hr {
 }
 
 .lede {
-  max-width: 40rem;
-  font-size: var(--text-lg);
-  line-height: 1.55;
-  color: var(--color-text-muted);
+  max-width: 34ch;
+  font-size: var(--text-xl);
+  line-height: 1.4;
+  color: var(--color-text);
 }
 
 .muted {
@@ -254,9 +269,7 @@ hr {
 }
 
 /* ---------- site header ---------- */
-.site-header {
-  border-bottom: var(--border-width) solid var(--color-border);
-}
+/* No border: the header sits on the page ground and the content below starts with space. */
 
 .site-header__inner {
   display: flex;
@@ -291,15 +304,18 @@ hr {
   min-height: var(--target-min);
   padding-inline: var(--space-3);
   color: var(--color-text);
+  font-size: var(--text-base);
   font-weight: 600;
   text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: background-color var(--duration-fast) var(--ease-out);
+  border-radius: var(--radius-full);
+  transition: background-color var(--duration-fast) var(--ease-color);
 }
 
-.site-nav a:hover {
-  background: var(--color-sunken);
-  color: var(--color-text);
+@media (hover: hover) and (pointer: fine) {
+  .site-nav a:hover {
+    background: var(--color-fill-hover);
+    color: var(--color-text);
+  }
 }
 
 /* Current page: the sea line from the logo, under the link. */
@@ -309,14 +325,14 @@ hr {
   left: var(--space-3);
   right: var(--space-3);
   bottom: 0.45rem;
-  height: 3px;
-  border-radius: 2px;
+  height: var(--sea-line);
+  border-radius: var(--radius-full);
   background: var(--color-accent);
 }
 
 @media (max-width: 40rem) {
   .site-header__inner {
-    padding-block: var(--space-2) 0;
+    padding-block: var(--space-2);
   }
 
   .site-nav {
@@ -324,7 +340,7 @@ hr {
   }
 
   .site-nav ul {
-    justify-content: space-between;
+    flex-wrap: wrap;
     margin-inline: calc(-1 * var(--space-2));
   }
 
@@ -339,41 +355,39 @@ hr {
 }
 
 /* ---------- site footer ---------- */
+/* A designed close on a sunken field: the place line and links, then the name at full width. */
 .site-footer {
-  margin-top: var(--space-7);
-  border-top: var(--border-width) solid var(--color-border);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  margin-top: var(--section-space);
+  background: var(--color-sunken);
+  color: var(--color-text);
 }
 
 .site-footer__inner {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: var(--space-4);
+  gap: var(--space-4) var(--space-5);
   max-width: calc(var(--content-width) + 2 * var(--gutter));
   margin-inline: auto;
-  padding: var(--space-5) var(--gutter) var(--space-5);
+  padding: var(--space-6) var(--gutter) var(--space-4);
 }
 
-.site-footer__brand {
-  display: grid;
-  gap: var(--space-2);
-  color: var(--color-text);
-}
-
-.site-footer__brand p {
-  color: var(--color-text-muted);
-}
-
-.site-footer__brand .logo {
-  height: 1.5rem;
+.site-footer__made {
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-stretch: 118%;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: var(--track-h2);
+  text-wrap: balance;
 }
 
 .site-footer__nav ul {
   display: flex;
   flex-wrap: wrap;
   gap: 0 var(--space-1);
+  margin-inline-end: calc(-1 * var(--space-3));
   padding: 0;
   list-style: none;
 }
@@ -382,23 +396,55 @@ hr {
   display: inline-flex;
   align-items: center;
   min-height: var(--target-min);
-  padding-inline: var(--space-2);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-full);
   color: var(--color-text);
+  font-size: var(--text-base);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-footer__nav a:hover {
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+}
+
+/* The name returns at full container width. */
+.site-footer__logo {
+  grid-column: 1 / -1;
+  margin-block: var(--space-6) var(--space-4);
+  color: var(--color-text);
+}
+
+.site-footer__logo .logo {
+  width: 100%;
+  height: auto;
 }
 
 .site-footer__legal {
   grid-column: 1 / -1;
-  padding-top: var(--space-3);
-  border-top: var(--border-width) solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
-@media (max-width: 40rem) {
+@media (max-width: 48rem) {
   .site-footer__inner {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: var(--space-5);
   }
 
   .site-footer__nav ul {
-    margin-inline: calc(-1 * var(--space-2));
+    margin-inline: calc(-1 * var(--space-2)) 0;
+  }
+
+  .site-footer__nav a {
+    padding-inline: var(--space-2);
+  }
+
+  .site-footer__logo {
+    margin-block: var(--space-4) var(--space-3);
   }
 }
 
@@ -411,7 +457,7 @@ hr {
   min-height: var(--target-min);
   padding: 0.5rem 1.125rem;
   border: var(--border-width) solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
@@ -421,30 +467,20 @@ hr {
   text-decoration: none;
   cursor: pointer;
   transition:
-    background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
+    background-color var(--duration-fast) var(--ease-color),
+    border-color var(--duration-fast) var(--ease-color),
+    color var(--duration-fast) var(--ease-color),
+    scale var(--duration-fast) var(--ease-out);
 }
 
-.btn:hover {
-  background: var(--color-sunken);
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-.btn:active {
-  translate: 0 1px;
+/* Press feedback: a small scale-down that confirms the press (none under reduced motion). */
+.btn:active:not(:disabled, [aria-disabled="true"]) {
+  scale: var(--press-scale);
 }
 
 .btn--primary {
   border-color: var(--color-accent);
   background: var(--color-accent);
-  color: var(--color-accent-contrast);
-}
-
-.btn--primary:hover {
-  border-color: var(--color-accent-hover);
-  background: var(--color-accent-hover);
   color: var(--color-accent-contrast);
 }
 
@@ -454,16 +490,31 @@ hr {
   color: var(--color-accent);
 }
 
-.btn--ghost:hover {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-hover);
+/* Hover only where a real pointer hovers: on touch a tap would leave the fill stuck. */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background: var(--color-fill-hover);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .btn--primary:hover {
+    border-color: var(--color-accent-hover);
+    background: var(--color-accent-hover);
+    color: var(--color-accent-contrast);
+  }
+
+  .btn--ghost:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent-hover);
+  }
 }
 
 .btn:disabled,
 .btn[aria-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.55;
-  translate: none;
+  scale: none;
 }
 
 .btn-row {
@@ -490,13 +541,15 @@ textarea {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
-  transition: border-color var(--duration-fast) var(--ease-out);
+  transition: border-color var(--duration-fast) var(--ease-color);
 }
 
-input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]):hover,
-select:hover,
-textarea:hover {
-  border-color: var(--color-text-muted);
+@media (hover: hover) and (pointer: fine) {
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]):hover,
+  select:hover,
+  textarea:hover {
+    border-color: var(--color-text-muted);
+  }
 }
 
 input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]):focus-visible,
@@ -634,4 +687,55 @@ label {
 
 .prose > :first-child {
   margin-top: 0;
+}
+
+/* ---------- scroll reveal (marketing pages, driven by src/scripts/reveal.ts) ----------
+ * Only the script sets data-reveal="pending", and only on elements below the fold at load, so
+ * content is never hidden without JS or while it is already on screen. Plays once. */
+[data-reveal="pending"] {
+  opacity: 0;
+  translate: 0 var(--rise);
+}
+
+[data-reveal="in"] {
+  transition:
+    opacity var(--duration-reveal) var(--ease-out),
+    translate var(--duration-reveal) var(--ease-out);
+}
+
+/* Stagger groups: the parent stays put, its children arrive one step apart (capped at four). */
+[data-reveal-stagger][data-reveal="pending"] {
+  opacity: 1;
+  translate: none;
+}
+
+[data-reveal-stagger][data-reveal="pending"] > * {
+  opacity: 0;
+  translate: 0 var(--rise);
+}
+
+[data-reveal-stagger][data-reveal="in"] > * {
+  transition:
+    opacity var(--duration-reveal) var(--ease-out),
+    translate var(--duration-reveal) var(--ease-out);
+}
+
+[data-reveal-stagger][data-reveal="in"] > :nth-child(2) {
+  transition-delay: var(--stagger);
+}
+
+[data-reveal-stagger][data-reveal="in"] > :nth-child(3) {
+  transition-delay: calc(2 * var(--stagger));
+}
+
+[data-reveal-stagger][data-reveal="in"] > :nth-child(n + 4) {
+  transition-delay: calc(3 * var(--stagger));
+}
+
+@media print {
+  [data-reveal],
+  [data-reveal] > * {
+    opacity: 1 !important;
+    translate: none !important;
+  }
 }

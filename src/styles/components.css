@@ -4,167 +4,251 @@
 
 /* ---------- shared section rhythm ---------- */
 .section {
-  padding-top: var(--space-7);
+  padding-top: var(--section-space);
 }
 
+/* Heading with its lede directly under it, read as one unit. */
 .section__head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  align-items: end;
-  gap: var(--space-2) var(--space-5);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.section__head h2 {
+  font-size: var(--text-3xl);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-h1);
+}
+
+.section__head p {
+  max-width: 40rem;
+  margin-top: var(--space-3);
+  font-size: var(--text-xl);
+  line-height: 1.4;
 }
 
 .section__more {
-  margin-top: var(--space-4);
-  font-weight: 700;
-}
-
-.section__more a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-min);
+  margin-top: var(--space-5);
 }
 
 @media (max-width: 48rem) {
-  .section {
-    padding-top: var(--space-6);
-  }
-
   .section__head {
-    grid-template-columns: 1fr;
+    margin-bottom: var(--space-5);
   }
 }
 
 /* ---------- home: hero ---------- */
+/* One dominant thing: the statement, set at display size across the grid. */
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-  align-items: end;
-  gap: var(--space-5) var(--space-6);
-  padding-block: var(--space-7) var(--space-6);
+  padding-block: clamp(4rem, 2rem + 7vw, 8.5rem) var(--section-space);
+}
+
+.hero + .section {
+  padding-top: 0;
 }
 
 .hero h1 {
-  max-width: 14ch;
+  max-width: none;
+  font-size: var(--text-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: var(--leading-display);
+  letter-spacing: var(--track-display);
 }
 
-.hero .lede {
+@media (max-width: 48rem) {
+  .hero h1 {
+    font-stretch: 112%;
+  }
+}
+
+@media (max-width: 30rem) {
+  .hero h1 {
+    font-stretch: 100%;
+  }
+}
+
+.hero__lede {
   margin-top: var(--space-4);
 }
 
-.hero .btn-row {
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
   margin-top: var(--space-5);
 }
 
-.hero__facts ul {
+.hero__cta {
+  min-height: 3.25rem;
+  padding-inline: 1.75rem;
+}
+
+/* Spec row: four short facts, a term over its sentence. No rules, no markers. */
+.hero__specs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4) var(--space-5);
+  margin-top: var(--space-7);
   padding: 0;
   list-style: none;
-  border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.hero__facts li {
-  position: relative;
-  padding: var(--space-3) 0 var(--space-3) var(--space-5);
-  border-top: var(--border-width) solid var(--color-border);
+.hero__specs li {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
 }
 
-/* The sea line from the mark, as a list marker. */
-.hero__facts li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: calc(var(--space-3) + 0.75em);
-  width: 1.25rem;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--color-accent);
+.hero__spec-term {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-stretch: 125%;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: var(--track-h3);
 }
 
-@media (max-width: 52rem) {
-  .hero {
-    grid-template-columns: 1fr;
-    padding-block: var(--space-6) var(--space-4);
+.hero__spec-text {
+  max-width: 28ch;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 30rem) {
+  .hero__specs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
+@media (min-width: 64rem) {
+  .hero__specs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 30rem) {
+  .hero__specs {
+    margin-top: var(--space-6);
+  }
+}
+
+/* Entrance, once per visit. The h1 is the LCP element: it moves but never fades, so it paints at
+   full strength on the first frame. Everything is visible without the animation. */
 @media (prefers-reduced-motion: no-preference) {
-  .hero__text > * {
-    animation: rise 520ms var(--ease-out) both;
+  .hero h1 {
+    animation: settle var(--duration-reveal) var(--ease-out) both;
   }
 
-  .hero__text > :nth-child(2) {
-    animation-delay: 60ms;
+  .hero__lede {
+    animation: rise var(--duration-reveal) var(--stagger) var(--ease-out) both;
   }
 
-  .hero__text > :nth-child(3) {
-    animation-delay: 120ms;
+  .hero__actions {
+    animation: rise var(--duration-reveal) calc(2 * var(--stagger)) var(--ease-out) both;
   }
 
-  .hero__facts {
-    animation: rise 520ms 180ms var(--ease-out) both;
+  .hero__specs > li {
+    animation: rise var(--duration-reveal) calc(3 * var(--stagger)) var(--ease-out) both;
+  }
+
+  .hero__specs > li:nth-child(2) {
+    animation-delay: calc(4 * var(--stagger));
+  }
+
+  .hero__specs > li:nth-child(3) {
+    animation-delay: calc(5 * var(--stagger));
+  }
+
+  .hero__specs > li:nth-child(4) {
+    animation-delay: calc(6 * var(--stagger));
   }
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    translate: 0 0.5rem;
+    translate: 0 var(--rise);
   }
 }
 
-/* ---------- tool index ---------- */
+@keyframes settle {
+  from {
+    translate: 0 var(--rise);
+  }
+}
+
+/* ---------- tool index (home and /tools/) ---------- */
+.tool-index {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .tool-index {
+    gap: var(--space-7);
+  }
+}
+
 .tool-index__group {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3) var(--space-5);
-  padding-block: var(--space-4) var(--space-5);
-  border-top: 2px solid var(--color-text);
+}
+
+.tool-index__head {
+  align-self: start;
 }
 
 .tool-index__head h2,
 .tool-index__head h3 {
-  font-size: var(--text-xl);
-  font-stretch: 118%;
+  font-size: var(--text-2xl);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: var(--track-h2);
 }
 
 .tool-index__head p {
-  margin-top: var(--space-1);
+  max-width: 24ch;
+  margin-top: var(--space-2);
   font-size: var(--text-sm);
+  line-height: 1.45;
   color: var(--color-text-muted);
 }
 
 .tool-index__list {
+  display: grid;
+  gap: var(--space-1);
   padding: 0;
   list-style: none;
 }
 
-.tool-index__item + .tool-index__item {
-  border-top: var(--border-width) solid var(--color-border);
-}
-
+/* Rows bleed into the gutter so their text sits on the grid edge; the fill shows on intent. */
 .tool-index__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.125rem var(--space-4);
+  gap: 0.25rem var(--space-4);
   min-height: var(--target-min);
-  padding-block: var(--space-3);
+  margin-inline: calc(-1 * var(--space-3));
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
   color: var(--color-text);
   text-decoration: none;
-}
-
-.tool-index__item:first-child .tool-index__row {
-  padding-top: 0.35rem;
+  transition: background-color var(--duration-fast) var(--ease-color);
 }
 
 .tool-index__name {
   grid-column: 1;
   font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-stretch: 108%;
+  font-size: var(--text-xl);
+  font-stretch: 112%;
   font-weight: 700;
-  line-height: var(--leading-snug);
+  line-height: 1.2;
+  letter-spacing: var(--track-h3);
 }
 
 .tool-index__summary,
@@ -174,51 +258,71 @@
 }
 
 .tool-index__limits {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .tool-index__soon {
   grid-column: 2;
   grid-row: 1 / span 2;
-  padding: 0.2rem 0.55rem;
-  border: var(--border-width) dashed var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-full);
+  background: var(--color-sunken);
+  font-size: var(--text-sm);
   font-weight: 700;
   color: var(--color-text-muted);
   white-space: nowrap;
 }
 
+/* The only arrow on the site: muted at rest, accent (and a nudge) on intent. */
 a.tool-index__row::after {
   content: "→" / "";
   grid-column: 2;
   grid-row: 1 / span 3;
-  font-size: var(--text-lg);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1;
+  color: var(--color-text-muted);
+  transition:
+    color var(--duration-fast) var(--ease-color),
+    translate var(--duration-base) var(--ease-out);
+}
+
+a.tool-index__row:focus-visible {
+  background: var(--color-fill-hover);
+}
+
+a.tool-index__row:focus-visible::after {
   color: var(--color-accent);
-  transition: translate var(--duration-base) var(--ease-out);
 }
 
-a.tool-index__row:hover {
-  color: var(--color-text);
+@media (hover: hover) and (pointer: fine) {
+  a.tool-index__row:hover {
+    background: var(--color-fill-hover);
+    color: var(--color-text);
+  }
+
+  a.tool-index__row:hover::after {
+    color: var(--color-accent);
+  }
 }
 
-a.tool-index__row:hover .tool-index__name {
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.2em;
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  a.tool-index__row:hover::after {
+    translate: 0.25rem 0;
+  }
 }
 
-a.tool-index__row:hover::after {
-  translate: 0.25rem 0;
-}
-
+/* /tools/: format converters under the image tool. */
 .tool-index__converters {
-  padding-bottom: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-3);
+  padding-block: var(--space-1) var(--space-3);
 }
 
 .tool-index__converters p {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 700;
   color: var(--color-text-muted);
 }
@@ -226,8 +330,7 @@ a.tool-index__row:hover::after {
 .tool-index__converters ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--space-1);
-  margin-inline: calc(-1 * var(--space-2));
+  gap: 0 var(--space-3);
   padding: 0;
   list-style: none;
 }
@@ -236,20 +339,518 @@ a.tool-index__row:hover::after {
   display: inline-flex;
   align-items: center;
   min-height: var(--target-min);
-  padding-inline: var(--space-2);
   font-size: var(--text-sm);
 }
 
-@media (max-width: 48rem) {
+@media (min-width: 48rem) {
   .tool-index__group {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2.6fr);
+  }
+
+  /* The category name stays in view while its list scrolls past. */
+  .tool-index__head {
+    position: sticky;
+    top: var(--space-5);
+  }
+
+  .tool-index__row {
+    margin-inline: calc(-1 * var(--space-4));
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+/* ---------- home: flow diagram (src/components/HowItWorks.astro) ----------
+ * Nodes are surfaces; connectors are CSS bars in the logo's sea-line style. Lanes use
+ * display: contents so their title, line and text sit straight in the figure's grid.
+ * Default = final, static state. The draw sequence plays once, only after reveal.ts marks the
+ * figure "in" and only without a reduced-motion preference. Total about 3.2s, never loops. */
+.flow {
+  --flow-line: var(--sea-line);
+  --flow-lane-draw: flow-draw-y;
+  --flow-link-draw: flow-draw-y;
+}
+
+.flow__grid {
+  display: grid;
+  grid-template-columns: 1rem 1.5rem 1.5rem minmax(0, 1fr);
+  grid-template-areas:
+    "a a a a"
+    ". l1 . t1"
+    ". l1 . s1"
+    ". l1 l2 t2"
+    ". l1 l2 s2"
+    "b b b b";
+}
+
+.flow__lane {
+  display: contents;
+}
+
+.flow__node {
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.flow__node h3 {
+  font-size: var(--text-lg);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.flow__node > p {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.flow__server {
+  grid-area: a;
+  padding: var(--space-4);
+}
+
+.flow__device {
+  grid-area: b;
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+}
+
+.flow__device > h3 {
+  font-size: var(--text-xl);
+}
+
+.flow__device > p {
+  font-size: var(--text-base);
+}
+
+.flow__lane--in > .flow__lane-title {
+  grid-area: t1;
+}
+
+.flow__lane--in > .flow__line {
+  grid-area: l1;
+}
+
+.flow__lane--in > .flow__lane-body {
+  grid-area: s1;
+}
+
+.flow__lane--out > .flow__lane-title {
+  grid-area: t2;
+}
+
+.flow__lane--out > .flow__line {
+  grid-area: l2;
+}
+
+.flow__lane--out > .flow__lane-body {
+  grid-area: s2;
+}
+
+.flow__lane-title {
+  padding: var(--space-4) 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-stretch: 112%;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.flow__lane-body {
+  max-width: 34rem;
+  padding: var(--space-1) 0 var(--space-3) var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.flow__lane--out > .flow__lane-body {
+  padding-bottom: var(--space-4);
+}
+
+.flow__lane-body code {
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* Connectors. Vertical by default (phones and tablets), horizontal at >= 64rem. */
+.flow__line {
+  position: relative;
+  justify-self: center;
+  width: var(--flow-line);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  transform-origin: top;
+}
+
+.flow__head {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 1rem;
+  height: 0.75rem;
+  translate: -50% 0;
+  background: var(--color-accent);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+/* The lane back: muted, starts at the device and stops halfway with a cap. No arrowhead. */
+.flow__line--stop {
+  align-self: end;
+  height: 58%;
+  background: var(--color-text-muted);
+  transform-origin: bottom;
+}
+
+.flow__cap {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1.375rem;
+  height: var(--flow-line);
+  translate: -50% 0;
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+}
+
+/* The pipeline inside the device: three wells joined by short sea lines. */
+.flow__steps {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.flow__step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-sunken);
+}
+
+.flow__step-title {
+  padding-right: 2rem;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-stretch: 112%;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.flow__step-body {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.flow__glyph {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.flow__step + .flow__step::before,
+.flow__step + .flow__step::after {
+  content: "";
+  position: absolute;
+  left: var(--space-5);
+  background: var(--color-accent);
+}
+
+.flow__step + .flow__step::before {
+  bottom: calc(100% + 0.375rem);
+  width: var(--flow-line);
+  height: calc(var(--space-5) - 0.75rem);
+  translate: -50% 0;
+  border-radius: var(--radius-full);
+  transform-origin: top;
+}
+
+.flow__step + .flow__step::after {
+  bottom: calc(100% + 0.25rem);
+  width: 0.875rem;
+  height: 0.625rem;
+  translate: -50% 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.flow__note {
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.flow__caption {
+  max-width: 46rem;
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  .flow__step {
+    background: var(--color-bg);
+  }
+}
+
+/* Tablet: device pipeline in a row, connectors horizontal; lanes stay vertical, side by side. */
+@media (min-width: 40rem) {
+  .flow {
+    --flow-link-draw: flow-draw-x;
+  }
+
+  .flow__grid {
+    grid-template-columns: 1.25rem 1.5rem minmax(0, 1fr) 1.5rem minmax(0, 1fr);
+    grid-template-areas:
+      "a a a a a"
+      ". l1 t1 l2 t2"
+      ". l1 s1 l2 s2"
+      "b b b b b";
+  }
+
+  .flow__lane-body,
+  .flow__lane--out > .flow__lane-body {
+    padding: var(--space-1) var(--space-4) var(--space-5) var(--space-3);
+  }
+
+  .flow__device {
+    padding: var(--space-5);
+  }
+
+  .flow__steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .flow__step + .flow__step::before {
+    top: 50%;
+    bottom: auto;
+    left: auto;
+    right: calc(100% + 0.375rem);
+    width: calc(var(--space-5) - 0.75rem);
+    height: var(--flow-line);
+    translate: 0 -50%;
+    transform-origin: left;
+  }
+
+  .flow__step + .flow__step::after {
+    top: 50%;
+    bottom: auto;
+    left: auto;
+    right: calc(100% + 0.25rem);
+    width: 0.625rem;
+    height: 0.875rem;
+    translate: 0 -50%;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+}
+
+@media (min-width: 48rem) {
+  .flow {
+    --flow-line: 4px;
+  }
+}
+
+/* Desktop: server | lanes | device, lanes centred on the device and drawn left to right. */
+@media (min-width: 64rem) {
+  .flow {
+    --flow-lane-draw: flow-draw-x;
+  }
+
+  /* The code lane enters the device at the level of its title; the server sits at that level too. */
+  .flow__grid {
+    grid-template-columns: minmax(13rem, 1fr) minmax(14rem, 1.2fr) minmax(0, 2.6fr);
+    grid-template-rows: repeat(6, auto) 1fr;
+    grid-template-areas:
+      "a t1 b"
+      "a l1 b"
+      "a s1 b"
+      ". t2 b"
+      ". l2 b"
+      ". s2 b"
+      ". . b";
+  }
+
+  .flow__server {
+    align-self: start;
+  }
+
+  .flow__lane-title,
+  .flow__lane-body,
+  .flow__lane--out > .flow__lane-body {
+    padding: 0 var(--space-4);
+  }
+
+  .flow__lane-title {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-2);
+  }
+
+  .flow__lane--out > .flow__lane-title {
+    padding-top: var(--space-5);
+  }
+
+  .flow__lane-body {
+    padding-top: var(--space-2);
+  }
+
+  .flow__lane--out > .flow__lane-body {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-4);
+  }
+
+  .flow__line {
+    justify-self: stretch;
+    align-self: center;
+    width: auto;
+    height: var(--flow-line);
+    transform-origin: left;
+  }
+
+  .flow__head {
+    top: 50%;
+    left: auto;
+    right: -2px;
+    bottom: auto;
+    width: 0.75rem;
+    height: 1rem;
+    translate: 0 -50%;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+
+  .flow__line--stop {
+    justify-self: end;
+    width: 58%;
+    height: var(--flow-line);
+    transform-origin: right;
+  }
+
+  .flow__cap {
+    top: 50%;
+    left: 0;
+    width: var(--flow-line);
+    height: 1.375rem;
+    translate: 0 -50%;
+  }
+}
+
+/* Fill backwards only: the base style is already the final state, so nothing is held after the
+   sequence ends (a held scale left connectors unpainted in Chromium). */
+@media (prefers-reduced-motion: no-preference) {
+  .flow[data-reveal="in"] .flow__lane--in .flow__line {
+    animation: var(--flow-lane-draw) 600ms 200ms var(--ease-in-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__head {
+    animation: flow-fade 160ms 700ms var(--ease-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__step--file {
+    animation: flow-drop 500ms 700ms var(--ease-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__step--worker::before {
+    animation: var(--flow-link-draw) 500ms 1200ms var(--ease-in-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__step--worker::after {
+    animation: flow-fade 160ms 1600ms var(--ease-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__step--worker {
+    animation: flow-work 400ms 1700ms var(--ease-in-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__step--result::before {
+    animation: var(--flow-link-draw) 400ms 2100ms var(--ease-in-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__step--result::after {
+    animation: flow-fade 160ms 2400ms var(--ease-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__step--result {
+    animation: flow-arrive 400ms 2500ms var(--ease-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__lane--out .flow__line {
+    animation: var(--flow-lane-draw) 400ms 2600ms var(--ease-out) backwards;
+  }
+
+  .flow[data-reveal="in"] .flow__cap {
+    animation: flow-stop 300ms 2950ms var(--ease-out) backwards;
+  }
+}
+
+@keyframes flow-draw-x {
+  from {
+    scale: 0 1;
+  }
+
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes flow-draw-y {
+  from {
+    scale: 1 0;
+  }
+
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes flow-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes flow-drop {
+  from {
+    opacity: 0;
+    translate: 0 -0.75rem;
+  }
+}
+
+@keyframes flow-work {
+  50% {
+    scale: 1.04;
+    background-color: var(--color-accent-soft);
+  }
+}
+
+@keyframes flow-arrive {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+@keyframes flow-stop {
+  from {
+    opacity: 0;
+    scale: 0.9;
   }
 }
 
 /* ---------- home: verify ---------- */
 .verify {
-  margin-top: var(--space-7);
-  padding-block: var(--space-7);
+  margin-top: var(--section-space);
+  padding-block: var(--section-space-lg);
   background: var(--color-ink-block);
   color: var(--color-ink-block-text);
 }
@@ -258,8 +859,10 @@ a.tool-index__row:hover::after {
   color: var(--sea-300);
 }
 
-.verify a:hover {
-  color: var(--sea-200);
+@media (hover: hover) and (pointer: fine) {
+  .verify a:hover {
+    color: var(--sea-200);
+  }
 }
 
 .verify :focus-visible {
@@ -268,68 +871,59 @@ a.tool-index__row:hover::after {
 
 .verify__inner {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5) var(--space-6);
   align-items: start;
+}
+
+.verify__title {
+  grid-column: 1 / -1;
 }
 
 .verify__intro > * + * {
   margin-top: var(--space-4);
 }
 
-.verify__intro p {
-  color: var(--color-ink-block-muted);
-  font-size: var(--text-lg);
-  line-height: 1.55;
+.verify h2 {
+  font-size: var(--text-3xl);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-h1);
+  color: var(--color-ink-block-text);
 }
 
+.verify__intro p {
+  max-width: 34rem;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--color-ink-block-muted);
+}
+
+/* The policy line is the proof, so it is set large. */
 .verify__policy {
   display: block;
   width: fit-content;
   max-width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--basalt-500);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  font-size: var(--text-base);
+  background: color-mix(in srgb, var(--color-ink-block-text) 8%, transparent);
+  font-size: var(--text-xl);
+  line-height: 1.3;
   color: var(--pumice-ink);
-}
-
-.verify__more {
-  display: flex;
-  width: fit-content;
-  align-items: center;
-  min-height: var(--target-min);
-  font-weight: 700;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .verify__list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5) var(--space-5);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
   padding: 0;
   list-style: none;
-  counter-reset: check;
-}
-
-.verify__list li {
-  padding-top: var(--space-3);
-  border-top: var(--border-width) solid var(--basalt-500);
-  counter-increment: check;
-}
-
-.verify__list li::before {
-  content: counter(check, decimal-leading-zero);
-  display: block;
-  margin-bottom: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-stretch: 125%;
-  font-weight: 760;
-  color: var(--sea-300);
 }
 
 .verify__list h3 {
-  font-size: var(--text-lg);
   color: var(--color-ink-block-text);
 }
 
@@ -338,24 +932,96 @@ a.tool-index__row:hover::after {
   color: var(--color-ink-block-muted);
 }
 
-@media (max-width: 52rem) {
-  .verify {
-    padding-block: var(--space-6);
-  }
-
-  .verify__inner,
+@media (min-width: 40rem) {
   .verify__list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-5);
+  }
+}
+
+@media (min-width: 52rem) {
+  .verify__inner {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-6);
   }
 }
 
 /* ---------- home: closing ---------- */
-.closing {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5) var(--space-6);
+/* Two blocks with different weights under one statement: the maker leads, Pro is a quiet tile. */
+.closing__title {
+  font-size: var(--text-3xl);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-h1);
 }
 
+.closing__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5) var(--space-6);
+  align-items: start;
+  margin-top: var(--space-5);
+}
+
+.closing__maker p {
+  max-width: 36rem;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+}
+
+.closing__maker p + p {
+  margin-top: var(--space-2);
+}
+
+.closing__pro {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.closing__pro h2 {
+  font-size: var(--text-xl);
+  font-stretch: 112%;
+  font-weight: 700;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--track-h3);
+}
+
+.closing__pro .btn {
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 48rem) {
+  .closing__row {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+}
+
+@media (max-width: 30rem) {
+  .closing__pro {
+    padding: var(--space-4);
+  }
+}
+
+/* Phones: the large home headings narrow their width axis, as the hero does, to keep to 2-3 lines. */
+@media (max-width: 30rem) {
+  .section__head h2,
+  .verify h2,
+  .closing__title {
+    font-stretch: 100%;
+  }
+
+  /* The longest home heading: one step down on phones so it holds to three lines, not four. */
+  .closing__title {
+    font-size: 2.125rem;
+  }
+}
+
+/* Pricing ("Why the free tools are free") still uses the old item style; restyled in its own pass. */
 .closing__item {
   padding-top: var(--space-4);
   border-top: 2px solid var(--color-text);
@@ -376,12 +1042,6 @@ a.tool-index__row:hover::after {
   align-items: center;
   min-height: var(--target-min);
   font-weight: 700;
-}
-
-@media (max-width: 48rem) {
-  .closing {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ---------- inner pages ---------- */

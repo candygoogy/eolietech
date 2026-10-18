@@ -1,52 +1,58 @@
 ---
 import Base from "../layouts/Base.astro";
+import HowItWorks from "../components/HowItWorks.astro";
 import ToolIndex from "../components/ToolIndex.astro";
 import { directive } from "../components/csp";
 import { localePath, t } from "../i18n";
 import type { Locale } from "../tools/types";
 
 const locale: Locale = "en";
-const facts = ["home.fact.local", "home.fact.free", "home.fact.open", "home.fact.offline"];
+const facts = ["local", "free", "open", "offline"];
 const checks = ["network", "csp", "offline", "code"];
 const connectSrc = directive("connect-src");
 ---
 
 <Base locale={locale} title={t(locale, "home.title")} description={t(locale, "site.description")} path="/">
   <section class="hero container">
-    <div class="hero__text">
-      <h1>{t(locale, "home.h1")}</h1>
-      <p class="lede">{t(locale, "home.lede")}</p>
-      <div class="btn-row">
-        <a class="btn btn--primary" href="#tools">{t(locale, "home.cta.tools")}</a>
-        <a class="btn btn--ghost" href={localePath(locale, "security")}>{t(locale, "home.cta.verify")}</a>
-      </div>
+    <h1>{t(locale, "home.h1")}</h1>
+    <p class="lede hero__lede">{t(locale, "home.lede")}</p>
+    <div class="hero__actions">
+      <a class="btn btn--primary hero__cta" href="#tools">{t(locale, "home.cta.tools")}</a>
+      <a class="link-strong" href={localePath(locale, "security")}>{t(locale, "home.cta.verify")}</a>
     </div>
-    <div class="hero__facts">
-      <h2 class="visually-hidden">{t(locale, "home.facts.label")}</h2>
-      <ul>
-        {facts.map((key) => <li>{t(locale, key)}</li>)}
-      </ul>
-    </div>
+    <h2 class="visually-hidden">{t(locale, "home.facts.label")}</h2>
+    <ul class="hero__specs">
+      {
+        facts.map((id) => (
+          <li>
+            <span class="hero__spec-term">{t(locale, `home.fact.${id}.term`)}</span>
+            <span class="hero__spec-text">{t(locale, `home.fact.${id}`)}</span>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <section id="tools" class="section container" aria-labelledby="tools-h">
-    <div class="section__head">
+    <div class="section__head" data-reveal>
       <h2 id="tools-h">{t(locale, "home.tools.h2")}</h2>
-      <p class="muted">{t(locale, "home.tools.lede")}</p>
+      <p>{t(locale, "home.tools.lede")}</p>
     </div>
-    <ToolIndex locale={locale} level={3} />
-    <p class="section__more"><a href={localePath(locale, "tools")}>{t(locale, "home.tools.all")}</a></p>
+    <ToolIndex locale={locale} level={3} reveal />
+    <p class="section__more"><a class="link-strong" href={localePath(locale, "tools")}>{t(locale, "home.tools.all")}</a></p>
   </section>
+
+  <HowItWorks locale={locale} />
 
   <section class="verify" aria-labelledby="verify-h">
     <div class="container verify__inner">
-      <div class="verify__intro">
-        <h2 id="verify-h">{t(locale, "home.verify.h2")}</h2>
+      <h2 id="verify-h" class="verify__title" data-reveal>{t(locale, "home.verify.h2")}</h2>
+      <div class="verify__intro" data-reveal>
         <p>{t(locale, "home.verify.lede")}</p>
         {connectSrc && <pre class="verify__policy"><code>{connectSrc}</code></pre>}
-        <a class="verify__more" href={localePath(locale, "security")}>{t(locale, "home.verify.more")}</a>
+        <a class="verify__more link-strong" href={localePath(locale, "security")}>{t(locale, "home.verify.more")}</a>
       </div>
-      <ol class="verify__list">
+      <ul class="verify__list" data-reveal data-reveal-stagger>
         {
           checks.map((id) => (
             <li>
@@ -55,20 +61,22 @@ const connectSrc = directive("connect-src");
             </li>
           ))
         }
-      </ol>
+      </ul>
     </div>
   </section>
 
   <section class="section container closing">
-    <div class="closing__item">
-      <h2>{t(locale, "home.maker.h2")}</h2>
-      <p>{t(locale, "home.maker.body")}</p>
-      <p><a href={localePath(locale, "about")}>{t(locale, "home.maker.link")}</a></p>
-    </div>
-    <div class="closing__item">
-      <h2>{t(locale, "home.pro.h2")}</h2>
-      <p>{t(locale, "home.pro.body")}</p>
-      <p><a href={`${localePath(locale, "pricing")}#waitlist`}>{t(locale, "home.pro.link")}</a></p>
+    <h2 class="closing__title" data-reveal>{t(locale, "home.maker.h2")}</h2>
+    <div class="closing__row" data-reveal data-reveal-stagger>
+      <div class="closing__maker">
+        <p>{t(locale, "home.maker.body")}</p>
+        <p><a class="link-strong" href={localePath(locale, "about")}>{t(locale, "home.maker.link")}</a></p>
+      </div>
+      <div class="closing__pro">
+        <h2>{t(locale, "home.pro.h2")}</h2>
+        <p>{t(locale, "home.pro.body")}</p>
+        <a class="btn" href={`${localePath(locale, "pricing")}#waitlist`}>{t(locale, "home.pro.link")}</a>
+      </div>
     </div>
   </section>
 </Base>
