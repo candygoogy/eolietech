@@ -2524,6 +2524,39 @@ a.tool-index__row:focus-visible::after {
   color: var(--color-danger);
 }
 
+/* Legal pages: the date the text was last changed, under the table of contents (on phones that puts
+   it above the first section, where a reader checks it). */
+.doc__updated {
+  margin-top: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+/* Privacy: the short version as a declaration, label and value per line, on one sunken tone step (the
+   same surface as .note) so it reads as the summary of everything below it. */
+.ledger {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-sunken);
+}
+
+.ledger > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ledger dt {
+  font-weight: 700;
+}
+
+@media (min-width: 40rem) {
+  .ledger > div {
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+}
+
 /* ---------- about ---------- */
 /* The palette as whole fields of colour: the about page's one picture. Fixed colours, named after
    what they are (raw values on purpose: a swatch shows the colour itself, in both themes). */

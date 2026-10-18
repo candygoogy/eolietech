@@ -7,6 +7,8 @@ const pages = [
   { path: "/pricing/", stamp: ".page-head__stamp", key: "pricing.stamp" },
   { path: "/about/", stamp: ".page-head__stamp", key: "about.stamp" },
   { path: "/security/", stamp: ".page-head__stamp", key: "security.stamp" },
+  { path: "/privacy/", stamp: ".page-head__stamp", key: "privacy.stamp" },
+  { path: "/terms/", stamp: ".page-head__stamp", key: "terms.stamp" },
   { path: "/this-page-does-not-exist/", stamp: ".not-found__stamp", key: "notFound.stamp" },
 ] as const;
 
