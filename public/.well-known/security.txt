@@ -1,0 +1,6 @@
+Contact: mailto:info@eolietech.com
+Contact: https://github.com/candygoogy/eolietech/security/advisories/new
+Expires: 2027-10-18T00:00:00.000Z
+Preferred-Languages: en, it
+Canonical: https://eolietech.com/.well-known/security.txt
+Policy: https://github.com/candygoogy/eolietech/blob/main/SECURITY.md

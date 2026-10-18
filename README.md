@@ -120,7 +120,7 @@ the CLA lets the project also offer it under other licences. On your first pull 
 a link: sign once and it covers your later pull requests too. For a large change, please open an
 issue first.
 
-For security reports and anything else, write to info@eolietech.com.
+For security reports, see [SECURITY.md](SECURITY.md). For anything else, write to info@eolietech.com.
 
 ## License
 
