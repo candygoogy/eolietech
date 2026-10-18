@@ -65,7 +65,7 @@ const siteToolStrings = Object.fromEntries(Object.entries(getDictionary(locale))
 const strings = { ...siteToolStrings, ...baseEntry.data.ui, ...(variant ? entry.data.ui : {}) };
 ---
 
-<Base locale={locale} {title} {description} path={localePath(locale, slug)} {alternates}>
+<Base locale={locale} {title} {description} path={localePath(locale, slug)} {alternates} compactFooter>
   <article class="tool-page">
     <header class="tool-page__head container">
       <a class="tool-page__back" href={localePath(locale, "tools")}>{t(locale, "toolPage.allTools")}</a>

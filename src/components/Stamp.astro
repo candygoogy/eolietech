@@ -1,0 +1,40 @@
+---
+/**
+ * A rubber stamp: the site's annotation voice (owner choice 2026-10-18, replacing handwritten notes).
+ * Archivo, uppercase, tracked, in one of three inks, a box or a circle, a slight turn, and an uneven
+ * ink edge from the page's one SVG filter (#ink-edge, in Base.astro). The words are real text, written
+ * in sentence case in en.json and set in capitals by CSS, so screen readers read them normally.
+ *
+ * Landing: `land="view"` stamps it once when it scrolls into view (src/scripts/reveal.ts);
+ * `land="load"` for stamps on the first screen, timed in CSS by the parent. Reduced motion: static.
+ * Turn and ink are data attributes mapped in CSS (no inline style: the CSP is style-src 'self').
+ * Styles: global.css, "rubber stamps".
+ */
+interface Props {
+  text: string;
+  /** A second, smaller line (circle stamps). */
+  sub?: string;
+  ink?: "ember" | "sea" | "ochre" | "on-dark";
+  shape?: "box" | "circle";
+  /** Degrees, -4 to 4. */
+  tilt?: -4 | -3 | -2 | -1 | 0 | 1 | 2 | 3 | 4;
+  land?: "view" | "load" | "none";
+  as?: "p" | "span" | "div";
+  class?: string;
+}
+
+const { text, sub, ink = "ember", shape = "box", tilt = 0, land = "view", as: Tag = "p", class: className } = Astro.props;
+---
+
+<Tag
+  class:list={["stamp", `stamp--${shape}`, className]}
+  data-ink={ink}
+  data-tilt={String(tilt)}
+  data-land={land === "load" ? "" : undefined}
+  data-reveal={land === "view" ? "" : undefined}
+>
+  <span class="stamp__ink">
+    <span class="stamp__text">{text}</span>
+    {sub && <span class="stamp__sub">{sub}</span>}
+  </span>
+</Tag>

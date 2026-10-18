@@ -37,81 +37,48 @@
   }
 }
 
-/* ---------- identity: handwritten notes and stickers ----------
- * Notes (.hand) are Caveat in the note ink (deep ember: 5.5:1 on white, 10.2:1 on black); they annotate,
- * they never carry running text or UI labels. Stickers are tilted pills with a hard sticker edge. */
-.hand {
-  font-family: var(--font-hand);
-  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
-  font-weight: 600;
-  line-height: 1.05;
-  color: var(--color-note);
-  text-wrap: balance;
+/* ---------- home: desk ----------
+ * The home's ground: the white page over faint sea-depth contours of the seven islands
+ * (SeaContours.astro), behind the hero only and fading out before the compressor. The hero statement
+ * sits on it with the paper objects (Desk.astro), then the live compressor. */
+.desk {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
 }
 
-/* On dark fields only (sulphur on ink, 11:1). */
-.hand--loud {
-  color: var(--color-loud);
+/* Phones and tablets: behind the pile only, under the text. Wide screens: the whole hero, fading out
+ * on the left where the lede sits. Both fade out at the bottom, before the compressor. */
+.contours {
+  position: absolute;
+  inset: clamp(22rem, 12rem + 26vw, 30rem) 0 auto;
+  z-index: -1;
+  width: 100%;
+  height: clamp(30rem, 20rem + 30vw, 44rem);
+  pointer-events: none;
+  mask-image: linear-gradient(#0000, #000 18%, #000 70%, #0000);
 }
 
-.hand__arrow {
-  flex: none;
-  width: 2.2em;
-  height: auto;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.sticker {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.42em 1em 0.5em;
-  border: 2px solid var(--sticker-edge);
-  border-radius: var(--radius-full);
-  background: var(--paper);
-  box-shadow: 0 0.18em 0 var(--sticker-edge);
-  color: var(--paper-ink);
-  font-family: var(--font-display);
-  font-stretch: 112%;
-  font-weight: 750;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  rotate: var(--tilt, 0deg);
-}
-
-.sticker--loud {
-  background: var(--color-loud);
-  color: var(--color-loud-ink);
-}
-
-.sticker--ink {
-  background: var(--neutral-800);
-  color: var(--neutral-50);
-}
-
-@media (prefers-color-scheme: dark) {
-  .sticker--ink {
-    background: var(--neutral-750);
+@media (min-width: 75rem) {
+  .contours {
+    inset-block-start: 0;
+    height: clamp(44rem, 30rem + 20vw, 60rem);
+    mask-image: linear-gradient(to right, #0000 12%, #000 46%), linear-gradient(#000 65%, #0000);
+    mask-composite: intersect;
   }
 }
 
-/* ---------- home: desk ----------
- * The home's ground: the white page with a faint dot grid (a desk, not graph paper: dots only, no lines).
- * The hero statement sits on it with the paper objects (Desk.astro), then the live compressor. */
-.desk,
-.desk-ground {
-  background-color: var(--color-bg);
-  background-image: radial-gradient(circle, var(--desk-dot) 1.25px, transparent 1.75px);
-  background-position: center top;
-  background-size: 1.375rem 1.375rem;
+.contours__depth,
+.contours__coast {
+  fill: none;
+  stroke: var(--contour);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
 }
 
-.desk {
-  overflow-x: clip;
+.contours__coast {
+  stroke: var(--contour-coast);
+  stroke-width: 1.5;
 }
 
 .desk__hero {
@@ -157,11 +124,11 @@
   padding-inline: 1.75rem;
 }
 
-/* The pile: a canvas with a fixed aspect ratio; objects sit at percentages of it and notes size with
+/* The pile: a canvas with a fixed aspect ratio; objects sit at percentages of it and labels size with
  * it (container units), so the arrangement holds at every width. Phones and tablets get their own
  * arrangement under the intro; wide screens lay the intro over the pile's empty left side. */
 .pile {
-  --note-size: clamp(1.125rem, 4.6cqi, 1.5rem);
+  --label-size: clamp(0.75rem, 3.3cqi, 0.875rem);
   position: relative;
   aspect-ratio: 360 / 440;
   margin: var(--space-6) 0 0;
@@ -172,7 +139,7 @@
 
 @media (min-width: 40rem) and (max-width: 74.99rem) {
   .pile {
-    --note-size: clamp(1.25rem, 2.8cqi, 1.5rem);
+    --label-size: clamp(0.8125rem, 1.9cqi, 0.9375rem);
     aspect-ratio: 720 / 560;
   }
 }
@@ -197,7 +164,7 @@
   }
 
   .pile {
-    --note-size: clamp(1.25rem, 2.2cqi, 1.75rem);
+    --label-size: clamp(0.8125rem, 1.25cqi, 0.9375rem);
     aspect-ratio: 1152 / 560;
     margin-top: 0;
   }
@@ -225,17 +192,32 @@
   overflow: visible;
 }
 
-.obj__note {
+/* File labels, as on a desktop: the file name, then a line about it. Upright and plain. */
+.obj__label {
   position: absolute;
   width: max-content;
-  max-width: 11em;
-  font-size: var(--note-size);
+  max-width: 13em;
+  font-size: var(--label-size);
+  line-height: 1.3;
 }
 
-.obj__sticker {
+.obj__label strong {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.obj__stamp {
   position: absolute;
   z-index: 1;
-  font-size: clamp(0.875rem, 3.4cqi, 1.25rem);
+  font-size: clamp(0.6875rem, 2.6cqi, 0.875rem);
+}
+
+@media (prefers-color-scheme: light) {
+  /* Ink on paper: the stamp darkens what it lands on instead of covering it. */
+  .obj__stamp {
+    mix-blend-mode: multiply;
+  }
 }
 
 /* Arrangement: phones (default), tablets, wide screens. --x/--y/--w are % of the pile. */
@@ -271,39 +253,34 @@
   --i: 3;
 }
 
-.obj--postcard .obj__note {
+.obj--postcard .obj__label {
   top: 106%;
   left: 2%;
-  rotate: 2deg;
 }
 
-.obj--postcard .obj__sticker {
-  top: -9%;
-  left: -3%;
-  --tilt: -8deg;
+.obj--postcard .obj__stamp {
+  right: 4%;
+  bottom: 6%;
 }
 
-.obj--pdf .obj__note {
-  top: 105%;
-  right: -4%;
-  max-width: 6.5em;
-  rotate: -4deg;
-  text-align: right;
-}
-
-.obj--memo .obj__note {
-  top: 108%;
-  right: 0;
-  max-width: 9em;
-  rotate: -1.5deg;
-  text-align: right;
-}
-
-.obj--lemon .obj__note {
+.obj--pdf .obj__label {
   top: 106%;
+  right: 0;
+  max-width: 8em;
+  text-align: right;
+}
+
+.obj--memo .obj__label {
+  top: 110%;
+  right: 0;
+  max-width: 11em;
+  text-align: right;
+}
+
+.obj--lemon .obj__label {
+  top: 108%;
   left: 0;
-  max-width: 5.5em;
-  rotate: 3deg;
+  max-width: 8em;
 }
 
 @media (min-width: 40rem) and (max-width: 74.99rem) {
@@ -331,14 +308,14 @@
     --w: 17%;
   }
 
-  .obj--pdf .obj__note {
+  .obj--pdf .obj__label {
     right: auto;
     left: 0;
     text-align: left;
   }
 
-  .obj--lemon .obj__note {
-    max-width: 6em;
+  .obj--lemon .obj__label {
+    max-width: 7em;
   }
 }
 
@@ -367,41 +344,37 @@
     --w: 14%;
   }
 
-  .obj--postcard .obj__note {
-    top: 104%;
-    left: -4%;
-    max-width: 8em;
-    rotate: -3deg;
+  .obj--postcard .obj__label {
+    top: 105%;
+    left: 0;
+    max-width: 16em;
   }
 
-  .obj--postcard .obj__sticker {
-    top: auto;
-    left: auto;
-    right: -4%;
-    bottom: -7%;
-    --tilt: 9deg;
+  .obj--postcard .obj__stamp {
+    right: -3%;
+    bottom: 5%;
   }
 
-  .obj--pdf .obj__note {
-    top: 104%;
+  .obj--pdf .obj__label {
+    top: 106%;
     right: auto;
-    left: -10%;
-    max-width: 8em;
+    left: 0;
+    max-width: 10em;
     text-align: left;
   }
 
-  .obj--memo .obj__note {
-    top: 106%;
+  .obj--memo .obj__label {
+    top: 110%;
     right: auto;
-    left: 6%;
+    left: 4%;
     max-width: none;
     text-align: left;
   }
 
-  .obj--lemon .obj__note {
-    top: 30%;
-    left: 112%;
-    max-width: 6em;
+  .obj--lemon .obj__label {
+    top: 34%;
+    left: 114%;
+    max-width: 8em;
   }
 }
 
@@ -510,15 +483,19 @@
   fill: #2b2b30;
 }
 
+/* The greeting, written on the sky (Handwriting.astro): placed over the art at the art's own scale. */
 .pc-hello {
-  font-family: var(--font-hand);
-  font-size: 24px;
-  font-weight: 700;
-  fill: #2b2b30;
+  position: absolute;
+  top: 9%;
+  left: 8%;
+  width: 50%;
+  height: auto;
+  color: #2b2b30;
+  stroke-width: 1.7;
 }
 
-/* Stamp (perforated) and postmark, top right of the postcard. */
-.stamp {
+/* Postage stamp (perforated) and postmark, top right of the postcard. */
+.pc-postage {
   position: absolute;
   top: 7%;
   right: 6%;
@@ -527,23 +504,23 @@
   rotate: 4deg;
 }
 
-.stamp__paper {
+.pc-postage__paper {
   fill: #fffdf8;
 }
 
-.stamp__field {
+.pc-postage__field {
   fill: var(--sulphur-400);
 }
 
-.stamp__cone {
+.pc-postage__cone {
   fill: #2b2b30;
 }
 
-.stamp__ember {
+.pc-postage__ember {
   fill: var(--ember);
 }
 
-.stamp__sea {
+.pc-postage__sea {
   fill: var(--color-mark-sea);
 }
 
@@ -704,7 +681,8 @@
 @media (prefers-color-scheme: dark) {
   /* Paper at night: the same drawings, a step dimmer, so the desk does not glare. */
   .obj__art,
-  .stamp {
+  .pc-hello,
+  .pc-postage {
     filter: brightness(0.9);
   }
 
@@ -718,25 +696,26 @@
 }
 
 /* Motion. Signature move: the objects are dropped onto the desk one after another (they arrive a
- * little high and turned, then settle), the notes are written on, the postmark lands once. Only
- * transform and opacity (clip-path for the writing). Under reduced motion it is all just there. */
+ * little high and turned, then settle), their labels follow, the postmark lands, then the NOT SENT
+ * stamp (Stamp.astro, [data-land]) is pressed on. Only transform and opacity. Under reduced motion
+ * it is all just there. */
+.obj__stamp {
+  --land-delay: 1100ms;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .obj {
     animation: desk-land 640ms var(--ease-out) backwards;
     animation-delay: calc(160ms + var(--i) * 90ms);
   }
 
-  .obj__note {
-    animation: desk-write 620ms var(--ease-out) backwards;
-    animation-delay: calc(560ms + var(--i) * 90ms);
+  .obj__label {
+    animation: rise var(--duration-reveal) var(--ease-out) backwards;
+    animation-delay: calc(520ms + var(--i) * 90ms);
   }
 
   .postmark {
     animation: desk-thump 300ms var(--ease-out) 900ms backwards;
-  }
-
-  .obj__sticker {
-    animation: desk-stick 360ms var(--ease-out) 1050ms backwards;
   }
 
   .desk__lede {
@@ -762,28 +741,10 @@
   }
 }
 
-@keyframes desk-write {
-  from {
-    clip-path: inset(-20% 100% -20% 0);
-  }
-
-  to {
-    clip-path: inset(-20% 0 -20% 0);
-  }
-}
-
 @keyframes desk-thump {
   from {
     opacity: 0;
     scale: 1.35;
-  }
-}
-
-@keyframes desk-stick {
-  from {
-    opacity: 0;
-    scale: 1.2;
-    rotate: calc(var(--tilt) - 10deg);
   }
 }
 
@@ -888,26 +849,13 @@
   box-shadow: var(--paper-shadow);
 }
 
-.try__note {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-  rotate: -1.5deg;
-}
-
-.try__note .hand__arrow {
-  rotate: 70deg;
-  translate: 0 0.4em;
-}
-
-.try__sticker {
+/* Struck across the panel's top edge, where a clerk would stamp a form. */
+.try__stamp {
   position: absolute;
   z-index: 2;
-  right: 0.5rem;
-  top: -0.25rem;
-  --tilt: 7deg;
-  font-size: var(--text-sm);
+  top: -1.1rem;
+  right: 1rem;
+  font-size: var(--text-xs);
 }
 
 .try__more {
@@ -919,34 +867,14 @@
     margin-top: var(--space-7);
   }
 
-  .try__note {
-    position: absolute;
-    bottom: 100%;
-    right: 14%;
-    max-width: 22em;
-  }
-
-  .try__sticker {
-    top: -1.1rem;
-    right: auto;
-    left: -0.9rem;
-    --tilt: -8deg;
-    font-size: var(--text-base);
+  .try__stamp {
+    top: -1.4rem;
+    right: 2.5rem;
+    font-size: var(--text-sm);
   }
 }
 
-@media (max-width: 51.99rem) {
-  .try__note .hand__arrow {
-    rotate: 80deg;
-  }
-
-  .try__sticker {
-    top: auto;
-    bottom: calc(100% - 1.25rem);
-  }
-}
-
-/* ---------- home: section notes (a handwritten aside next to a heading) ---------- */
+/* ---------- home: a rubber stamp beside a section heading ---------- */
 .section__head--noted {
   display: grid;
   grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
@@ -958,7 +886,7 @@
   grid-column: 1 / -1;
 }
 
-.section__head--noted > p:not(.hand) {
+.section__head--noted > p:not(.stamp) {
   grid-column: 1;
   grid-row: 2;
 }
@@ -967,11 +895,9 @@
   grid-column: 2;
   grid-row: 2;
   justify-self: start;
-  max-width: 11em;
   margin-top: 0;
-  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
-  line-height: 1.05;
-  rotate: -4deg;
+  font-size: var(--text-sm);
+  line-height: 1;
 }
 
 @media (max-width: 40rem) {
@@ -982,107 +908,151 @@
   .section__head .section__note {
     grid-column: 1;
     grid-row: auto;
-    margin-top: var(--space-3);
-    rotate: -2deg;
+    margin-top: var(--space-4);
   }
 }
 
-/* ---------- home: formats as stickers ---------- */
-.formats {
-  margin-top: var(--section-space);
-  padding-block: clamp(4.5rem, 2rem + 7vw, 9rem);
-  text-align: center;
+/* ---------- home: formats as a sheet of postage stamps ----------
+ * One perforated stamp per format, in straight rows, each row filed under the tools that open it.
+ * The sheet is a paper sheet (surface tone) with a printed selvage along the top: its title on the left
+ * and the printer's colour checks on the right, as on a real sheet. Stamp faces: images sulphur, PDF
+ * ember, audio sea, the two video containers ink. Every stamp's face value is €0. */
+.sheet {
+  padding: clamp(1rem, 0.5rem + 2vw, 2.25rem);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
 }
 
-.formats h2 {
-  font-size: var(--text-3xl);
-  font-stretch: 125%;
-  font-weight: 800;
-  line-height: var(--leading-tight);
-  letter-spacing: var(--track-h1);
-}
-
-.formats__lede {
-  max-width: 34rem;
-  margin: var(--space-3) auto 0;
-  font-size: var(--text-lg);
-  line-height: 1.5;
-}
-
-.stickers {
+.sheet__selvage {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-3) var(--space-2);
-  max-width: 50rem;
-  margin: var(--space-5) auto 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+/* Colour checks: four printed squares in the sheet's inks (shapes, not shadows: no blur). */
+.sheet__selvage::after {
+  content: "";
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-right: 2.25rem;
+  background: var(--postage-sulphur);
+  box-shadow:
+    0.875rem 0 0 var(--postage-ember),
+    1.75rem 0 0 var(--postage-sea),
+    2.625rem 0 0 var(--postage-neutral);
+}
+
+.sheet__row + .sheet__row {
+  margin-top: var(--space-5);
+}
+
+.sheet__label h3 {
+  font-size: var(--text-xl);
+  font-stretch: 112%;
+  font-weight: 800;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--track-h3);
+}
+
+.sheet__label p {
+  max-width: 22rem;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.sheet__label a {
+  color: var(--color-text);
+}
+
+.sheet__stamps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.375rem;
+  margin: var(--space-3) 0 0;
   padding: 0;
   list-style: none;
 }
 
-.stickers .sticker {
-  font-size: clamp(1.125rem, 0.95rem + 0.7vw, 1.625rem);
+.sheet .postage {
+  container-type: inline-size;
 }
 
-.stickers .sticker:nth-child(8n + 1) {
-  --tilt: -4deg;
+.sheet .postage__face {
+  display: grid;
+  place-content: center;
+  aspect-ratio: 5 / 6;
+  padding: 0.5rem;
+  text-align: center;
 }
 
-.stickers .sticker:nth-child(8n + 2) {
-  --tilt: 3deg;
+/* The face value, top left, as on a real stamp. */
+.postage__value {
+  position: absolute;
+  top: 7cqi;
+  left: 8cqi;
+  font-family: var(--font-display);
+  font-size: max(0.6875rem, 11cqi);
+  font-weight: 700;
+  line-height: 1;
 }
 
-.stickers .sticker:nth-child(8n + 3) {
-  --tilt: -1.5deg;
+.postage__name {
+  font-family: var(--font-display);
+  font-size: max(0.875rem, 21cqi);
+  font-stretch: 112%;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
 }
 
-.stickers .sticker:nth-child(8n + 4) {
-  --tilt: 5deg;
+.postage__kind {
+  margin-top: 0.35em;
+  font-size: max(0.6875rem, 10cqi);
+  font-weight: 700;
+  line-height: 1;
 }
 
-.stickers .sticker:nth-child(8n + 5) {
-  --tilt: -3deg;
+/* The logo's sea line, printed along the foot of every face. */
+.sheet .postage__face::after {
+  content: "";
+  position: absolute;
+  right: 18%;
+  bottom: 9%;
+  left: 18%;
+  height: max(2px, 2.5cqi);
+  border-radius: var(--radius-full);
+  background: currentColor;
+  opacity: 0.45;
 }
 
-.stickers .sticker:nth-child(8n + 6) {
-  --tilt: 2deg;
-}
-
-.stickers .sticker:nth-child(8n + 7) {
-  --tilt: -5deg;
-}
-
-.stickers .sticker:nth-child(8n) {
-  --tilt: 3.5deg;
-}
-
-/* Colour mix: a few loud, a few ink, the rest paper (no regular pattern). */
-.stickers .sticker:is(:nth-child(1), :nth-child(4), :nth-child(6), :nth-child(10), :nth-child(13)) {
-  background: var(--color-loud);
-  color: var(--color-loud-ink);
-}
-
-.stickers .sticker:is(:nth-child(3), :nth-child(8), :nth-child(12), :nth-child(15)) {
-  background: var(--neutral-800);
-  color: var(--neutral-50);
-}
-
-@media (prefers-color-scheme: dark) {
-  .stickers .sticker:is(:nth-child(3), :nth-child(8), :nth-child(12), :nth-child(15)) {
-    background: var(--neutral-750);
+@media (min-width: 40rem) {
+  .sheet__stamps {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 }
 
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .stickers .sticker {
-    transition:
-      translate var(--duration-fast) var(--ease-out),
-      rotate var(--duration-base) var(--ease-out);
+/* Wide: the labels take the sheet's left margin and the stamps line up in one grid down the sheet. */
+@media (min-width: 64rem) {
+  .sheet__row {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
   }
 
-  .stickers .sticker:hover {
-    translate: 0 -0.25rem;
-    rotate: 0deg;
+  .sheet__stamps {
+    margin-top: 0;
+  }
+
+  .sheet__label {
+    padding-top: var(--space-2);
   }
 }
 
@@ -1806,9 +1776,16 @@ a.tool-index__row:focus-visible::after {
   gap: var(--space-2) var(--space-5);
 }
 
-.verify__note {
-  font-size: clamp(1.5rem, 1.2rem + 1vw, 2.125rem);
-  rotate: -4deg;
+/* The policy line and the stamp that vouches for it. */
+.verify__proof {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.verify__stamp {
+  font-size: var(--text-xs);
 }
 
 .verify__intro > * + * {
@@ -1886,9 +1863,6 @@ a.tool-index__row:focus-visible::after {
   gap: var(--space-2) var(--space-5);
 }
 
-.closing__note {
-  rotate: -3deg;
-}
 .closing__title {
   font-size: var(--text-3xl);
   font-stretch: 125%;

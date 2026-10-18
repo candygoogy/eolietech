@@ -1,19 +1,25 @@
 ---
 /**
- * The closing band on every page: the site's one loud colour (sulphur, from Vulcano's fumaroles).
- * A sign-off line with the two actions, the handwritten place line and the links, then the name at
- * full width, cropped by the bottom edge of the page. Styles: global.css, "site footer".
+ * The close of every page: the back of a postcard. A paper card with an airmail edge (sea and
+ * sulphur stripes) and a divider down the middle. Left, the message: a handwritten sign-off (SVG
+ * strokes, Handwriting.astro), one line, and where it was made. Right, the address side: a
+ * perforated stamp with the logo mark and a postmark over it, the site links written on the address
+ * lines, and the copyright. Tool pages get a compact card so the tool stays the page.
+ * Styles: global.css, "site footer".
  */
+import Handwriting from "./Handwriting.astro";
 import Logo from "./Logo.astro";
+import Stamp from "./Stamp.astro";
 import { localePath, t } from "../i18n";
 import { siteConfig } from "../site.config";
 import type { Locale } from "../tools/types";
 
 interface Props {
   locale: Locale;
+  compact?: boolean;
 }
 
-const { locale } = Astro.props;
+const { locale, compact = false } = Astro.props;
 const year = new Date().getFullYear();
 const links = [
   { href: localePath(locale, "security"), label: t(locale, "footer.security") },
@@ -23,28 +29,47 @@ const links = [
 ];
 ---
 
-<footer class="site-footer">
+<footer class:list={["site-footer", { "site-footer--compact": compact }]}>
   <div class="site-footer__inner">
-    <p class="site-footer__line">{t(locale, "footer.line")}</p>
-    <div class="site-footer__actions">
-      <a class="btn site-footer__btn site-footer__btn--solid" href={localePath(locale, "tools")}>{t(locale, "footer.cta.tools")}</a>
-      <a class="btn site-footer__btn" href={localePath(locale, "security")}>{t(locale, "footer.cta.verify")}</a>
+    <div class="postcard-back">
+      <div class="postcard-back__message">
+        <Handwriting
+          class="postcard-back__signoff"
+          text={t(locale, "footer.signoff")}
+          label={t(locale, "footer.signoff.label")}
+          lang="it"
+        />
+        <p class="postcard-back__line">{t(locale, "footer.line")}</p>
+        <p class="postcard-back__made">{t(locale, "footer.made")}</p>
+      </div>
+      <div class="postcard-back__address">
+        <div class="postcard-back__corner" aria-hidden="true">
+          <span class="postage postage--mark">
+            <span class="postage__face"><Logo mark /></span>
+          </span>
+          <Stamp
+            class="postcard-back__postmark"
+            as="span"
+            shape="circle"
+            ink="sea"
+            tilt={-4}
+            text={t(locale, "footer.postmark")}
+            sub={t(locale, "footer.postmark.place")}
+          />
+        </div>
+        <nav class="postcard-back__nav" aria-label={t(locale, "footer.label")}>
+          <ul>
+            {
+              links.map((link) => (
+                <li>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <p class="postcard-back__legal">{t(locale, "footer.copyright", { year })}</p>
+      </div>
     </div>
-    <p class="site-footer__made">{t(locale, "footer.made")}</p>
-    <nav class="site-footer__nav" aria-label={t(locale, "footer.label")}>
-      <ul>
-        {
-          links.map((link) => (
-            <li>
-              <a href={link.href}>{link.label}</a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
-    <p class="site-footer__legal">{t(locale, "footer.copyright", { year })}</p>
-  </div>
-  <div class="site-footer__word">
-    <Logo wordmark />
   </div>
 </footer>

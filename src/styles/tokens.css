@@ -4,13 +4,15 @@
  * Palette: neutral white and greys for surfaces and text (Apple/Cloudflare-like; owner choice 2026-10-18),
  * plus three colours taken from the Aeolian Islands:
  *   Tyrrhenian sea     (deep teal)                         -> links, primary actions, focus
- *   ember              (Stromboli at night)                -> the logo mark; a deeper ember inks handwritten notes
- *   sulphur            (Vulcano's fumaroles)               -> the one loud colour: closing band, stickers
+ *   ember              (Stromboli at night)                -> the logo mark; ember stamp ink
+ *   sulphur            (Vulcano's fumaroles)               -> the postcard sky, postage stamps, ochre stamp ink
  *
- * Identity (home desk, owner choice 2026-10-18): "postcards that never get posted". The visitor's
- * files lie on a dotted desk as paper objects with handwritten notes (Caveat) and postmarks.
- * Contrast of the additions: note ink 5.5:1 on white / 5.1:1 on surface, 10.2:1 on black;
- * ink on sulphur 11.1:1 (light band), 9.9:1 (dark band); sulphur on the dark verify field 11.1:1.
+ * Identity (owner choice 2026-10-18): "postcards that never get posted". The visitor's files lie on the
+ * home desk as paper objects, over faint sea-depth contours of the islands. Annotations are rubber
+ * stamps (.stamp, Stamp.astro) in three inks; formats are perforated postage stamps; every page
+ * closes on the back of a postcard (Footer.astro). Handwriting exists only on the postcards, drawn
+ * as SVG strokes (Handwriting.astro), never as a font.
+ * Contrast of the stamp inks (text, WCAG AA): see the --ink-* comments below.
  *
  * Contrast (WCAG 2.2): body text >= 13:1, muted text >= 5.6:1, accent text >= 6.2:1 on every
  * surface, control borders (--color-border-strong) >= 3:1, in both themes.
@@ -30,15 +32,6 @@
 @font-face {
   font-family: "Atkinson Hyperlegible Next";
   src: url("/fonts/atkinson-hyperlegible-next-var-latin.woff2") format("woff2");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Handwriting: notes and annotations only (never running text, never UI labels). */
-@font-face {
-  font-family: "Caveat";
-  src: url("/fonts/caveat-var-latin.woff2") format("woff2");
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;
@@ -69,8 +62,8 @@
   --sea-wash-light: #dcebee;
   --sea-wash-dark: #16323a;
   --ember: #e0623a;
-  --ember-ink: #b5441c; /* notes on light grounds */
-  --ember-ink-light: #ff9b72; /* notes on dark grounds */
+  --ember-ink: #b5441c; /* stamp ink and the PDF postage on light grounds */
+  --ember-ink-light: #ff9b72; /* stamp ink on dark grounds */
   /* Vulcano sulphur */
   --sulphur-100: #fdf1bf;
   --sulphur-200: #fbe48a;
@@ -102,23 +95,35 @@
   --color-mark-fg: var(--neutral-50);
   --color-mark-sea: #3fa7b9;
   --color-mark-ember: var(--ember);
-  /* identity: the loud colour, handwriting, the desk and the paper objects on it */
-  --color-loud: var(--sulphur-400);
-  --color-loud-ink: var(--neutral-800);
-  --color-note: var(--ember-ink);
+  /* identity: stamp inks, postage, the desk, the paper objects on it and the postcard back */
+  --ink-ember: var(--ember-ink); /* 5.5:1 on white, 5.0:1 on surface */
+  --ink-sea: var(--sea-700); /* 7.8:1 on white */
+  --ink-ochre: #7a6000; /* 6.0:1 on white, 5.5:1 on surface */
+  --ink-on-dark: var(--sulphur-400); /* stamps on the dark verify field: 11:1 or more */
   --color-stamp: var(--neutral-700); /* postmark ink */
-  --desk-dot: var(--neutral-200);
+  --contour: var(--neutral-100); /* sea-depth lines behind the hero */
+  --contour-coast: var(--neutral-200);
+  --postage-paper: #fffdf8;
+  --postage-sulphur: var(--sulphur-400);
+  --postage-sulphur-ink: var(--neutral-800); /* 11:1 */
+  --postage-sea: var(--sea-700);
+  --postage-ember: var(--ember-ink);
+  --postage-neutral: var(--neutral-800);
+  --postage-light-ink: #ffffff; /* on sea 7.8:1, ember 5.5:1, neutral 16:1 */
+  --postcard-paper: var(--neutral-50);
+  --postcard-rule: var(--neutral-200);
+  --postcard-divider: var(--neutral-200);
+  --airmail-a: var(--sea-700);
+  --airmail-b: var(--sulphur-400);
   --paper: #fffdf8;
   --paper-edge: rgb(0 0 0 / 0.07);
   --paper-ink: var(--neutral-800);
   --paper-shadow: 0 1px 1px rgb(0 0 0 / 0.06), 0 6px 14px -4px rgb(0 0 0 / 0.16), 0 18px 32px -16px rgb(0 0 0 / 0.18);
   --paper-shadow-lift: 0 2px 2px rgb(0 0 0 / 0.06), 0 12px 22px -6px rgb(0 0 0 / 0.2), 0 30px 48px -20px rgb(0 0 0 / 0.22);
-  --sticker-edge: var(--neutral-800);
 
   /* typography */
   --font-sans: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Archivo", "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, sans-serif;
-  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
   --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;
@@ -204,18 +209,25 @@
     --color-mark-bg: var(--neutral-750);
     --color-mark-fg: var(--neutral-50);
     --color-mark-sea: #3fa7b9;
-    /* identity: the desk at night. Paper is dimmed, not inverted; the band deepens a step. */
-    --color-loud: var(--sulphur-500);
-    --color-loud-ink: #111112;
-    --color-note: var(--ember-ink-light);
+    /* identity at night: inks lighten to read on black, paper is dimmed (not inverted), the postcard
+     * back becomes a deep paper tone. */
+    --ink-ember: var(--ember-ink-light); /* 10.2:1 on black, 8.4:1 on the dark postcard paper */
+    --ink-sea: var(--sea-300); /* 10.4:1 on black */
+    --ink-ochre: var(--sulphur-400); /* 12:1 or more on black and the dark surfaces */
     --color-stamp: var(--neutral-700);
-    --desk-dot: var(--neutral-750);
+    --contour: #1a1a1c;
+    --contour-coast: #2a2a2d;
+    --postage-paper: #e9e6de;
+    --postcard-paper: #1b1a18;
+    --postcard-rule: #34322e;
+    --postcard-divider: #34322e;
+    --airmail-a: var(--sea-300);
+    --airmail-b: var(--sulphur-500);
     --paper: #e9e6de;
     --paper-edge: rgb(0 0 0 / 0.2);
     --paper-ink: var(--neutral-800);
     --paper-shadow: 0 1px 1px rgb(0 0 0 / 0.5), 0 10px 24px -6px rgb(0 0 0 / 0.8);
     --paper-shadow-lift: 0 2px 2px rgb(0 0 0 / 0.5), 0 18px 36px -8px rgb(0 0 0 / 0.9);
-    --sticker-edge: #000000;
   }
 }
 

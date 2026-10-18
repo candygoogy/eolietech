@@ -354,206 +354,438 @@ hr {
   }
 }
 
-/* ---------- site footer: the closing band ----------
- * The site's one loud field (sulphur, --color-loud) on every page: a sign-off line and the two actions,
- * the handwritten place line with the links, then the name at full width, cropped by the page's bottom
- * edge. Everything on the band is ink (--color-loud-ink, 11:1 light / 9.9:1 dark); teal is not used here
- * because it reads muddy on yellow, so links and focus rings switch to ink. */
+/* ---------- identity primitives: rubber stamps, postage stamps, handwriting ----------
+ * Shared by the home and the footer on every page. */
+
+/* The page's SVG filter definitions (Base.astro): present for url(#ink-edge), never seen. */
+.svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Rubber stamps (Stamp.astro). Archivo at a wider width, capitals tracked out, a 2px rule with a thin
+ * inner rule, in one of three inks; the uneven edge comes from #ink-edge. Text is real text. */
+.stamp {
+  --stamp-ink: var(--ink-ember);
+  --stamp-tilt: 0deg;
+  width: fit-content;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-stretch: 112%;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  rotate: var(--stamp-tilt);
+}
+
+.stamp[data-ink="sea"] {
+  --stamp-ink: var(--ink-sea);
+}
+
+.stamp[data-ink="ochre"] {
+  --stamp-ink: var(--ink-ochre);
+}
+
+.stamp[data-ink="on-dark"] {
+  --stamp-ink: var(--ink-on-dark);
+}
+
+.stamp[data-tilt="-4"] {
+  --stamp-tilt: -4deg;
+}
+
+.stamp[data-tilt="-3"] {
+  --stamp-tilt: -3deg;
+}
+
+.stamp[data-tilt="-2"] {
+  --stamp-tilt: -2deg;
+}
+
+.stamp[data-tilt="-1"] {
+  --stamp-tilt: -1deg;
+}
+
+.stamp[data-tilt="1"] {
+  --stamp-tilt: 1deg;
+}
+
+.stamp[data-tilt="2"] {
+  --stamp-tilt: 2deg;
+}
+
+.stamp[data-tilt="3"] {
+  --stamp-tilt: 3deg;
+}
+
+.stamp[data-tilt="4"] {
+  --stamp-tilt: 4deg;
+}
+
+.stamp__ink {
+  display: block;
+  color: var(--stamp-ink); /* here, not on .stamp, so no surrounding "p { color }" rule can reach it */
+  padding: 0.62em 0.8em 0.55em;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  outline: 1px solid currentColor;
+  outline-offset: -5px;
+  filter: url(#ink-edge);
+}
+
+.stamp__text,
+.stamp__sub {
+  display: block;
+}
+
+.stamp--circle .stamp__ink {
+  display: grid;
+  place-content: center;
+  gap: 0.35em;
+  inline-size: 7.5em;
+  aspect-ratio: 1;
+  padding: 0.75em;
+  border-radius: 50%;
+  outline-offset: -6px;
+  text-align: center;
+}
+
+.stamp__sub {
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+/* Landing: once, as it comes into view (reveal.ts sets pending/in), a short press down onto the page,
+ * after the block it sits in has arrived. First-screen stamps ([data-land]) are timed by their parent
+ * with --land-delay. Under reduced motion they are simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  .stamp[data-reveal="pending"] {
+    opacity: 0;
+    translate: none;
+    scale: 1.15;
+  }
+
+  .stamp[data-reveal="in"] {
+    transition:
+      opacity 180ms var(--ease-out) 320ms,
+      scale 180ms var(--ease-out) 320ms;
+  }
+
+  .stamp[data-land] {
+    animation: stamp-land 180ms var(--ease-out) var(--land-delay, 0ms) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp[data-reveal="pending"] {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@keyframes stamp-land {
+  from {
+    opacity: 0;
+    scale: 1.15;
+  }
+}
+
+/* Postage stamps: perforated paper (a mask of holes along every edge; `round` fits a whole number of
+ * holes to any size) around a coloured face. Used by the formats sheet and the footer card. */
+.postage {
+  --perf: 3.5px;
+  --postage-fill: var(--postage-sulphur);
+  --postage-ink: var(--postage-sulphur-ink);
+  display: block;
+  padding: calc(var(--perf) * 2);
+  background: var(--postage-paper);
+  mask:
+    radial-gradient(var(--perf), #0000 98%, #000) round calc(-1.5 * var(--perf)) calc(-1.5 * var(--perf)) /
+      calc(3 * var(--perf)) calc(3 * var(--perf)),
+    linear-gradient(#000 0 0) no-repeat 50% / calc(100% - 3 * var(--perf)) calc(100% - 3 * var(--perf));
+}
+
+.postage[data-fill="sea"] {
+  --postage-fill: var(--postage-sea);
+  --postage-ink: var(--postage-light-ink);
+}
+
+.postage[data-fill="ember"] {
+  --postage-fill: var(--postage-ember);
+  --postage-ink: var(--postage-light-ink);
+}
+
+.postage[data-fill="neutral"] {
+  --postage-fill: var(--postage-neutral);
+  --postage-ink: var(--postage-light-ink);
+}
+
+.postage__face {
+  position: relative;
+  display: block;
+  background: var(--postage-fill);
+  color: var(--postage-ink);
+}
+
+/* Handwriting on the postcards (Handwriting.astro): pen strokes in currentColor. */
+.handwriting {
+  display: block;
+  width: auto;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- site footer: the back of a postcard ----------
+ * A paper card on every page with an airmail edge: sea and sulphur stripes with the page showing
+ * between them, drawn as the card's border. Message on the left, address side on the right, a rule
+ * down the middle as on a real card. Text is the page ink on the card paper (16:1 light, 16:1 dark). */
 .site-footer {
   margin-top: var(--section-space);
-  overflow: hidden;
-  background: var(--color-loud);
-  color: var(--color-loud-ink);
-}
-
-.site-footer ::selection {
-  background: var(--color-loud-ink);
-  color: var(--color-loud);
-}
-
-.site-footer :focus-visible {
-  outline-color: var(--color-loud-ink);
+  padding-bottom: clamp(1.25rem, 3vw, 2.5rem);
 }
 
 .site-footer__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "line actions"
-    "made nav"
-    "legal legal";
-  align-items: center;
-  gap: var(--space-3) var(--space-5);
   max-width: calc(var(--content-width) + 2 * var(--gutter));
   margin-inline: auto;
-  padding: clamp(3.5rem, 2rem + 5vw, 6.5rem) var(--gutter) 0;
+  padding-inline: var(--gutter);
 }
 
-.site-footer__line {
-  grid-area: line;
-  max-width: 16ch;
-  font-family: var(--font-display);
-  font-size: clamp(2.25rem, 1.2rem + 3.2vw, 4rem);
-  font-stretch: 125%;
-  font-weight: 800;
-  line-height: var(--leading-tight);
-  letter-spacing: var(--track-h1);
-  text-wrap: balance;
+.postcard-back {
+  --airmail: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border: var(--airmail) solid transparent;
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(var(--postcard-paper) 0 0) padding-box,
+    repeating-linear-gradient(
+        -45deg,
+        var(--airmail-a) 0 14px,
+        transparent 14px 21px,
+        var(--airmail-b) 21px 35px,
+        transparent 35px 42px
+      )
+      border-box;
+  color: var(--color-text);
 }
 
-.site-footer__actions {
-  grid-area: actions;
+.postcard-back__message,
+.postcard-back__address {
+  padding: clamp(1.5rem, 1rem + 2.5vw, 3.25rem);
+}
+
+.postcard-back__message {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-3);
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-/* Buttons on the band: an ink outline, and one solid ink pill for the main way on.
- * (.site-footer prefix: these must beat .btn, which comes later in this file.) */
-.site-footer .site-footer__btn {
-  min-height: 3.25rem;
-  padding-inline: 1.5rem;
-  border: 2px solid var(--color-loud-ink);
-  background: transparent;
-  color: var(--color-loud-ink);
+.postcard-back__signoff {
+  height: clamp(3.75rem, 2.75rem + 3vw, 5.75rem);
+  margin-left: -0.25rem;
 }
 
-.site-footer .site-footer__btn--solid {
-  background: var(--color-loud-ink);
-  color: var(--color-loud);
+.postcard-back__line {
+  max-width: 24ch;
+  margin-top: var(--space-4);
+  font-size: var(--text-xl);
+  line-height: 1.3;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .site-footer .site-footer__btn:hover {
-    background: color-mix(in srgb, var(--color-loud-ink) 10%, transparent);
-    color: var(--color-loud-ink);
-  }
-
-  .site-footer .site-footer__btn--solid:hover {
-    background: color-mix(in srgb, var(--color-loud-ink) 84%, var(--color-loud));
-    color: var(--color-loud);
-  }
-}
-
-.site-footer__made {
-  grid-area: made;
-  margin-top: var(--space-6);
-  font-family: var(--font-hand);
-  font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
-  font-weight: 600;
-  line-height: 1.1;
-  rotate: -1.5deg;
-  transform-origin: left center;
-}
-
-.site-footer__nav {
-  grid-area: nav;
-  margin-top: var(--space-6);
-}
-
-.site-footer__nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 var(--space-1);
-  margin-inline-end: calc(-1 * var(--space-3));
-  padding: 0;
-  list-style: none;
-}
-
-.site-footer__nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-min);
-  padding-inline: var(--space-3);
-  border-radius: var(--radius-full);
-  color: var(--color-loud-ink);
-  font-size: var(--text-base);
-  font-weight: 700;
-  text-decoration: none;
-  transition: background-color var(--duration-fast) var(--ease-color);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .site-footer__nav a:hover {
-    background: color-mix(in srgb, var(--color-loud-ink) 10%, transparent);
-    color: var(--color-loud-ink);
-  }
-}
-
-.site-footer__legal {
-  grid-area: legal;
+.postcard-back__made {
+  margin-top: auto;
+  padding-top: var(--space-5);
+  color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
 
-/* The name at full width, its lower quarter cut off by the bottom of the page. */
-.site-footer__word {
-  max-width: calc(var(--content-width) + 2 * var(--gutter));
-  margin: var(--space-5) auto 0;
-  padding-inline: calc(var(--gutter) * 0.5);
-  aspect-ratio: 4926 / 590;
-  box-sizing: content-box;
-  overflow: hidden;
-  color: var(--color-loud-ink);
+.postcard-back__address {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border-left: 2px solid var(--postcard-divider);
 }
 
-.site-footer__word .logo {
+/* Top right: the stamp with the mark, the postmark struck across its left edge. */
+.postcard-back__corner {
+  position: relative;
+  justify-self: end;
+  margin-bottom: var(--space-4);
+}
+
+.postage--mark {
+  --perf: 3px;
+  width: 5.25rem;
+  rotate: 2deg;
+}
+
+.postage--mark .postage__face {
+  padding: 0.6rem 0.6rem 0.75rem;
+}
+
+.postage--mark .logo {
   display: block;
   width: 100%;
   height: auto;
 }
 
-/* The name rises out of the page edge as it scrolls into view (scroll-driven, CSS only). Where
- * scroll timelines are unsupported, or motion is reduced, it simply sits there. */
-@media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .site-footer__word {
-      view-timeline: --footer-word block;
-    }
+.postcard-back__postmark {
+  position: absolute;
+  z-index: 1;
+  top: 1.5rem;
+  right: 2.4rem;
+  font-size: 0.6875rem;
+}
 
-    .site-footer__word .logo {
-      animation: footer-word-rise linear both;
-      animation-timeline: --footer-word;
-      animation-range: entry 0% entry 100%;
-    }
+.postcard-back__postmark .stamp__ink {
+  inline-size: 7.25em;
+}
+
+/* The links, written on the address lines. */
+.postcard-back__nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.postcard-back__nav li {
+  border-bottom: 2px solid var(--postcard-rule);
+}
+
+.postcard-back__nav a {
+  display: flex;
+  align-items: flex-end;
+  min-height: 3rem;
+  padding: 0 0.25rem 0.35rem;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .postcard-back__nav a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
   }
 }
 
-@keyframes footer-word-rise {
-  from {
-    translate: 0 55%;
+.postcard-back__legal {
+  margin-top: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+/* Tool pages: the same card, smaller, so the tool stays the page. */
+.site-footer--compact {
+  margin-top: var(--space-7);
+}
+
+.site-footer--compact .postcard-back {
+  --airmail: 7px;
+}
+
+.site-footer--compact .postcard-back__message,
+.site-footer--compact .postcard-back__address {
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+}
+
+.site-footer--compact .postcard-back__signoff {
+  height: clamp(2.75rem, 2.25rem + 1.5vw, 3.75rem);
+}
+
+.site-footer--compact .postcard-back__line {
+  margin-top: var(--space-3);
+  font-size: var(--text-lg);
+}
+
+.site-footer--compact .postcard-back__made {
+  padding-top: var(--space-4);
+}
+
+.site-footer--compact .postcard-back__corner {
+  margin-bottom: var(--space-3);
+}
+
+.site-footer--compact .postage--mark {
+  width: 4.25rem;
+}
+
+.site-footer--compact .postcard-back__nav a {
+  min-height: 2.75rem;
+  font-size: var(--text-base);
+}
+
+/* Compact, wide: the stamp moves beside the address lines instead of above them. */
+@media (min-width: 48.01rem) {
+  .site-footer--compact .postcard-back__address {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr;
+    column-gap: var(--space-6);
+  }
+
+  .site-footer--compact .postcard-back__corner {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+    margin: 0.75rem 0 0;
+  }
+
+  .site-footer--compact .postcard-back__nav {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .site-footer--compact .postcard-back__legal {
+    grid-column: 1;
+    grid-row: 2;
   }
 }
 
+/* Phones: the card turns into one column; the rule down the middle becomes a rule across, and the
+ * stamp goes to the card's top right corner, where it sits on a real postcard. */
 @media (max-width: 48rem) {
-  .site-footer__inner {
+  .postcard-back {
+    position: relative;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "line"
-      "actions"
-      "made"
-      "nav"
-      "legal";
-    align-items: start;
   }
 
-  .site-footer__actions {
-    margin-top: var(--space-3);
+  .postcard-back__corner,
+  .site-footer--compact .postcard-back__corner {
+    position: absolute;
+    top: clamp(1.25rem, 1rem + 2.5vw, 2rem);
+    right: clamp(1.25rem, 1rem + 2.5vw, 2rem);
+    margin: 0;
   }
 
-  .site-footer__made {
-    margin-top: var(--space-5);
+  .postage--mark,
+  .site-footer--compact .postage--mark {
+    width: 3.75rem;
   }
 
-  .site-footer__nav {
-    margin-top: 0;
+  .postcard-back__postmark {
+    top: 0.4rem;
+    right: 2.1rem;
+    font-size: 0.5625rem;
   }
 
-  .site-footer__nav ul {
-    margin-inline: calc(-1 * var(--space-2)) 0;
+  .postcard-back__address {
+    border-left: 0;
+    border-top: 2px solid var(--postcard-divider);
   }
 
-  .site-footer__nav a {
-    padding-inline: var(--space-2);
+  .postcard-back__made {
+    padding-top: var(--space-4);
   }
 }
 

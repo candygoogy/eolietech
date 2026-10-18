@@ -1,0 +1,79 @@
+---
+/**
+ * The home desk's texture: sea-depth contours around the seven Aeolian Islands, placed by their real
+ * longitude and latitude (x: 14.3-15.3 E, y: 38.85-38.35 N, latitude scaled to keep kilometres
+ * square) and sized by their real areas. Each island is a coastline plus rings of depth that wobble a
+ * little, generated at build time from a fixed seed, so the drawing is the same on every build.
+ * Purely decorative (aria-hidden), inline so the strokes take the --contour tokens in both themes,
+ * and never an image, so it can't become the page's LCP element. Styles: components.css, "home: desk".
+ */
+
+/* name, longitude, latitude, area in km2 (data for the drawing, not copy) */
+const islands: [string, number, number, number][] = [
+  ["alicudi", 14.35, 38.54, 5.2],
+  ["filicudi", 14.56, 38.57, 9.5],
+  ["salina", 14.84, 38.56, 26.8],
+  ["lipari", 14.95, 38.48, 37.6],
+  ["vulcano", 14.96, 38.4, 21],
+  ["panarea", 15.07, 38.64, 3.4],
+  ["stromboli", 15.21, 38.79, 12.6],
+];
+
+const KM = 1000 / 87; // viewBox units per km (1 degree of longitude at 38.5 N is about 87 km)
+const RINGS = 6;
+const GAP = 15; // units between depth lines
+const POINTS = 18;
+
+/* Deterministic noise: a tiny LCG per island, so builds are reproducible. */
+function rng(seed: number) {
+  let s = seed;
+  return () => ((s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296);
+}
+
+/* A closed, smooth path through points (Catmull-Rom converted to cubic Beziers). */
+function smooth(pts: [number, number][]): string {
+  const n = pts.length;
+  const at = (i: number) => pts[(i + n) % n];
+  let d = `M${at(0)[0].toFixed(1)} ${at(0)[1].toFixed(1)}`;
+  for (let i = 0; i < n; i++) {
+    const [p0, p1, p2, p3] = [at(i - 1), at(i), at(i + 1), at(i + 2)];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += `C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return `${d}Z`;
+}
+
+const shapes = islands.map(([, lon, lat, area], k) => {
+  const cx = (lon - 14.3) * 1000;
+  const cy = (38.85 - lat) * 1000 * (111 / 87);
+  const r0 = Math.sqrt(area / Math.PI) * KM;
+  const rand = rng(97 + k * 31);
+  /* One wobble profile per island, loosened a little more on every ring outwards. */
+  const wobble = Array.from({ length: POINTS }, () => rand() - 0.5);
+  const rings = Array.from({ length: RINGS + 1 }, (_, ring) => {
+    const r = r0 + ring * GAP;
+    const loose = 0.16 + ring * 0.05;
+    const pts = wobble.map((w, i): [number, number] => {
+      const a = (i / POINTS) * Math.PI * 2;
+      const rr = r * (1 + w * loose) + (rand() - 0.5) * 3;
+      return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.92];
+    });
+    return smooth(pts);
+  });
+  return { coast: rings[0], depths: rings.slice(1) };
+});
+---
+
+<svg class="contours" viewBox="-60 -40 1120 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  {
+    shapes.map(({ coast, depths }) => (
+      <g>
+        {depths.map((d) => (
+          <path class="contours__depth" d={d} />
+        ))}
+        <path class="contours__coast" d={coast} />
+      </g>
+    ))
+  }
+</svg>

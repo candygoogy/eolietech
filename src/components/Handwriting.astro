@@ -1,0 +1,39 @@
+---
+/**
+ * Handwriting on a postcard, drawn as SVG pen strokes (src/lib/hand-glyphs.ts), not a font. Each
+ * letter sits a little off the line and turns a degree or two, so the words look written, not set.
+ * Exposed as one image with the words (or a fuller `label`) as its accessible name. Ink is
+ * currentColor; size it with CSS height or width. Styles: global.css, ".handwriting".
+ */
+import { layout } from "../lib/hand-glyphs";
+
+interface Props {
+  text: string;
+  /** Accessible name. Defaults to the text itself. */
+  label?: string;
+  /** Language of the written words, when it differs from the page's. */
+  lang?: string;
+  class?: string;
+}
+
+const { text, label = text, lang, class: className } = Astro.props;
+const { parts, width } = layout(text);
+/* Small, repeating irregularities (data for the drawing): baseline drift and turn per letter. */
+const drift = [0, -0.4, 0.3, -0.2, 0.4, -0.3];
+const turn = [0, 1.5, -1, 2, -1.5, 0.5];
+/* Room for the slant (skewX -8deg moves ascenders right by about 3 units). */
+const viewBox = `-2 -24 ${(width + 6).toFixed(1)} 34`;
+---
+
+<svg class:list={["handwriting", className]} viewBox={viewBox} role="img" aria-label={label} lang={lang} focusable="false">
+  <g transform="skewX(-8)">
+    {
+      parts.map(({ d, x, i }) => (
+        <path
+          transform={`translate(${x.toFixed(1)} ${drift[i % drift.length]}) rotate(${turn[i % turn.length]} 5 -5)`}
+          d={d}
+        />
+      ))
+    }
+  </g>
+</svg>

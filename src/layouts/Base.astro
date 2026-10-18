@@ -23,9 +23,11 @@ interface Props {
   /** Translations of this page, including itself. Defaults to just this page. */
   alternates?: Alternate[];
   noindex?: boolean;
+  /** Tool pages: a smaller postcard at the end, so the tool stays the page. */
+  compactFooter?: boolean;
 }
 
-const { locale = DEFAULT_LOCALE, title, description, path, noindex = false } = Astro.props;
+const { locale = DEFAULT_LOCALE, title, description, path, noindex = false, compactFooter = false } = Astro.props;
 const site = Astro.site ?? new URL("https://eolietech.com");
 const abs = (p: string) => new URL(p, site).href;
 const alternates: Alternate[] = Astro.props.alternates ?? (path ? [{ locale, path }] : []);
@@ -60,12 +62,23 @@ const xDefault = alternates.find((a) => a.locale === DEFAULT_LOCALE);
     <slot name="head" />
   </head>
   <body>
+    {/* The rubber stamps' uneven ink (.stamp__ink, global.css): edges pushed about by noise, plus a few
+     * thin spots where the stamp did not take. Defined once per page; referenced from CSS. */}
+    <svg class="svg-defs" aria-hidden="true" focusable="false" width="0" height="0">
+      <filter id="ink-edge" x="-6%" y="-12%" width="112%" height="124%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="7" result="grain"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.3" xChannelSelector="R" yChannelSelector="G" result="edge"></feDisplacementMap>
+        <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="3" result="blots"></feTurbulence>
+        <feColorMatrix in="blots" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -3 0 0 0 2.85" result="take"></feColorMatrix>
+        <feComposite in="edge" in2="take" operator="in"></feComposite>
+      </filter>
+    </svg>
     <a class="skip-link" href="#main">{t(locale, "a11y.skipToContent")}</a>
     <Header locale={locale} />
     <main id="main" tabindex="-1">
       <slot />
     </main>
-    <Footer locale={locale} />
+    <Footer locale={locale} compact={compactFooter} />
     <script>
       // Bundled to an external module (assetsInlineLimit: 0), so the CSP stays free of inline scripts.
       import "../scripts/reveal";

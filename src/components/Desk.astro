@@ -1,11 +1,15 @@
 ---
 /**
  * The home desk: "postcards that never get posted". The visitor's own kinds of files lie on the desk
- * as paper objects (a postcard of Stromboli, a tax PDF, a voice memo, a cut-out lemon), each with a
- * handwritten note. Drawings are inline SVG in the site's colours (no external images, CSP-clean) and
- * aria-hidden; the notes are real text, read as a list. Placement, tilts, entrance and hover:
- * components.css, "home: desk".
+ * as paper objects (a postcard of Stromboli, a tax PDF, a voice memo, a cut-out lemon), each labelled
+ * with a file name and a line about it, like a file on a desktop. Drawings are inline SVG in the
+ * site's colours (no external images, CSP-clean) and aria-hidden; the labels are real text, read as
+ * a list. The postcard's greeting is drawn handwriting (an image with its words as its name) and
+ * the postcard carries a rubber stamp. Placement, tilts, entrance and hover: components.css,
+ * "home: desk".
  */
+import Handwriting from "./Handwriting.astro";
+import Stamp from "./Stamp.astro";
 import { t } from "../i18n";
 import type { Locale } from "../tools/types";
 
@@ -33,8 +37,8 @@ const PLAYED = 11;
 
 <ul class="pile" aria-label={t(locale, "home.desk.label")}>
   <li class="obj obj--postcard">
-    <div class="obj__paper" aria-hidden="true">
-      <svg class="obj__art" viewBox="0 0 300 196" focusable="false">
+    <div class="obj__paper">
+      <svg class="obj__art" viewBox="0 0 300 196" aria-hidden="true" focusable="false">
         <rect class="pc-sky" width="300" height="196"></rect>
         <rect class="pc-sky-low" y="92" width="300" height="60"></rect>
         <circle class="pc-sun" cx="236" cy="138" r="24"></circle>
@@ -50,9 +54,9 @@ const PLAYED = 11;
         <path class="pc-glint" d="M218 160h36M226 170h20"></path>
         <path class="pc-sail" d="M62 142v-24l14 22z"></path>
         <path class="pc-hull" d="M52 144h30l-4 6H56z"></path>
-        <text class="pc-hello" x="16" y="34">saluti dalle Eolie!</text>
       </svg>
-      <svg class="stamp" viewBox={`-2 -2 ${W + 4} ${H + 4}`} focusable="false">
+      <Handwriting class="pc-hello" text={t(locale, "home.desk.hello")} label={t(locale, "home.desk.hello.label")} lang="it" />
+      <svg class="pc-postage" viewBox={`-2 -2 ${W + 4} ${H + 4}`} aria-hidden="true" focusable="false">
         <defs>
           <mask id="stamp-perf">
             <rect x="-2" y="-2" width={W + 4} height={H + 4} fill="#fff"></rect>
@@ -60,14 +64,14 @@ const PLAYED = 11;
           </mask>
         </defs>
         <g mask="url(#stamp-perf)">
-          <rect class="stamp__paper" width={W} height={H}></rect>
-          <rect class="stamp__field" x="5" y="5" width="46" height="56"></rect>
-          <path class="stamp__cone" d="M12 46 25.5 25h5L44 46z"></path>
-          <circle class="stamp__ember" cx="29.5" cy="17" r="2.6"></circle>
-          <rect class="stamp__sea" x="10" y="50" width="36" height="3.5" rx="1.75"></rect>
+          <rect class="pc-postage__paper" width={W} height={H}></rect>
+          <rect class="pc-postage__field" x="5" y="5" width="46" height="56"></rect>
+          <path class="pc-postage__cone" d="M12 46 25.5 25h5L44 46z"></path>
+          <circle class="pc-postage__ember" cx="29.5" cy="17" r="2.6"></circle>
+          <rect class="pc-postage__sea" x="10" y="50" width="36" height="3.5" rx="1.75"></rect>
         </g>
       </svg>
-      <svg class="postmark" viewBox="0 0 150 80" focusable="false">
+      <svg class="postmark" viewBox="0 0 150 80" aria-hidden="true" focusable="false">
         <path class="postmark__waves" d="M0 24q7-5 14 0t14 0 14 0 14 0 14 0 14 0M0 34q7-5 14 0t14 0 14 0 14 0 14 0 14 0M0 44q7-5 14 0t14 0 14 0 14 0 14 0 14 0M0 54q7-5 14 0t14 0 14 0 14 0 14 0 14 0"></path>
         <circle class="postmark__ring" cx="114" cy="40" r="31"></circle>
         <circle class="postmark__ring postmark__ring--inner" cx="114" cy="40" r="17"></circle>
@@ -76,8 +80,8 @@ const PLAYED = 11;
         <text class="postmark__mid" x="114" y="43">EOLIE</text>
       </svg>
     </div>
-    <p class="hand obj__note">{t(locale, "home.desk.photo")}</p>
-    <p class="sticker sticker--loud obj__sticker">{t(locale, "home.desk.sticker")}</p>
+    <Stamp class="obj__stamp" text={t(locale, "home.desk.notsent")} ink="ember" tilt={-4} land="load" />
+    <p class="obj__label"><strong>{t(locale, "home.desk.photo.file")}</strong> {t(locale, "home.desk.photo")}</p>
   </li>
 
   <li class="obj obj--pdf">
@@ -107,7 +111,7 @@ const PLAYED = 11;
         <path class="doc-clip" d="M22-8v30a7 7 0 0 0 14 0V0a4.5 4.5 0 0 0-9 0v20"></path>
       </svg>
     </div>
-    <p class="hand obj__note">{t(locale, "home.desk.pdf")}</p>
+    <p class="obj__label"><strong>{t(locale, "home.desk.pdf.file")}</strong> {t(locale, "home.desk.pdf")}</p>
   </li>
 
   <li class="obj obj--memo">
@@ -132,7 +136,7 @@ const PLAYED = 11;
         <circle class="memo-knob" cx="134" cy="105.5" r="5"></circle>
       </svg>
     </div>
-    <p class="hand obj__note">{t(locale, "home.desk.memo")}</p>
+    <p class="obj__label"><strong>{t(locale, "home.desk.memo.file")}</strong> {t(locale, "home.desk.memo")}</p>
   </li>
 
   <li class="obj obj--lemon">
@@ -159,6 +163,6 @@ const PLAYED = 11;
         <path class="leaf-vein" d="M87 41c14-7 28-13 42-16"></path>
       </svg>
     </div>
-    <p class="hand obj__note">{t(locale, "home.desk.lemon")}</p>
+    <p class="obj__label"><strong>{t(locale, "home.desk.lemon.file")}</strong> {t(locale, "home.desk.lemon")}</p>
   </li>
 </ul>
