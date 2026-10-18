@@ -196,6 +196,33 @@ async function fitName(tab) {
   });
 }
 
+/**
+ * The page address goes on the first free address line. When it is too long, it carries on to the
+ * next line after a "/" or "-" (the latest break that fits), and only if that still overflows does
+ * the handwriting get smaller (25px down to 18px).
+ */
+async function fitAddress(tab) {
+  return tab.evaluate(() => {
+    const [, first, second] = document.querySelectorAll(".lines p");
+    const text = first.textContent;
+    if (!text) return;
+    const fits = (p) => p.scrollWidth <= p.clientWidth;
+    for (let size = 25; size >= 18; size--) {
+      first.style.fontSize = second.style.fontSize = `${size}px`;
+      first.textContent = text;
+      second.textContent = "";
+      if (fits(first)) return;
+      const breaks = [...text.matchAll(/[/-]/g)].map((m) => m.index + 1).filter((i) => i < text.length);
+      for (const i of breaks.reverse()) {
+        first.textContent = text.slice(0, i);
+        second.textContent = text.slice(i);
+        if (fits(first) && fits(second)) return;
+      }
+    }
+    throw new Error(`address "${text}" does not fit the card`);
+  });
+}
+
 for (const l of LOCALES) fs.mkdirSync(path.join(outDir, prefix(l)), { recursive: true });
 const browser = await chromium.launch();
 const tab = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
@@ -205,6 +232,7 @@ try {
     await tab.setContent(page(card), { waitUntil: "load" });
     await tab.evaluate(() => document.fonts.ready);
     const fit = await fitName(tab);
+    await fitAddress(tab);
     const file = path.join(outDir, card.file);
     await tab.screenshot({ path: file, type: "png", animations: "disabled" });
     const bytes = fs.statSync(file).size;
