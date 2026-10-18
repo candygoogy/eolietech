@@ -207,13 +207,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       const pages = docs.reduce((n, d) => n + d.getPageCount(), 0);
       result = { blob: pdfBlob(bytes), pages };
       const name = t("merge.outputName");
-      const dl = button(t("merge.download", { pages, size: formatBytes(result.blob.size) }), {
+      const dl = button(tPlural(ctx, "merge.download", pages, { pages, size: formatBytes(result.blob.size) }), {
         variant: "primary",
         onClick: () => result && downloadBlob(result.blob, name),
       });
       resultBox.replaceChildren(dl);
       resultBox.hidden = false;
-      status.set(t("merge.done", { pages, size: formatBytes(result.blob.size) }));
+      status.set(tPlural(ctx, "merge.done", pages, { pages, size: formatBytes(result.blob.size) }));
       dl.focus();
     } catch (err) {
       errors.show(errorMessage(err, ctx, t("merge.outputName")));

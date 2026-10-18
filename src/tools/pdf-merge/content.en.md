@@ -36,8 +36,10 @@ ui:
   merge.moved: "{name} is now number {position} of {total}."
   merge.removed: "Removed {name}."
   merge.working: "Merging {count} files…"
-  merge.done: "Done: one PDF with {pages} pages ({size})."
-  merge.download: "Download merged PDF ({pages} pages, {size})"
+  merge.done.one: "Done: one PDF with {pages} page ({size})."
+  merge.done.other: "Done: one PDF with {pages} pages ({size})."
+  merge.download.one: "Download merged PDF ({pages} page, {size})"
+  merge.download.other: "Download merged PDF ({pages} pages, {size})"
   merge.outputName: "merged.pdf"
 ---
 

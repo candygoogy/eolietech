@@ -46,10 +46,14 @@ ui:
   img.downloadNew: "Scarica comunque il nuovo file"
   img.downloadNewNamed: "Scarica comunque il nuovo {name}"
   img.removeNamed: "Rimuovi {name}"
-  img.summary.working: "Conversione: {done} foto su {total} completate."
-  img.summary.done: "Fatto: {done} foto su {total} convertite."
+  # working.one only shows "0 foto su 1", so it keeps the plural.
+  img.summary.working.one: "Conversione: {done} foto su {total} completate."
+  img.summary.working.other: "Conversione: {done} foto su {total} completate."
+  img.summary.done.one: "Fatto: {done} foto su {total} convertita."
+  img.summary.done.other: "Fatto: {done} foto su {total} convertite."
   img.summary.sizes: "Peso totale {before} → {after}."
-  img.summary.failed: "Non convertite: {failed}."
+  img.summary.failed.one: "Non convertita: {failed}."
+  img.summary.failed.other: "Non convertite: {failed}."
 ---
 
 ## Quando ti serve un JPG al posto di un HEIC

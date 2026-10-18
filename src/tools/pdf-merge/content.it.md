@@ -36,8 +36,10 @@ ui:
   merge.moved: "{name} ora è il numero {position} di {total}."
   merge.removed: "Rimosso: {name}."
   merge.working: "Unione di {count} file…"
-  merge.done: "Fatto: un PDF di {pages} pagine ({size})."
-  merge.download: "Scarica il PDF unito ({pages} pagine, {size})"
+  merge.done.one: "Fatto: un PDF di {pages} pagina ({size})."
+  merge.done.other: "Fatto: un PDF di {pages} pagine ({size})."
+  merge.download.one: "Scarica il PDF unito ({pages} pagina, {size})"
+  merge.download.other: "Scarica il PDF unito ({pages} pagine, {size})"
   merge.outputName: "unito.pdf"
 ---
 

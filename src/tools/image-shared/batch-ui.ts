@@ -4,6 +4,7 @@
  * from src/lib/tool-ui.ts. All strings come from ctx.t (the tools' `ui:` frontmatter, keys "img.*").
  */
 import { createDropzone, downloadBlob, downloadZip, formatBytes, markEnter, type FileIntake } from "../../lib/tool-ui";
+import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { MIME, outputName, percentSaved, uniqueNames, type InputFormat, type RasterFormat } from "./formats";
 import { WorkerPool, defaultPoolSize } from "./pool";
@@ -330,16 +331,16 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
       return;
     }
     if (finished < total) {
-      status.textContent = t("img.summary.working", { done: finished, total });
+      status.textContent = tPlural(ctx, "img.summary.working", total, { done: finished, total });
       return;
     }
     const before = items.filter((i) => i.state === "done").reduce((s, i) => s + i.file.size, 0);
     const after = items
       .filter((i) => i.state === "done" && i.result)
       .reduce((s, i) => s + (i.result!.preferOriginal ? i.file.size : i.result!.blob.size), 0);
-    const parts = [t("img.summary.done", { done, total })];
+    const parts = [tPlural(ctx, "img.summary.done", total, { done, total })];
     if (done > 0) parts.push(t("img.summary.sizes", { before: formatBytes(before), after: formatBytes(after) }));
-    if (failed > 0) parts.push(t("img.summary.failed", { failed }));
+    if (failed > 0) parts.push(tPlural(ctx, "img.summary.failed", failed, { failed }));
     status.textContent = parts.join(" ");
   }
 

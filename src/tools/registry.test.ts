@@ -85,6 +85,26 @@ describe("tool registry", () => {
     }
   });
 
+  it("defines counted ui strings as .one/.other pairs, never as a bare key (tPlural)", () => {
+    // Keys read with tPlural; a bare key here would print "1 pages".
+    const counted = [
+      "merge.done", "merge.download", "split.ready", "split.fileInfo", "split.error.outOfRange",
+      "img.summary.working", "img.summary.done", "img.summary.failed",
+    ];
+    for (const tool of tools) {
+      for (const file of fs.readdirSync(path.join(toolsDir, tool.id)).filter((f) => /^content\..*\.md$/.test(f))) {
+        const fm = fs.readFileSync(path.join(toolsDir, tool.id, file), "utf8").split(/^---\s*$/m)[1] ?? "";
+        const keys = new Set([...fm.matchAll(/^\s+([a-z][\w.]*):/gm)].map((m) => m[1]));
+        const where = `${tool.id}/${file}`;
+        for (const k of keys) {
+          const m = /^(.+)\.(one|other)$/.exec(k);
+          if (m) expect(keys.has(`${m[1]}.${m[2] === "one" ? "other" : "one"}`), `${where}: ${k} has no pair`).toBe(true);
+        }
+        for (const k of counted) expect(keys.has(k), `${where}: bare ${k}`).toBe(false);
+      }
+    }
+  });
+
   it("gives every tool and variant page, in every locale, cross-origin isolation in public/_headers", () => {
     for (const tool of tools) {
       for (const locale of tool.locales) {

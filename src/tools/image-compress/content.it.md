@@ -51,10 +51,14 @@ ui:
   img.downloadNew: "Scarica comunque il nuovo file"
   img.downloadNewNamed: "Scarica comunque il nuovo {name}"
   img.removeNamed: "Rimuovi {name}"
-  img.summary.working: "Elaborazione: {done} file su {total} completati."
-  img.summary.done: "Fatto: {done} file su {total} convertiti."
+  # working.one only shows "0 file su 1", so it keeps the plural.
+  img.summary.working.one: "Elaborazione: {done} file su {total} completati."
+  img.summary.working.other: "Elaborazione: {done} file su {total} completati."
+  img.summary.done.one: "Fatto: {done} file su {total} convertito."
+  img.summary.done.other: "Fatto: {done} file su {total} convertiti."
   img.summary.sizes: "Peso totale {before} → {after}."
-  img.summary.failed: "Non elaborati: {failed}."
+  img.summary.failed.one: "Non elaborato: {failed}."
+  img.summary.failed.other: "Non elaborati: {failed}."
 ---
 
 ## Comprimi o converti, sul tuo dispositivo

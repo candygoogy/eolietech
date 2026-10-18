@@ -119,11 +119,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       const doc = await loadPdf(await readFile(file));
       source = { file, doc };
       const pages = doc.getPageCount();
-      fileInfo.textContent = t("split.fileInfo", { name: file.name, pages, size: formatBytes(file.size) });
+      fileInfo.textContent = tPlural(ctx, "split.fileInfo", pages, { name: file.name, pages, size: formatBytes(file.size) });
       everyInput.max = String(pages);
       options.hidden = false;
       actions.hidden = false;
-      status.set(t("split.ready", { pages }));
+      status.set(tPlural(ctx, "split.ready", pages, { pages }));
       rangesInput.focus();
     } catch (err) {
       errors.show(errorMessage(err, ctx, file.name));
@@ -164,7 +164,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       case "syntax":
         return t("split.error.syntax", { part: e.part });
       case "outOfRange":
-        return t("split.error.outOfRange", { part: e.part, pages: e.pages });
+        return tPlural(ctx, "split.error.outOfRange", e.pages, { part: e.part, pages: e.pages });
       case "reversed":
         return t("split.error.reversed", { part: e.part });
       case "size":

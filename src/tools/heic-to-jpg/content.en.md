@@ -46,10 +46,13 @@ ui:
   img.downloadNew: "Download new file anyway"
   img.downloadNewNamed: "Download the new {name} anyway"
   img.removeNamed: "Remove {name}"
-  img.summary.working: "Converting: {done} of {total} photos done."
-  img.summary.done: "Done: {done} of {total} photos converted."
+  img.summary.working.one: "Converting: {done} of {total} photo done."
+  img.summary.working.other: "Converting: {done} of {total} photos done."
+  img.summary.done.one: "Done: {done} of {total} photo converted."
+  img.summary.done.other: "Done: {done} of {total} photos converted."
   img.summary.sizes: "Total size {before} → {after}."
-  img.summary.failed: "{failed} could not be converted."
+  img.summary.failed.one: "{failed} could not be converted."
+  img.summary.failed.other: "{failed} could not be converted."
 ---
 
 ## When you need a JPG instead of a HEIC

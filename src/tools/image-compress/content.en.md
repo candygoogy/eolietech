@@ -51,10 +51,13 @@ ui:
   img.downloadNew: "Download new file anyway"
   img.downloadNewNamed: "Download the new {name} anyway"
   img.removeNamed: "Remove {name}"
-  img.summary.working: "Processing: {done} of {total} files done."
-  img.summary.done: "Done: {done} of {total} files converted."
+  img.summary.working.one: "Processing: {done} of {total} file done."
+  img.summary.working.other: "Processing: {done} of {total} files done."
+  img.summary.done.one: "Done: {done} of {total} file converted."
+  img.summary.done.other: "Done: {done} of {total} files converted."
   img.summary.sizes: "Total size {before} → {after}."
-  img.summary.failed: "{failed} could not be processed."
+  img.summary.failed.one: "{failed} could not be processed."
+  img.summary.failed.other: "{failed} could not be processed."
 ---
 
 ## Compress or convert, on your own device
