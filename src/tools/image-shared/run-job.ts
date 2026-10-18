@@ -1,6 +1,6 @@
 /** Worker-side job runner shared by the image workers: sniff -> decode -> (resize) -> encode. */
-import { decode, encode, fit } from "./codecs";
-import { resolveOutput, sniffFormat, type InputFormat } from "./formats";
+import { decode, encode, fit, resizeTo } from "./codecs";
+import { resolveOutput, sniffFormat, targetSize, type InputFormat } from "./formats";
 import type { JobErrorCode, JobRequest, JobResponse } from "./protocol";
 
 export type HeicDecoder = (buffer: ArrayBuffer) => Promise<ImageData>;
@@ -24,11 +24,32 @@ export async function runJob(
     } catch (err) {
       return { res: { id, ok: false, error: classify(err, "decode"), detail: String(err) }, transfer: [] };
     }
-    img = await fit(img, settings.maxWidth, settings.maxHeight);
+    const sourceWidth = img.width;
+    const sourceHeight = img.height;
+    let notEnlarged = false;
+    if (settings.resize) {
+      const target = targetSize(img.width, img.height, settings.resize);
+      notEnlarged = target.notEnlarged;
+      img = await resizeTo(img, target.width, target.height);
+    } else {
+      img = await fit(img, settings.maxWidth, settings.maxHeight);
+    }
     const format = resolveOutput(settings.output, input);
     const out = await encode(img, format, settings.quality);
     return {
-      res: { id, ok: true, buffer: out.buffer, input, format, width: img.width, height: img.height, flattened: out.flattened },
+      res: {
+        id,
+        ok: true,
+        buffer: out.buffer,
+        input,
+        format,
+        width: img.width,
+        height: img.height,
+        sourceWidth,
+        sourceHeight,
+        notEnlarged,
+        flattened: out.flattened,
+      },
       transfer: [out.buffer],
     };
   } catch (err) {

@@ -84,6 +84,11 @@ export async function decode(buffer: ArrayBuffer, format: Exclude<InputFormat, "
 /** Downscale to fit max bounds (Lanczos3, linear light); returns the input when no resize is needed. */
 export async function fit(img: ImageData, maxW?: number | null, maxH?: number | null): Promise<ImageData> {
   const { width, height } = fitWithin(img.width, img.height, maxW, maxH);
+  return resizeTo(img, width, height);
+}
+
+/** Resample to exactly width x height (Lanczos3, linear light; up or down); returns the input when the size is unchanged. */
+export async function resizeTo(img: ImageData, width: number, height: number): Promise<ImageData> {
   if (width === img.width && height === img.height) return img;
   await resizeReady();
   return resizeImage(img, { width, height, method: "lanczos3", fitMethod: "stretch", premultiply: true, linearRGB: true });

@@ -133,6 +133,59 @@ export function fitWithin(w: number, h: number, maxW?: number | null, maxH?: num
   return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) };
 }
 
+/** Largest output side an exact resize may produce (the dimension inputs share this ceiling). */
+export const MAX_SIDE = 20000;
+
+/**
+ * An exact resize request (image-resize). "width", "height" and "percent" keep the aspect ratio;
+ * "box" fits inside width x height when keepAspect is on, and stretches to exactly that size when off.
+ * With enlarge off, an image is never made bigger on any side.
+ */
+export type ResizeSpec =
+  | { mode: "width"; width: number; enlarge: boolean }
+  | { mode: "height"; height: number; enlarge: boolean }
+  | { mode: "box"; width: number; height: number; keepAspect: boolean; enlarge: boolean }
+  | { mode: "percent"; percent: number; enlarge: boolean };
+
+export interface TargetSize {
+  width: number;
+  height: number;
+  /** The request would have enlarged the image (on at least one side), and enlarging was off. */
+  notEnlarged: boolean;
+}
+
+const side = (n: number): number => Math.min(MAX_SIDE, Math.max(1, Math.round(n)));
+
+/** Output size for an exact resize request. */
+export function targetSize(w: number, h: number, spec: ResizeSpec): TargetSize {
+  if (spec.mode === "box" && !spec.keepAspect) {
+    // Stretch: each side independently; without enlarging, a side smaller than the target stays as it is.
+    let tw = spec.width;
+    let th = spec.height;
+    let notEnlarged = false;
+    if (!spec.enlarge && tw > w) [tw, notEnlarged] = [w, true];
+    if (!spec.enlarge && th > h) [th, notEnlarged] = [h, true];
+    return { width: side(tw), height: side(th), notEnlarged };
+  }
+  const s =
+    spec.mode === "width"
+      ? spec.width / w
+      : spec.mode === "height"
+        ? spec.height / h
+        : spec.mode === "percent"
+          ? spec.percent / 100
+          : Math.min(spec.width / w, spec.height / h);
+  if (s > 1 && !spec.enlarge) return { width: w, height: h, notEnlarged: true };
+  // Enlarging stops where the longer side reaches MAX_SIDE.
+  const k = s > 1 ? Math.max(1, Math.min(s, MAX_SIDE / Math.max(w, h))) : s;
+  let width = side(w * k);
+  let height = side(h * k);
+  // The side the user typed comes out exactly as typed (w * s can round one pixel off).
+  if (k === s && spec.mode === "width") width = side(spec.width);
+  if (k === s && spec.mode === "height") height = side(spec.height);
+  return { width, height, notEnlarged: false };
+}
+
 /** Composite RGBA pixels onto a solid background in place (JPEG has no alpha; transparent areas would turn black). */
 export function flattenAlpha(data: Uint8ClampedArray | Uint8Array, bg: [number, number, number] = [255, 255, 255]): boolean {
   let changed = false;

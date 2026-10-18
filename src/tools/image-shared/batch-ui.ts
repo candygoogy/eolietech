@@ -19,6 +19,10 @@ interface Result {
   format: RasterFormat;
   width: number;
   height: number;
+  /** Size before resizing (falls back to width/height when the worker does not report it). */
+  sourceWidth: number;
+  sourceHeight: number;
+  notEnlarged: boolean;
   flattened: boolean;
   /** Same format as the input and not smaller: we recommend keeping the original. */
   preferOriginal: boolean;
@@ -45,6 +49,12 @@ export interface BatchOptions {
   createWorker: () => Worker;
   /** Name of the "Download all" archive. */
   zipName: string;
+  /**
+   * Resizer rows (image-resize): lead with "old -> new" pixel dimensions (img.status.resized), say when
+   * an image was too small to enlarge (img.status.notEnlarged), and offer the original only when the
+   * pixel size did not change. Off for every other tool, whose rows stay as they were.
+   */
+  resize?: boolean;
 }
 
 export interface Batch {
@@ -193,7 +203,11 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
     const res = await pool.run({ id: item.id, buffer, settings: opts.getSettings() });
     if (res.ok) {
       const blob = new Blob([res.buffer], { type: MIME[res.format] });
-      const preferOriginal = res.format === res.input && blob.size >= item.file.size;
+      const sourceWidth = res.sourceWidth ?? res.width;
+      const sourceHeight = res.sourceHeight ?? res.height;
+      // A resized image is the point of the resizer, even when its file is not smaller.
+      const resized = sourceWidth !== res.width || sourceHeight !== res.height;
+      const preferOriginal = res.format === res.input && blob.size >= item.file.size && !(opts.resize && resized);
       finish(item, jobGen, {
         result: {
           blob,
@@ -202,6 +216,9 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
           format: res.format,
           width: res.width,
           height: res.height,
+          sourceWidth,
+          sourceHeight,
+          notEnlarged: !!res.notEnlarged,
           flattened: res.flattened,
           preferOriginal,
         },
@@ -233,6 +250,7 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
     li.dataset.state = item.state;
     // Not smaller than the original: shown neutral, not as a success (tool.css).
     if (item.state === "done" && result?.preferOriginal) li.dataset.outcome = "kept-original";
+    else if (item.state === "done" && opts.resize && result?.notEnlarged) li.dataset.outcome = "not-enlarged";
     else delete li.dataset.outcome;
     li.replaceChildren();
 
@@ -276,9 +294,14 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
         percent: Math.abs(pct),
         width: result.width,
         height: result.height,
+        fromWidth: result.sourceWidth,
+        fromHeight: result.sourceHeight,
       };
-      const lines = [t(pct > 0 ? "img.status.smaller" : pct < 0 ? "img.status.larger" : "img.status.same", sizes)];
-      lines.push(t("img.status.dimensions", sizes));
+      const weight = t(pct > 0 ? "img.status.smaller" : pct < 0 ? "img.status.larger" : "img.status.same", sizes);
+      const lines = opts.resize
+        ? [t("img.status.resized", sizes), weight]
+        : [weight, t("img.status.dimensions", sizes)];
+      if (opts.resize && result.notEnlarged) lines.push(t("img.status.notEnlarged"));
       if (result.preferOriginal) lines.push(t("img.status.keepOriginal"));
       if (result.flattened) lines.push(t("img.status.flattened"));
       meta.textContent = lines.join(" · ");
@@ -435,6 +458,21 @@ export function numberField(label: string, placeholder: string) {
   input.inputMode = "numeric";
   input.placeholder = placeholder;
   wrap.append(l, input);
+  return { wrap, input };
+}
+
+/** A checkbox with its label after it (the order tool.css lays out as a row). */
+export function checkField(label: string, checked: boolean) {
+  const id = domId("img-check");
+  const wrap = document.createElement("div");
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.id = id;
+  input.checked = checked;
+  const l = document.createElement("label");
+  l.htmlFor = id;
+  l.textContent = label;
+  wrap.append(input, l);
   return { wrap, input };
 }
 
