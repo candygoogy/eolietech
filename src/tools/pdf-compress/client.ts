@@ -5,6 +5,7 @@
  */
 import gsWasmUrl from "@okathira/ghostpdl-wasm/gs.wasm?url";
 import { createDropzone, downloadBlob, downloadZip, formatBytes, renameExtension } from "../../lib/tool-ui";
+import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { baseName, button, entryTracker, errorRegion, h, readFile, statusRegion } from "../pdf-shared/dom";
 import { looksLikePdf } from "../pdf-shared/pdf-errors";
@@ -138,7 +139,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       else errors.clear();
       if (accepted.length) {
         entries = entries.concat(accepted.map((file) => ({ id: nextId++, file, state: "pending" }) satisfies Entry));
-        status.set(t("compress.added", { count: accepted.length }));
+        status.set(tPlural(ctx, "compress.added", accepted.length));
         render();
       }
     },
@@ -175,6 +176,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   const zipBtn = button(t("tool.downloadAll"), { onClick: () => void downloadAllZip() });
   const resetBtn = button(t("tool.reset"), { variant: "ghost", onClick: reset });
   const actions = h("div", { className: "tool-actions", hidden: true }, compressBtn, zipBtn, resetBtn);
+  // A file that fails keeps its message in its own row; this off-screen alert only reads it out,
+  // so sighted users do not see it twice. Last in the panel: out of flow, no grid gap.
+  const rowAlert = h("p", { className: "visually-hidden", role: "alert" });
 
   el.append(
     h(
@@ -188,6 +192,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       actions,
       progress,
       status.el,
+      rowAlert,
     ),
   );
   render();
@@ -210,6 +215,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   function reset() {
     entries = [];
     errors.clear();
+    rowAlert.textContent = "";
     status.set("");
     progress.hidden = true;
     render();
@@ -258,7 +264,12 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
         }
         const li = h(
           "li",
-          { className: "tool-item", "data-state": e.state },
+          {
+            className: "tool-item",
+            "data-state": e.state,
+            // Not smaller: not an error, not a win either (neutral meta, tool.css).
+            "data-outcome": e.state === "done" && e.keptOriginal ? "kept-original" : undefined,
+          },
           h("span", { className: "tool-item__name", text: e.file.name }),
           h("span", { className: "tool-item__meta", text: meta }),
           h("span", { className: "tool-actions" }, ...controls),
@@ -280,6 +291,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     if (todo.length === 0 || busy) return;
     busy = true;
     errors.clear();
+    rowAlert.textContent = "";
     render();
     let engine: Engine;
     try {
@@ -359,8 +371,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     busy = false;
     progress.hidden = true;
     const done = entries.filter((e) => e.state === "done");
-    status.set(t("compress.done", { count: done.length }));
-    if (failures.length) errors.show(failures);
+    status.set(tPlural(ctx, "compress.done", done.length));
+    if (failures.length) rowAlert.textContent = failures.join(" ");
     render();
     list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .tool-actions .btn:not(.btn--ghost)")?.focus();
   }

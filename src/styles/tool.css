@@ -560,6 +560,11 @@ div.tool-options select {
   font-weight: 700;
 }
 
+/* Finished, but the output was not smaller, so the original is offered: plain text, not success green. */
+.tool-item[data-state="done"][data-outcome="kept-original"] .tool-item__meta {
+  color: var(--color-text);
+}
+
 .tool-item[data-state="error"] {
   background: var(--color-danger-soft);
 }

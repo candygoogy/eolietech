@@ -5,6 +5,7 @@
 import type { PDFDocument } from "pdf-lib";
 import type { PDFDocumentProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { createDropzone, downloadBlob, formatBytes, markEnter } from "../../lib/tool-ui";
+import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import {
   baseName,
@@ -100,11 +101,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       doc = loaded;
       viewer = proxy;
       pages = loaded.getPageIndices().map((index) => ({ index, rotate: 0, thumb: null }));
-      fileInfo.textContent = t("organize.fileInfo", { name: f.name, pages: pages.length, size: formatBytes(f.size) });
+      fileInfo.textContent = tPlural(ctx, "organize.fileInfo", pages.length, { name: f.name, pages: pages.length, size: formatBytes(f.size) });
       hint.hidden = false;
       actions.hidden = false;
       render();
-      status.set(t("organize.ready", { pages: pages.length }));
+      status.set(tPlural(ctx, "organize.ready", pages.length, { pages: pages.length }));
       void renderThumbs(gen);
     } catch (err) {
       if (gen !== generation) return;
@@ -201,6 +202,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     );
     list.hidden = pages.length === 0;
     saveBtn.disabled = busy || pages.length === 0;
+    // While a saved PDF is offered (any edit hides it again), its Download is the one primary button.
+    saveBtn.classList.toggle("btn--primary", resultBox.hidden === true);
     undoBtn.disabled = busy || !doc || !changed();
     resetBtn.disabled = busy;
   }
@@ -245,7 +248,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     if (pages.length <= 1) return;
     const [p] = pages.splice(i, 1);
     edited();
-    status.set(t("organize.deleted", { page: p!.index + 1, remaining: pages.length }));
+    status.set(tPlural(ctx, "organize.deleted", pages.length, { page: p!.index + 1, remaining: pages.length }));
     const next = pages[Math.min(i, pages.length - 1)];
     if (next) focusAct(next.index, "delete", "right");
   }
@@ -290,13 +293,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       );
       const blob = pdfBlob(bytes);
       const name = t("organize.outputName", { name: baseName(file.name) });
-      const dl = button(t("organize.download", { pages: pages.length, size: formatBytes(blob.size) }), {
+      const dl = button(tPlural(ctx, "organize.download", pages.length, { pages: pages.length, size: formatBytes(blob.size) }), {
         variant: "primary",
         onClick: () => downloadBlob(blob, name),
       });
       resultBox.replaceChildren(dl);
       resultBox.hidden = false;
-      status.set(t("organize.done", { pages: pages.length }));
+      status.set(tPlural(ctx, "organize.done", pages.length, { pages: pages.length }));
       busy = false;
       render();
       dl.focus();

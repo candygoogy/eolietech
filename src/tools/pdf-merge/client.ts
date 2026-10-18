@@ -4,6 +4,7 @@
  */
 import type { PDFDocument } from "pdf-lib";
 import { createDropzone, downloadBlob, formatBytes } from "../../lib/tool-ui";
+import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { button, enableDragSort, entryTracker, setDisabled, errorMessage, errorRegion, h, moveItem, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
 
@@ -35,6 +36,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   const resetBtn = button(t("tool.reset"), { variant: "ghost", onClick: reset });
   const actions = h("div", { className: "tool-actions" }, mergeBtn, resetBtn);
   const resultBox = h("div", { className: "tool-actions", hidden: true });
+  // A file that fails to load keeps its message in its own row; this off-screen alert only reads
+  // it out, so sighted users do not see it twice. Last in the panel: out of flow, no grid gap.
+  const loadAlert = h("p", { className: "visually-hidden", role: "alert" });
 
   const drop = createDropzone({
     accept: ACCEPT,
@@ -65,6 +69,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       actions,
       status.el,
       resultBox,
+      loadAlert,
     ),
   );
   render();
@@ -72,10 +77,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   function add(files: File[]) {
     if (files.length === 0) return;
     clearResult();
+    loadAlert.textContent = "";
     const fresh = files.map((file): Entry => ({ id: nextId++, file, loading: true }));
     entries = entries.concat(fresh);
     render();
-    status.set(t("merge.added", { count: fresh.length }));
+    status.set(tPlural(ctx, "merge.added", fresh.length));
     void (async () => {
       const { loadPdf } = await ops();
       const failed: string[] = [];
@@ -90,7 +96,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
         entry.loading = false;
         render();
       }
-      if (failed.length) errors.show(failed);
+      if (failed.length) loadAlert.textContent = failed.join(" ");
     })();
   }
 
@@ -123,6 +129,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   function reset() {
     entries = [];
     errors.clear();
+    loadAlert.textContent = "";
     clearResult();
     status.set("");
     render();
@@ -181,6 +188,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     list.hidden = entries.length === 0;
     const ready = entries.filter((e) => e.doc && !e.error);
     mergeBtn.disabled = busy || ready.length < 2 || entries.some((e) => e.loading);
+    // Once a merged PDF exists, its Download is the one primary button.
+    mergeBtn.classList.toggle("btn--primary", !result);
     resetBtn.disabled = busy || entries.length === 0;
   }
 

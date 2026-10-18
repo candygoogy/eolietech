@@ -230,6 +230,9 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
   function renderItem(item: Item) {
     const { li, file, result } = item;
     li.dataset.state = item.state;
+    // Not smaller than the original: shown neutral, not as a success (tool.css).
+    if (item.state === "done" && result?.preferOriginal) li.dataset.outcome = "kept-original";
+    else delete li.dataset.outcome;
     li.replaceChildren();
 
     if (item.state === "done" && result) {

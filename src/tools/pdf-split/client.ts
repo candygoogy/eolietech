@@ -4,6 +4,7 @@
  */
 import type { PDFDocument } from "pdf-lib";
 import { createDropzone, downloadBlob, downloadZip, formatBytes, markEnter } from "../../lib/tool-ui";
+import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { baseName, button, errorMessage, errorRegion, h, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
 import { planSplit, type SplitMode, type SplitPlan } from "./plan";
@@ -248,7 +249,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       });
     }
     resultActions.replaceChildren(main);
-    status.set(t("split.done", { count: outputs.length }));
+    status.set(tPlural(ctx, "split.done", outputs.length));
     main.focus();
   }
 }

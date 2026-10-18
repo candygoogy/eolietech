@@ -4,7 +4,8 @@
  * shown its size; the browser then keeps it in its cache. Images never leave the device.
  */
 import { createDropzone, downloadBlob, downloadZip, formatBytes } from "../../lib/tool-ui";
-import { detectDevice, type Device } from "../ai-shared/backend";
+import { tPlural } from "../../i18n/plural";
+import { detectDevice, ENGINE_BYTES, type Device } from "../ai-shared/backend";
 import { button, errorRegion, h, statusRegion } from "../ai-shared/dom";
 import { firstDownloadBytes } from "../ai-shared/model-files";
 import { entryTracker } from "../pdf-shared/dom";
@@ -56,7 +57,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       else errors.clear();
       if (accepted.length) {
         entries = entries.concat(accepted.map((file) => ({ id: nextId++, file, state: "pending" }) satisfies Entry));
-        status.set(t("bg.added", { count: accepted.length }));
+        status.set(tPlural(ctx, "bg.added", accepted.length));
         render();
       }
     },
@@ -166,7 +167,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           progress.value = msg.loaded;
           status.set(
             msg.downloaded > 0
-              ? t("bg.downloading", { loaded: formatBytes(msg.loaded), total: formatBytes(msg.total) })
+              ? t("bg.downloading", {
+                  loaded: formatBytes(msg.loaded),
+                  total: formatBytes(msg.total),
+                  engine: formatBytes(ENGINE_BYTES[device]),
+                })
               : t("bg.fromCache"),
           );
           if (msg.loaded >= msg.total) {
@@ -243,7 +248,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       modelLoaded = true;
       backendNote.hidden = false;
       backendNote.textContent =
-        info.device === "webgpu" ? t("bg.backend.webgpu") : t("bg.backend.wasm", { threads: info.threads });
+        info.device === "webgpu" ? t("bg.backend.webgpu") : tPlural(ctx, "bg.backend.wasm", info.threads, { threads: info.threads });
     } catch (err) {
       console.error(err);
       stopWorker();
@@ -282,7 +287,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     }
     busy = false;
     progress.hidden = true;
-    status.set(t("bg.done", { count: entries.filter((e) => e.state === "done").length }));
+    status.set(tPlural(ctx, "bg.done", entries.filter((e) => e.state === "done").length));
     if (failures.length) errors.show(failures);
     render();
     list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .tool-actions .btn:not(.btn--ghost)")?.focus();

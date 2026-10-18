@@ -133,4 +133,21 @@ describe("pinned models", () => {
     expect(fs.statSync(path.join(dist, "ort-wasm-simd-threaded.wasm")).size).toBe(ENGINE_BYTES.wasm);
     expect(fs.statSync(path.join(dist, "ort-wasm-simd-threaded.jspi.wasm")).size).toBe(ENGINE_BYTES.webgpu);
   });
+
+  // The progress line reads "{total} for the model, then its engine": total must be the model alone,
+  // and model plus engine must be the one-time size the page announces.
+  it("reports the model alone as the progress total, the engine on top of it", async () => {
+    for (const id of Object.keys(spec.models) as (keyof typeof spec.models)[]) {
+      for (const device of ["wasm", "webgpu"] as const) {
+        const files = spec.models[id].files.map((f) => ({ path: f.path, size: f.size, sha256: f.sha256, chunks: [{ name: `${f.sha256}.bin`, size: f.size, sha256: f.sha256 }] }));
+        const manifest: ModelManifest = { id, repo: "r", revision: "x", chunkBytes: 1, totalBytes: 0, files };
+        const fetchFn = (async (input: RequestInfo | URL) =>
+          String(input).endsWith("manifest.json") ? new Response(JSON.stringify(manifest)) : new Response(null, { status: 404 })) as typeof fetch;
+        const totals: number[] = [];
+        await loadModel(id, { fetch: fetchFn, cache: null, only: fileFilter(id, device), onProgress: (p) => totals.push(p.total) }).catch(() => undefined);
+        expect(totals[0], `${id} ${device}`).toBe(modelBytes(id, device));
+        expect(totals[0]! + ENGINE_BYTES[device]).toBe(firstDownloadBytes(id, device));
+      }
+    }
+  });
 });

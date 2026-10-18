@@ -5,7 +5,8 @@
  * shown its size. Nothing is uploaded.
  */
 import { createDropzone, downloadBlob, formatBytes, renameExtension } from "../../lib/tool-ui";
-import { detectDevice, type Device } from "../ai-shared/backend";
+import { tPlural } from "../../i18n/plural";
+import { detectDevice, ENGINE_BYTES, type Device } from "../ai-shared/backend";
 import { button, errorRegion, h, statusRegion } from "../ai-shared/dom";
 import { firstDownloadBytes } from "../ai-shared/model-files";
 import type { ToolCtx } from "../types";
@@ -178,7 +179,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           progress.value = msg.loaded;
           status.set(
             msg.downloaded > 0
-              ? t("asr.downloading", { loaded: formatBytes(msg.loaded), total: formatBytes(msg.total) })
+              ? t("asr.downloading", {
+                  loaded: formatBytes(msg.loaded),
+                  total: formatBytes(msg.total),
+                  engine: formatBytes(ENGINE_BYTES[device]),
+                })
               : t("asr.fromCache"),
           );
           if (msg.loaded >= msg.total) {
@@ -271,7 +276,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       modelLoaded = true;
       backendNote.hidden = false;
       backendNote.textContent =
-        info.device === "webgpu" ? t("asr.backend.webgpu") : t("asr.backend.wasm", { threads: info.threads });
+        info.device === "webgpu" ? t("asr.backend.webgpu") : tPlural(ctx, "asr.backend.wasm", info.threads, { threads: info.threads });
     } catch (err) {
       console.error(err);
       stopWorker();

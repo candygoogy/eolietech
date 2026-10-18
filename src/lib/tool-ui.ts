@@ -10,6 +10,7 @@
  *   .tool-drop__label / .tool-drop__hint
  *   .tool-options          settings row (format, quality, ranges...)
  *   .tool-list / .tool-item          list of files or pages; .tool-item[data-state="pending|working|done|error"]
+ *   .tool-item[data-outcome="kept-original"]  done, but not smaller, so the original is offered (neutral, not success)
  *   .tool-item__name / .tool-item__meta / .tool-item__thumb
  *   .tool-progress         a <progress> element
  *   .tool-actions          button row
