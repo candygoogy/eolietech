@@ -14,7 +14,7 @@ faq:
   - q: "Perché prima scarica circa 110 MB?"
     a: "È il modello di AI (circa 94 MB) più il motore che lo fa girare (da 14 a 16 MB, a seconda che usi o no la scheda grafica). Non viene scaricato niente finché non premi Rimuovi sfondo, e il browser conserva entrambi nella sua memoria, così le visite successive partono senza scaricarli di nuovo. Se cancelli i dati del browser, verranno riscaricati la volta dopo."
   - q: "Quanto tempo ci vuole?"
-    a: "Nelle nostre prove, circa 2 secondi per foto con il processore di un computer desktop e meno di un secondo con una scheda grafica, una volta caricato il modello. Sui portatili possono servire alcuni secondi per foto. I browser con WebGPU (le versioni attuali di Chrome ed Edge sulla maggior parte dei computer) usano la scheda grafica. Smartphone e computer meno recenti sono più lenti e possono esaurire la memoria con foto molto grandi; se succede, prova una foto alla volta."
+    a: "Nelle nostre prove, circa 2 secondi per foto con il processore di un computer desktop e meno di un secondo con una scheda grafica, una volta pronto il modello. Sui portatili possono servire alcuni secondi per foto. I browser con WebGPU (le versioni attuali di Chrome ed Edge sulla maggior parte dei computer) usano la scheda grafica. Smartphone e computer meno recenti sono più lenti e possono esaurire la memoria con foto molto grandi; se succede, prova una foto alla volta."
   - q: "Il risultato avrà le stesse dimensioni della mia foto?"
     a: "Sì. Il modello guarda una versione da 512 × 512 pixel della foto per decidere cosa è soggetto e cosa è sfondo, e quella maschera viene poi ingrandita e applicata all'immagine originale. Il PNG ha la stessa larghezza e altezza della foto che hai aggiunto."
   - q: "Con che tipo di foto funziona meglio?"
@@ -66,4 +66,4 @@ Il risultato è sempre un PNG, perché il JPG non può salvare la trasparenza. I
 
 ## Privacy e licenze
 
-Le tue foto non lasciano mai il tuo dispositivo. I file del modello vengono forniti da questo sito, verificati con checksum fissi e conservati nella memoria del browser. BiRefNet è di Peng Zheng, Dehong Gao, Deng-Ping Fan, Li Liu, Jorma Laaksonen, Wanli Ouyang e Nicu Sebe, rilasciato con licenza MIT; l'esportazione ONNX a 512 × 512 usata qui è di Studio Ludens, anch'essa MIT. ONNX Runtime è di Microsoft, con licenza MIT.
+Le tue foto non escono mai dal tuo dispositivo. I file del modello vengono forniti da questo sito, verificati con checksum fissi e conservati nella memoria del browser. BiRefNet è di Peng Zheng, Dehong Gao, Deng-Ping Fan, Li Liu, Jorma Laaksonen, Wanli Ouyang e Nicu Sebe, rilasciato con licenza MIT; l'esportazione ONNX a 512 × 512 usata qui è di Studio Ludens, anch'essa MIT. ONNX Runtime è di Microsoft, con licenza MIT.

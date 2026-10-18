@@ -16,7 +16,7 @@ faq:
   - q: "Perché il mio JPG non è molto più leggero?"
     a: "La grafica semplice con ampie zone a tinta unita, come diagrammi o loghi, è già salvata in modo efficiente in PNG. Il JPG fa risparmiare di più su foto e immagini ricche di dettagli."
   - q: "Viene caricato qualcosa?"
-    a: "No. Il decoder PNG e l'encoder MozJPEG girano nel tuo browser, e i tuoi file non lasciano mai il dispositivo."
+    a: "No. Il decoder PNG e l'encoder MozJPEG girano nel tuo browser, e i tuoi file non escono mai dal dispositivo."
 ui:
   img.drop.hint: "Immagini PNG. Convertite sul tuo dispositivo: non viene caricato nulla."
   img.zipName: "png-in-jpg.zip"

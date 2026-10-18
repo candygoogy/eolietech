@@ -10,7 +10,7 @@ howTo:
   - "Scarica il PDF unito e controllalo con il lettore PDF che usi di solito."
 faq:
   - q: "I miei file vengono caricati da qualche parte?"
-    a: "No. L'unione avviene nel tuo browser con la libreria open source pdf-lib. I tuoi PDF vengono letti dal disco nella memoria della pagina e il risultato viene salvato di nuovo sul disco. Una volta caricata la pagina puoi anche scollegarti da internet: lo strumento funziona lo stesso."
+    a: "No. L'unione avviene nel tuo browser con la libreria open source pdf-lib. I tuoi PDF vengono letti dal disco nella memoria della pagina e il risultato viene salvato di nuovo sul disco. Dopo la prima apertura della pagina puoi anche scollegarti da internet: lo strumento funziona lo stesso."
   - q: "Posso unire PDF protetti da password?"
     a: "No. I PDF cifrati non si possono unire qui. Apri il file in un lettore che conosce la password, salva una copia non protetta e aggiungi quella."
   - q: "Link, segnalibri e campi dei moduli restano?"

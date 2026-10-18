@@ -2,7 +2,7 @@
 title: "Riordinare, ruotare ed eliminare pagine PDF | Eolietech"
 description: "Vedi ogni pagina di un PDF come miniatura, poi riordina, ruota o elimina le pagine e salva un nuovo file. Funziona nel browser; non viene caricato niente."
 h1: "Organizzare le pagine di un PDF"
-intro: "Sistema un PDF pagina per pagina: metti le pagine nell'ordine giusto, raddrizza le scansioni storte ed elimina quelle che non ti servono. Vedi una miniatura di ogni pagina e il file non lascia mai il tuo dispositivo."
+intro: "Sistema un PDF pagina per pagina: metti le pagine nell'ordine giusto, raddrizza le scansioni storte ed elimina quelle che non ti servono. Vedi una miniatura di ogni pagina e il file non esce mai dal tuo dispositivo."
 howTo:
   - "Scegli un PDF o trascinalo nel riquadro qui sopra. Compare una miniatura per ogni pagina."
   - "Riordina le pagine trascinandole, oppure con i pulsanti Prima e Dopo sotto ogni pagina."
