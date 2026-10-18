@@ -1,9 +1,8 @@
 /*
  * Eolietech design tokens.
  *
- * Palette, taken from the Aeolian Islands:
- *   basalt / obsidian  (Stromboli, Lipari's Rocche Rosse)  -> text and dark surfaces
- *   pumice             (Lipari's pumice quarries)          -> light surfaces
+ * Palette: neutral white and greys for surfaces and text (Apple/Cloudflare-like; owner choice 2026-10-18),
+ * plus two colours taken from the Aeolian Islands:
  *   Tyrrhenian sea     (deep teal)                         -> links, primary actions, focus
  *   ember              (Stromboli at night)                -> the logo mark only
  *
@@ -34,23 +33,22 @@
   color-scheme: light dark;
 
   /* raw palette */
-  --basalt-950: #0c0f10;
-  --basalt-900: #111416;
-  --basalt-850: #181d20;
+  /* neutrals: white and greys (Apple/Cloudflare-like; owner choice 2026-10-18) */
+  --neutral-0: #ffffff;
+  --neutral-50: #f5f5f7;
+  --neutral-100: #e8e8ed;
+  --neutral-200: #d2d2d7;
+  --neutral-400: #a1a1a6;
+  --neutral-450: #7d7d83;
+  --neutral-500: #5e5e63;
+  --neutral-700: #333336;
+  --neutral-750: #2a2a2d;
+  --neutral-800: #1d1d1f;
+  --neutral-850: #161617;
+  --neutral-1000: #000000;
+  /* Aeolian */
   --basalt-800: #1a1f22;
-  --basalt-750: #232b2f;
-  --basalt-700: #2b3236;
-  --basalt-500: #525a5f;
-  --basalt-450: #7a848b;
-  --basalt-400: #69737a;
-  --basalt-300: #a2a9ad;
-  --pumice-25: #fdfcf9;
-  --pumice-50: #fbfaf7;
-  --pumice-100: #f3f1ec;
   --pumice-200: #e9e6df;
-  --pumice-300: #d5d1c7;
-  --pumice-500: #7a7870;
-  --pumice-ink: #e8e5de;
   --sea-800: #084a5b;
   --sea-700: #0a5a6e;
   --sea-300: #6bc3d5;
@@ -60,27 +58,27 @@
   --ember: #e0623a;
 
   /* semantic colour: light theme */
-  --color-bg: var(--pumice-100);
-  --color-surface: var(--pumice-25);
-  --color-sunken: var(--pumice-200);
-  --color-fill-hover: var(--pumice-200); /* hover fill on bg and surface */
-  --color-text: var(--basalt-800);
-  --color-text-muted: var(--basalt-500);
-  --color-border: var(--pumice-300);
-  --color-border-strong: var(--pumice-500);
+  --color-bg: var(--neutral-0);
+  --color-surface: var(--neutral-50);
+  --color-sunken: var(--neutral-100);
+  --color-fill-hover: var(--neutral-100); /* hover fill on bg and surface */
+  --color-text: var(--neutral-800);
+  --color-text-muted: var(--neutral-500);
+  --color-border: var(--neutral-200);
+  --color-border-strong: var(--neutral-450);
   --color-accent: var(--sea-700);
   --color-accent-hover: var(--sea-800);
-  --color-accent-contrast: #ffffff;
+  --color-accent-contrast: var(--neutral-0);
   --color-accent-soft: var(--sea-wash-light);
   --color-focus: var(--sea-700);
   --color-danger: #a8261c;
   --color-danger-soft: #f7e3df;
   --color-success: #2d6a3a;
-  --color-ink-block: var(--basalt-800);
-  --color-ink-block-text: var(--pumice-ink);
-  --color-ink-block-muted: var(--basalt-300);
-  --color-mark-bg: var(--basalt-800);
-  --color-mark-fg: var(--pumice-200);
+  --color-ink-block: var(--neutral-800);
+  --color-ink-block-text: var(--neutral-50);
+  --color-ink-block-muted: var(--neutral-400);
+  --color-mark-bg: var(--neutral-800);
+  --color-mark-fg: var(--neutral-50);
   --color-mark-sea: #3fa7b9;
   --color-mark-ember: var(--ember);
 
@@ -150,14 +148,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: var(--basalt-900);
-    --color-surface: var(--basalt-800);
-    --color-sunken: var(--basalt-950);
-    --color-fill-hover: var(--basalt-750);
-    --color-text: var(--pumice-ink);
-    --color-text-muted: var(--basalt-300);
-    --color-border: var(--basalt-700);
-    --color-border-strong: var(--basalt-450);
+    --color-bg: var(--neutral-1000);
+    --color-surface: var(--neutral-850);
+    --color-sunken: var(--neutral-800);
+    --color-fill-hover: var(--neutral-750);
+    --color-text: var(--neutral-50);
+    --color-text-muted: var(--neutral-400);
+    --color-border: var(--neutral-700);
+    --color-border-strong: var(--neutral-450);
     --color-accent: var(--sea-300);
     --color-accent-hover: var(--sea-200);
     --color-accent-contrast: #0a1b1f;
@@ -166,12 +164,12 @@
     --color-danger: #ff8f80;
     --color-danger-soft: #3a1d1a;
     --color-success: #82cb91;
-    --color-ink-block: var(--basalt-800);
-    --color-ink-block-text: var(--pumice-ink);
-    --color-ink-block-muted: var(--basalt-300);
-    --color-mark-bg: var(--pumice-200);
-    --color-mark-fg: var(--basalt-800);
-    --color-mark-sea: #0a7d93;
+    --color-ink-block: var(--neutral-850);
+    --color-ink-block-text: var(--neutral-50);
+    --color-ink-block-muted: var(--neutral-400);
+    --color-mark-bg: var(--neutral-750);
+    --color-mark-fg: var(--neutral-50);
+    --color-mark-sea: #3fa7b9;
   }
 }
 

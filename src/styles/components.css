@@ -910,7 +910,7 @@ a.tool-index__row:focus-visible::after {
   background: color-mix(in srgb, var(--color-ink-block-text) 8%, transparent);
   font-size: var(--text-xl);
   line-height: 1.3;
-  color: var(--pumice-ink);
+  color: var(--color-ink-block-text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
