@@ -18,10 +18,9 @@
     {
       "binding": "DB",
       "database_name": "eolietech",
-      // Placeholder. At launch create the real database in the EU jurisdiction:
-      //   npx wrangler d1 create eolietech --jurisdiction eu
-      // and paste its id here. Local dev / tests do not need a real id.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Created with `npx wrangler d1 create eolietech --jurisdiction eu` (EU jurisdiction, region EEUR).
+      // Local dev / tests use a local copy and never touch it.
+      "database_id": "0fd3e95d-11e5-4f6f-a314-9a57424078e1",
       "migrations_dir": "migrations"
     }
   ],
@@ -29,8 +28,9 @@
     { "name": "RL_WAITLIST", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
   ],
   "vars": {
-    // Cloudflare's official Turnstile test site key (always passes). Replace at launch.
-    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
+    // Site key of the "eolietech-waitlist" Turnstile widget (eolietech.com). Unused by code today: the form reads
+    // the build-time PUBLIC_TURNSTILE_SITE_KEY (src/site.config.ts).
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAFaUkgrbhRsWTSor"
   }
   // Secrets (wrangler secret put): TURNSTILE_SECRET. Locally: copy .dev.vars.example to .dev.vars.
 }
