@@ -1,0 +1,613 @@
+/* ---------- home: the playable desk ----------
+ * The examples on the desk (desk-play.ts): the lemon's before/after wipe, the voice memo that plays
+ * and types itself out on strips of telegram tape, the PDF that fans out like a hand of cards and
+ * can be reordered. Picking the objects up and throwing them, and "tidy the desk" (desk-drag.ts).
+ * Only transform, opacity and, for the wipe, clip-path move. Placement of the objects themselves:
+ * components.css, "home: desk". */
+
+/* ---------- picking objects up ----------
+ * desk-drag.ts writes the offset as --dx/--dy (px); --fan is the PDF making room for its open fan.
+ * The pile is its own stacking layer, so a lifted object goes under the intro and its button
+ * (z-index 2 on wide screens), never over them. */
+.pile {
+  isolation: isolate;
+}
+
+.pile > .obj {
+  translate: calc(var(--dx, 0px) + var(--fan, 0px)) var(--dy, 0px);
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.pile > .obj[data-held] {
+  cursor: grabbing;
+  scale: 1.03;
+  rotate: calc(var(--tilt) * 0.4 + var(--swing, 0deg));
+}
+
+.pile > .obj[data-held] > .obj__paper:not(.pdf),
+.pile > .obj--pdf[data-held] .pdf__page {
+  box-shadow: var(--paper-shadow-lift);
+}
+
+/* The open PDF lies straight, so its fan reads as one hand of pages. */
+.pile > .obj--pdf[data-open] {
+  --tilt: 0deg;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pile > .obj:hover {
+    translate: calc(var(--dx, 0px) + var(--fan, 0px)) calc(var(--dy, 0px) - 0.375rem);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pile > .obj {
+    transition:
+      translate var(--duration-base) var(--ease-out),
+      rotate var(--duration-base) var(--ease-out),
+      scale var(--duration-base) var(--ease-out);
+  }
+
+  /* Held or sliding, the position follows the hand (or the glide) frame by frame. */
+  .pile > .obj[data-held],
+  .pile > .obj[data-gliding] {
+    transition:
+      rotate 160ms var(--ease-out),
+      scale 160ms var(--ease-out);
+  }
+
+  .pile > .obj[data-tidying] {
+    transition:
+      translate 560ms var(--ease-in-out),
+      rotate var(--duration-base) var(--ease-out),
+      scale var(--duration-base) var(--ease-out);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pile > .obj[data-held] {
+    scale: none;
+    rotate: var(--tilt);
+  }
+}
+
+/* Links to the real tools, under each example's file label. */
+.obj__links {
+  display: block;
+  margin-top: 0.2em;
+}
+
+.obj__links a {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* The small "example" stamps (Stamp.astro), pressed on after the objects land. */
+.pile .obj__example {
+  --land-delay: 1250ms;
+  z-index: 20;
+  font-size: clamp(0.5625rem, 1.9cqi, 0.6875rem);
+  pointer-events: none;
+}
+
+/* ---------- lemon: the original photo wiped away to the cut-out ---------- */
+.pile > .obj--lemon .obj__paper {
+  overflow: visible;
+  padding: 7%;
+}
+
+.wipe {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.wipe__before {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 50% 0 0);
+}
+
+/* The divider: an element as wide as the picture, moved by its own width; the line is its left edge. */
+.wipe__line {
+  position: absolute;
+  inset: 0;
+  transform: translateX(50%);
+  pointer-events: none;
+}
+
+.wipe__line::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: -1.5px;
+  width: 3px;
+  background: var(--paper);
+}
+
+.wipe__knob {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: clamp(1.375rem, 7cqi, 1.75rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: var(--paper-shadow);
+  translate: -50% -50%;
+}
+
+.wipe__knob svg {
+  width: 72%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The real slider: invisible, over the whole picture, so pressing anywhere moves the divider there. */
+.wipe__range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.wipe:has(.wipe__range:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.pile .obj--lemon .obj__example {
+  top: -5%;
+  left: -9%;
+}
+
+/* The "photo" the lemon was cut from: on a terracotta table by the sea. */
+.ph-sky {
+  fill: #cfe8ee;
+}
+
+.ph-sea {
+  fill: var(--color-mark-sea);
+}
+
+.ph-island {
+  fill: #6e8f97;
+}
+
+.ph-table {
+  fill: #c4693f;
+}
+
+.ph-plank {
+  fill: none;
+  stroke: #a5532e;
+  stroke-width: 2;
+}
+
+.ph-shadow {
+  fill: rgb(60 20 0 / 0.28);
+}
+
+/* ---------- voice memo: play, and the transcript on telegram tape ---------- */
+.memo__played {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 73.08% 0 0);
+  pointer-events: none;
+}
+
+/* The knob's run: as wide as the track (x 70..248 of 260), so moving it by 100% of itself
+ * carries the knob from the start of the track to the end. */
+.memo__run {
+  position: absolute;
+  top: 81.15%;
+  left: 26.92%;
+  width: 68.46%;
+  height: 0;
+  pointer-events: none;
+}
+
+.memo__knob {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5.6%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #2b2b30;
+  translate: -50% -50%;
+}
+
+.memo__play {
+  position: absolute;
+  top: 28.46%;
+  left: 5.77%;
+  display: grid;
+  place-items: center;
+  width: 16.15%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ember);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* A bigger target than the drawn button, for fingers. */
+.memo__play::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+}
+
+.memo__play svg {
+  width: 52%;
+  fill: currentColor;
+}
+
+.memo__icon {
+  display: none;
+}
+
+.memo__play:is([data-state="idle"], [data-state="paused"]) .memo__icon--play,
+.memo__play[data-state="playing"] .memo__icon--pause,
+.memo__play[data-state="done"] .memo__icon--replay {
+  display: inline;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .memo__play {
+    transition: scale var(--duration-fast) var(--ease-out);
+  }
+
+  .memo__play:active {
+    scale: var(--press-scale);
+  }
+}
+
+.pile .obj--memo .obj__example {
+  top: 7%;
+  right: 5%;
+}
+
+.memo__desc {
+  display: block;
+}
+
+/* Wide screens: the memo's label sits to the left of the card, so the transcript has room. */
+@media (min-width: 75rem) {
+  .pile .obj--memo .obj__label {
+    top: 12%;
+    right: 106%;
+    left: auto;
+    max-width: 14em;
+    text-align: right;
+  }
+}
+
+/* Each line arrives as a strip of telegram tape, pasted under the memo. */
+/* An empty list until the memo plays (it stays in place as the live region that reads the lines). */
+.memo__transcript {
+  display: grid;
+  justify-items: end;
+  gap: 0.3em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.memo__transcript:has(> li:not([hidden])) {
+  margin: 0.35em 0 0.2em;
+}
+
+.memo__transcript li {
+  width: max-content;
+  padding: 0.24em 0.55em 0.28em;
+  border-radius: 1px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.08), 0 3px 6px -3px rgb(0 0 0 / 0.25);
+  font-weight: 600;
+  rotate: -0.6deg;
+}
+
+.memo__transcript li:nth-child(2) {
+  margin-inline-end: 0.5em;
+  rotate: 0.5deg;
+}
+
+.memo__transcript li:nth-child(3) {
+  margin-inline-end: 0.2em;
+  rotate: -0.3deg;
+}
+
+.memo__transcript li {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  .memo__transcript li {
+    opacity: 0;
+    translate: 0 calc(-1 * var(--enter-rise));
+  }
+}
+
+/* ---------- PDF: a stack of four pages that fans out ---------- */
+.pile > .obj--pdf .obj__paper {
+  background: none;
+  box-shadow: none;
+}
+
+.pile > .obj--pdf .obj__paper::before,
+.pile > .obj--pdf .obj__paper::after {
+  content: none;
+}
+
+.pdf__pages {
+  position: relative;
+  aspect-ratio: 170 / 220;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdf__page {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: var(--paper);
+  box-shadow: var(--paper-shadow);
+  transform-origin: 50% 100%;
+}
+
+.pdf__art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Top left: the part of each page the next one in the fan leaves showing. */
+.pdf__num {
+  position: absolute;
+  top: 4%;
+  left: 6%;
+  min-width: 1.6em;
+  padding: 0.25em 0.35em;
+  border-radius: 2px;
+  background: #2b2b30;
+  color: #fffdf8;
+  font-family: var(--font-display);
+  font-size: clamp(0.625rem, 2.4cqi, 0.8125rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: center;
+  opacity: 0;
+}
+
+.pdf__clip {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Closed: the whole stack is one button. */
+.pdf__open {
+  position: absolute;
+  inset: -3%;
+  z-index: 11;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+
+.obj--pdf[data-open] .pdf__num {
+  opacity: 1;
+}
+
+.obj--pdf[data-open] .pdf__clip {
+  opacity: 0;
+  translate: 0 -12%;
+}
+
+.obj--pdf[data-open] .pdf__page {
+  cursor: grab;
+  touch-action: pan-y; /* sideways drags reorder; up and down still scroll the page */
+}
+
+.obj--pdf[data-open] .pdf__page[data-dragging] {
+  cursor: grabbing;
+}
+
+.pdf__page:focus-visible {
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pdf__page {
+    transition:
+      transform 300ms var(--ease-out),
+      translate 300ms var(--ease-out);
+  }
+
+  .pdf__page[data-dragging],
+  .obj--pdf[data-instant] .pdf__page {
+    transition: none;
+  }
+
+  .pdf__num,
+  .pdf__clip {
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      translate var(--duration-base) var(--ease-out);
+  }
+}
+
+/* Under the open fan: move the selected page earlier or later, or stack them again. */
+.pdf__tools {
+  position: absolute;
+  top: calc(100% - var(--target-min) / 2);
+  left: 50%;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  translate: -50% 0;
+}
+
+.pdf__tools[hidden] {
+  display: none;
+}
+
+.pdf__tools button {
+  display: grid;
+  place-items: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pdf__tools .pdf__move {
+  padding: 0;
+}
+
+.pdf__move svg {
+  width: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pdf__tools [aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pdf__tools button {
+    transition:
+      scale var(--duration-fast) var(--ease-out),
+      opacity var(--duration-fast) var(--ease-color);
+  }
+
+  .pdf__tools button:active:not([aria-disabled="true"]) {
+    scale: var(--press-scale);
+  }
+
+  .pdf__tools {
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  @starting-style {
+    .pdf__tools {
+      opacity: 0;
+    }
+  }
+}
+
+/* While the pages are spread out, the controls take the label's place. */
+.obj--pdf[data-open] .obj__label {
+  visibility: hidden;
+}
+
+.pile .obj--pdf .obj__example {
+  bottom: 9%;
+  left: -6%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pile .obj--pdf .obj__example {
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+}
+
+.pile .obj--pdf[data-open] .obj__example {
+  opacity: 0;
+}
+
+/* Page drawings (the figures and signature reuse the doc-* fills in components.css). */
+.doc-band {
+  fill: var(--sea-wash-light);
+}
+
+.doc-band-line {
+  fill: var(--color-mark-sea);
+}
+
+/* ---------- tidy the desk ---------- */
+.desk-tidy {
+  display: block;
+  min-height: var(--target-min);
+  margin: var(--space-3) 0 0 auto;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.desk-tidy[hidden] {
+  display: none;
+}
+
+@media (min-width: 75rem) {
+  .desk-tidy {
+    position: relative;
+    z-index: 3;
+    grid-area: stack;
+    align-self: end;
+    justify-self: end;
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .desk-tidy {
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  @starting-style {
+    .desk-tidy {
+      opacity: 0;
+    }
+  }
+}
