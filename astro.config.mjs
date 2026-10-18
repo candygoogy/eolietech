@@ -19,6 +19,7 @@ const toolLastmod = new Map(
  * Cloudflare serves the nearest 404.html for a missing asset. Astro only writes the root 404 as a file
  * (dist/404.html); the Italian one comes out as dist/it/404/index.html, so move it next to the pages.
  */
+/** @type {import("astro").AstroIntegration} */
 const localized404 = {
   name: "localized-404",
   hooks: {

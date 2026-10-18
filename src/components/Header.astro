@@ -20,9 +20,12 @@ const links = siteConfig.nav.map((item) => {
   const href = pagePath(locale, item.page);
   return { href, label: t(locale, item.key), current: current === href || current.startsWith(href) };
 });
-const languages = LOCALES.filter((l) => l !== locale).map((l) => ({
+/** Every language as its two-letter code; the current one is marked, the others link to this page in them. */
+const languages = LOCALES.map((l) => ({
   locale: l,
-  label: ENDONYMS[l],
+  code: l.toUpperCase(),
+  name: ENDONYMS[l],
+  current: l === locale,
   href: alternates.find((a) => a.locale === l)?.path ?? localePath(l),
 }));
 ---
@@ -45,12 +48,29 @@ const languages = LOCALES.filter((l) => l !== locale).map((l) => ({
         }
       </ul>
     </nav>
-    {
-      languages.map((lang) => (
-        <a class="site-lang" href={lang.href} hreflang={lang.locale} lang={lang.locale}>
-          {lang.label}
-        </a>
-      ))
-    }
+    <p class="site-lang" role="group" aria-label={t(locale, "nav.language")}>
+      {
+        languages.map((lang, i) => (
+          <>
+            {i > 0 && (
+              <span class="site-lang__sep" aria-hidden="true">
+                /
+              </span>
+            )}
+            {lang.current ? (
+              <span class="site-lang__code" aria-current="true" lang={lang.locale}>
+                <span aria-hidden="true">{lang.code}</span>
+                <span class="visually-hidden">{lang.name}</span>
+              </span>
+            ) : (
+              <a class="site-lang__code" href={lang.href} hreflang={lang.locale} lang={lang.locale}>
+                <span aria-hidden="true">{lang.code}</span>
+                <span class="visually-hidden">{lang.name}</span>
+              </a>
+            )}
+          </>
+        ))
+      }
+    </p>
   </div>
 </header>

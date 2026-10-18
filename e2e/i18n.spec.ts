@@ -36,10 +36,10 @@ for (const [it, en] of pages) {
     await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute("href", `https://eolietech.com${en}`);
     expect(await res!.text(), "served HTML has no inline style attributes").not.toMatch(/\sstyle=/);
 
-    await page.locator(".site-lang").click();
+    await page.locator(".site-lang a").click();
     await expect(page).toHaveURL(new URL(en, baseURL).href);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.locator(".site-lang")).toHaveAttribute("href", it);
+    await expect(page.locator(".site-lang a")).toHaveAttribute("href", it);
   });
 }
 

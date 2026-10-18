@@ -2370,7 +2370,8 @@ a.tool-index__row:focus-visible::after {
   align-items: start;
 }
 
-/* Table of contents: quiet text links, no rail. Muted at rest, full ink on intent. */
+/* Table of contents: quiet text links, no rail. Muted at rest, full ink on intent and for the section
+ * being read (src/scripts/toc-spy.ts), which also gets a short sea line that slides between items. */
 .doc__aside {
   position: sticky;
   top: var(--space-4);
@@ -2387,21 +2388,49 @@ a.tool-index__row:focus-visible::after {
 }
 
 .doc__aside ol {
+  position: relative;
   margin-top: var(--space-2);
   padding: 0;
   list-style: none;
+}
+
+.doc__aside ol::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.75rem;
+  height: var(--sea-line);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  opacity: 0;
+  translate: 0 calc(var(--toc-y, 0px) - var(--sea-line) / 2);
+}
+
+.doc__aside ol[data-spy]::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .doc__aside ol[data-spy]::before {
+    transition:
+      translate var(--duration-base) var(--ease-out),
+      opacity var(--duration-base) var(--ease-out);
+  }
 }
 
 .doc__aside li a {
   display: flex;
   align-items: center;
   min-height: 2.25rem;
+  padding-inline-start: 1.25rem; /* room for the sea-line marker */
   color: var(--color-text-muted);
   text-decoration: none;
   transition: color var(--duration-fast) var(--ease-color);
 }
 
-.doc__aside li a:focus-visible {
+.doc__aside li a:focus-visible,
+.doc__aside li a[aria-current] {
   color: var(--color-text);
 }
 
