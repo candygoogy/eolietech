@@ -114,9 +114,11 @@ in the production build.
 
 Issues are welcome: bug reports, files a tool handles badly, ideas for new tools.
 
-Code contributions from outside need a signed Contributor License Agreement before they can be
-merged. The CLA keeps the option of offering the code under other licences besides the AGPL. It
-isn't published yet, so please open an issue before you write a large pull request.
+Code contributions from outside need a signed [Contributor License Agreement](CLA.md) before they
+can be merged. You keep the copyright in your work, and your code stays available under the AGPL;
+the CLA lets the project also offer it under other licences. On your first pull request a bot posts
+a link: sign once and it covers your later pull requests too. For a large change, please open an
+issue first.
 
 For security reports and anything else, write to info@eolietech.com.
 
