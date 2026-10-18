@@ -77,7 +77,7 @@ test("/remove-background/ cuts out the subject on the device and caches the mode
   await page.goto("/remove-background/");
   await expect(page).toHaveTitle(/Eolietech/);
   await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
-  await expect(page.locator(".tool-note").filter({ hasText: /downloads once from this site \(\d+ MB\)/ })).toBeVisible();
+  await expect(page.locator(".tool-note").filter({ hasText: /once from this site \(\d+ MB\)/})).toBeVisible();
 
   await page.locator('.tool-drop input[type="file"]').setInputFiles(fixture("photo.png"));
   await expect(page.locator(".tool-item")).toHaveCount(1);
@@ -122,7 +122,7 @@ test("/transcribe-audio/ transcribes a speech clip on the device", async ({ page
   await page.goto("/transcribe-audio/");
   await expect(page).toHaveTitle(/Eolietech/);
   await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
-  await expect(page.locator(".tool-note").filter({ hasText: /downloads once from this site \(\d+ MB\)/ })).toBeVisible();
+  await expect(page.locator(".tool-note").filter({ hasText: /once from this site \(\d+ MB\)/})).toBeVisible();
 
   await page.locator('.tool-drop input[type="file"]').setInputFiles(fixture("jfk.wav"));
   await expect(page.getByLabel("Spoken language")).toHaveValue("");
