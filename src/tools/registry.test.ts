@@ -6,6 +6,8 @@ import { contentFileName } from "./content-files";
 import { localePath } from "../i18n";
 import { toolPages, tools } from "./registry";
 import { LOCALES } from "./types";
+import en from "../i18n/en.json";
+import itDict from "../i18n/it.json";
 
 const toolsDir = path.resolve(__dirname);
 const headers = fs.readFileSync(path.resolve(__dirname, "../../public/_headers"), "utf8");
@@ -113,6 +115,19 @@ describe("tool registry", () => {
           expect(headers, `${p} missing in public/_headers`).toMatch(
             new RegExp(String.raw`^${p}\r?\n\s+Cross-Origin-Embedder-Policy: credentialless`, "m"),
           );
+        }
+      }
+    }
+  });
+
+  it("labels every preset variant (not a { from, to } converter) for the /tools/ index", () => {
+    const dicts: Record<string, Record<string, string>> = { en, it: itDict };
+    for (const tool of tools) {
+      for (const v of tool.variants ?? []) {
+        if (v.preset.from && v.preset.to) continue;
+        for (const locale of tool.locales) {
+          if (!v.slug[locale]) continue;
+          expect(dicts[locale][`tools.${tool.id}.variant.${v.id}`], `${locale}: tools.${tool.id}.variant.${v.id}`).toBeTruthy();
         }
       }
     }

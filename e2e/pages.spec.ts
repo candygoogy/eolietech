@@ -27,3 +27,13 @@ for (const { path, stamp, key } of pages) {
     await expect(mark).toContainText(en[key as keyof typeof en], { ignoreCase: true });
   });
 }
+
+for (const path of ["/tools/", "/it/strumenti/"]) {
+  test(`${path} links every variant page with a real label`, async ({ page }) => {
+    await page.goto(path);
+    const links = page.locator(".tool-index__converters a");
+    expect(await links.count()).toBeGreaterThan(0);
+    for (const label of await links.allTextContents()) expect(label).not.toMatch(/undefined|\{|\}/i);
+    await expect(page.locator(`.tool-index__converters a[href$="${path === "/tools/" ? "/resize-image-for-email/" : "/ridimensionare-immagini-per-email/"}"]`)).toHaveCount(1);
+  });
+}

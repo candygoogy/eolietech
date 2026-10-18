@@ -6,13 +6,13 @@
 import { localePath, t } from "../i18n";
 import { formatBytes } from "../lib/tool-ui";
 import { publishedTools, tools } from "../tools/registry";
-import type { Category, Locale } from "../tools/types";
+import type { Category, Locale, ToolVariant } from "../tools/types";
 
 interface Props {
   locale: Locale;
   /** Heading level for the category titles. */
   level?: 2 | 3;
-  /** Show limits and format converters (the /tools/ page). */
+  /** Show limits, format converters and presets (the /tools/ page). */
   detailed?: boolean;
   /** Reveal each group as it scrolls into view (home page only; see src/scripts/reveal.ts). */
   reveal?: boolean;
@@ -25,6 +25,26 @@ const categories: Category[] = ["image", "pdf", "audio"];
 
 /** File format names as written (data, not copy). */
 const formatName = (f: unknown) => (f === "webp" ? "WebP" : String(f).toUpperCase());
+
+/**
+ * A tool's variant pages for this locale: format converters (preset { from, to }, labelled "PNG to WebP")
+ * and presets (anything else, labelled by tools.<id>.variant.<variantId>).
+ */
+function variantLinks(variants: ToolVariant[], toolId: string) {
+  const converters: { href: string; label: string }[] = [];
+  const presets: { href: string; label: string }[] = [];
+  for (const v of variants) {
+    const slug = v.slug[locale];
+    if (!slug) continue;
+    const href = localePath(locale, slug);
+    if (v.preset.from && v.preset.to) {
+      converters.push({ href, label: t(locale, "tools.convert", { from: formatName(v.preset.from), to: formatName(v.preset.to) }) });
+    } else {
+      presets.push({ href, label: t(locale, `tools.${toolId}.variant.${v.id}`) });
+    }
+  }
+  return { converters, presets };
+}
 
 const groups = categories
   .map((category) => ({
@@ -45,18 +65,7 @@ const groups = categories
             maxFiles === 1
               ? t(locale, "tools.limits.one", { size })
               : t(locale, "tools.limits.many", { files: maxFiles, size }),
-          converters: live
-            ? (tool.variants ?? []).flatMap((v) =>
-                v.slug[locale]
-                  ? [
-                      {
-                        href: localePath(locale, v.slug[locale]!),
-                        label: t(locale, "tools.convert", { from: formatName(v.preset.from), to: formatName(v.preset.to) }),
-                      },
-                    ]
-                  : [],
-              )
-            : [],
+          ...variantLinks(live ? (tool.variants ?? []) : [], tool.id),
         };
       }),
   }))
@@ -92,6 +101,18 @@ const groups = categories
                   <p>{t(locale, "tools.converters")}</p>
                   <ul>
                     {item.converters.map((c) => (
+                      <li>
+                        <a href={c.href}>{c.label}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {detailed && item.presets.length > 0 && (
+                <div class="tool-index__converters">
+                  <p>{t(locale, "tools.presets")}</p>
+                  <ul>
+                    {item.presets.map((c) => (
                       <li>
                         <a href={c.href}>{c.label}</a>
                       </li>
