@@ -140,7 +140,7 @@
 @media (min-width: 40rem) and (max-width: 74.99rem) {
   .pile {
     --label-size: clamp(0.8125rem, 1.9cqi, 0.9375rem);
-    aspect-ratio: 720 / 560;
+    aspect-ratio: 720 / 580;
   }
 }
 
@@ -296,10 +296,11 @@
     --w: 20%;
   }
 
+  /* Under the postcard, so the pile reads as one diagonal instead of leaving the lower left empty. */
   .obj--memo {
-    --x: 48%;
-    --y: 60%;
-    --w: 34%;
+    --x: 20%;
+    --y: 58%;
+    --w: 36%;
   }
 
   .obj--lemon {
@@ -311,6 +312,7 @@
   .obj--pdf .obj__label {
     right: auto;
     left: 0;
+    max-width: min(14em, 25cqi); /* keeps "reorder yours · merge a few" on one line where it fits; clears the lemon */
     text-align: left;
   }
 
@@ -774,7 +776,8 @@
 /* ---------- home: a rubber stamp beside a section heading ---------- */
 .section__head--noted {
   display: grid;
-  grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+  /* auto, not 1fr: the stamp never wraps, so its column must keep the stamp's width (it overflowed at 640-900px). */
+  grid-template-columns: minmax(0, 40rem) auto;
   align-items: center;
   column-gap: var(--space-6);
 }
@@ -1498,7 +1501,20 @@ a.tool-index__row:focus-visible::after {
   .flow__device {
     align-self: start;
   }
+}
 
+/* Small desktops: the lane gives the device a little width back, so the step titles hold to one line. */
+@media (min-width: 64rem) and (max-width: 71.99rem) {
+  .flow__grid {
+    grid-template-columns: minmax(12.5rem, 0.8fr) minmax(12rem, 1fr) minmax(0, 3fr);
+  }
+
+  .flow__steps {
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 64rem) {
   .flow__lane-title,
   .flow__lane-body,
   .flow__lane--out > .flow__lane-body {
