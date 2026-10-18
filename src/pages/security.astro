@@ -41,6 +41,10 @@ const rules = ["script", "worker", "media", "frame", "form"];
       <section aria-labelledby="how">
         <h2 id="how">{t(locale, "security.how.h2")}</h2>
         <p>{t(locale, "security.how.p1")}</p>
+        <p>{t(locale, "security.guide")}</p>
+        <ul class="links">
+          <li><a href={localePath(locale, "check-file-uploads")}>{t(locale, "security.guide.link")}</a></li>
+        </ul>
       </section>
 
       <section aria-labelledby="csp">
