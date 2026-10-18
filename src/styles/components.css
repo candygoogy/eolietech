@@ -2196,10 +2196,14 @@ a.tool-index__row:focus-visible::after {
 }
 
 .waitlist-form {
+  --form-pad: clamp(var(--space-3), 3vw, var(--space-5));
   display: grid;
   gap: var(--space-3);
   /* Narrow enough at 375px for Turnstile's 300px minimum width. */
-  padding: clamp(var(--space-3), 3vw, var(--space-5));
+  padding: var(--form-pad);
+  /* Never narrower than the widget plus padding. The fieldset reset (min-width: 0) hides the widget's
+     300px from min-content, so the waitlist grid's min-content column needs this floor. */
+  min-width: calc(300px + 2 * var(--form-pad));
   border-radius: var(--radius-xl);
   background: var(--color-surface);
 }
@@ -2271,9 +2275,11 @@ a.tool-index__row:focus-visible::after {
   }
 }
 
+/* The form's column never goes below the form's floor (Turnstile's fixed 300px plus padding): at small
+   tablet widths 5fr alone left the form's insides spilling past the tile. */
 @media (min-width: 48rem) {
   .waitlist {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-columns: minmax(0, 7fr) minmax(min-content, 5fr);
     align-items: stretch;
   }
 
