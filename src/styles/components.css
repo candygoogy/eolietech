@@ -39,8 +39,8 @@
 
 /* ---------- home: desk ----------
  * The home's ground: the white page over faint sea-depth contours of the seven islands
- * (SeaContours.astro), behind the hero only and fading out before the compressor. The hero statement
- * sits on it with the paper objects (Desk.astro), then the live compressor. */
+ * (SeaContours.astro), behind the hero only and fading out below it. The hero statement sits on it
+ * with the paper objects (Desk.astro); the postcard is the live compressor (desk-post.css). */
 .desk {
   position: relative;
   isolation: isolate;
@@ -48,7 +48,7 @@
 }
 
 /* Phones and tablets: behind the pile only, under the text. Wide screens: the whole hero, fading out
- * on the left where the lede sits. Both fade out at the bottom, before the compressor. */
+ * on the left where the lede sits. Both fade out at the bottom, before the tools. */
 .contours {
   position: absolute;
   inset: clamp(22rem, 12rem + 26vw, 30rem) 0 auto;
@@ -768,109 +768,6 @@
 
   .obj:hover .obj__paper {
     box-shadow: var(--paper-shadow-lift);
-  }
-}
-
-/* ---------- home: the live compressor on the desk ---------- */
-.try {
-  padding-block: clamp(3rem, 1.5rem + 4vw, 5.5rem) clamp(4rem, 2rem + 6vw, 8rem);
-}
-
-.try__head {
-  display: grid;
-  gap: var(--space-3) var(--space-6);
-}
-
-.try__head h2 {
-  font-size: var(--text-3xl);
-  font-stretch: 125%;
-  font-weight: 800;
-  line-height: var(--leading-tight);
-  letter-spacing: var(--track-h1);
-}
-
-.try__lede {
-  max-width: 36rem;
-  font-size: var(--text-lg);
-  line-height: 1.5;
-}
-
-/* Three short facts; the marker is the logo's sea line. */
-.try__facts {
-  display: grid;
-  gap: var(--space-2);
-  padding: 0;
-  list-style: none;
-}
-
-.try__facts li {
-  position: relative;
-  padding-left: 1.75rem;
-  font-size: var(--text-base);
-  line-height: 1.45;
-}
-
-.try__facts li::before {
-  content: "";
-  position: absolute;
-  top: 0.68em;
-  left: 0;
-  width: 1rem;
-  height: var(--sea-line);
-  border-radius: var(--radius-full);
-  background: var(--color-accent);
-}
-
-@media (min-width: 52rem) {
-  .try__head {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    align-items: end;
-  }
-
-  .try__head h2,
-  .try__lede {
-    grid-column: 1;
-  }
-
-  .try__facts {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: end;
-  }
-}
-
-.try__stage {
-  position: relative;
-  margin-top: var(--space-5);
-}
-
-/* The panel is the one big object on the desk, so it lies on it like the paper does. */
-.try__stage .tool-panel {
-  box-shadow: var(--paper-shadow);
-}
-
-/* Struck across the panel's top edge, where a clerk would stamp a form. */
-.try__stamp {
-  position: absolute;
-  z-index: 2;
-  top: -1.1rem;
-  right: 1rem;
-  font-size: var(--text-xs);
-}
-
-.try__more {
-  margin-top: var(--space-4);
-}
-
-@media (min-width: 52rem) {
-  .try__stage {
-    margin-top: var(--space-7);
-  }
-
-  .try__stamp {
-    top: -1.4rem;
-    right: 2.5rem;
-    font-size: var(--text-sm);
   }
 }
 

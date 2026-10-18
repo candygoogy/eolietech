@@ -1,0 +1,307 @@
+/* ---------- home: the postcard compressor, the facts line, the live counter ----------
+ * Loaded by src/pages/index.astro only. Behaviour: src/scripts/desk-post.ts (the postcard, state in
+ * [data-post="idle|working|done|error"], [data-photo] once a picture is showing, [data-over] while a
+ * file is dragged over it) and src/scripts/net-counter.ts. Motion is transform/opacity only; the
+ * stamp presses are WAAPI in the script and skipped under reduced motion. */
+
+/* The user's photo, laid exactly over the drawing: the paper's padding is 4% of its width, and an
+ * absolutely placed box takes margin percentages from the width too. */
+.post__photo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 92%;
+  margin: 4%;
+  aspect-ratio: 300 / 196;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.obj--postcard[data-photo] .post__photo {
+  opacity: 1;
+}
+
+/* The greeting was written on the drawing's sky; it leaves with the drawing. */
+.obj--postcard .pc-hello {
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.obj--postcard[data-photo] .pc-hello {
+  opacity: 0;
+}
+
+/* Not postmarked yet while it is being processed; struck again when the result is in. */
+.obj--postcard[data-post="working"] .postmark,
+.obj--postcard[data-post="error"] .postmark {
+  opacity: 0;
+}
+
+/* Struck over a photo, the postmark keeps a thin rim of paper around its letters (as ink on a
+ * print would read), and the saving takes the date's place in the middle, larger than the town. */
+.obj--postcard[data-photo] .postmark__arc,
+.obj--postcard[data-photo] .postmark__mid {
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+}
+
+.obj--postcard[data-post="done"] .postmark__mid {
+  font-size: 10.5px;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.obj--postcard[data-post="done"] .postmark__ring--inner {
+  opacity: 0;
+}
+
+.obj--postcard[data-post="done"][data-photo] .postmark {
+  opacity: 1;
+}
+
+/* The whole card is the button. Transparent over the paper, so the drawing stays the drawing. */
+.post__target {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.obj--postcard[data-post="working"] .post__target {
+  cursor: progress;
+}
+
+.post__target:focus-visible {
+  outline-offset: 4px;
+}
+
+/* A file dragged over the card: the paper rises to meet it and the frame lights in the sea colour.
+ * Direct gesture feedback, so fast. */
+.obj--postcard .obj__paper {
+  transition: scale var(--duration-fast) var(--ease-out);
+}
+
+.obj--postcard[data-over] .obj__paper {
+  scale: 1.03;
+}
+
+.obj--postcard[data-over] .post__target {
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 3px var(--color-accent);
+}
+
+/* Stamps lie on the card but never catch the click meant for it. */
+.obj--postcard .obj__stamp {
+  pointer-events: none;
+}
+
+.post__returned {
+  display: none;
+}
+
+.obj--postcard[data-post="error"] .post__returned {
+  display: block;
+}
+
+.obj--postcard[data-post="error"] .post__notsent {
+  display: none;
+}
+
+/* Download, on the card itself, bottom left (the NOT SENT stamp holds the bottom right). */
+.post__save {
+  position: absolute;
+  bottom: 9%;
+  left: 7%;
+  z-index: 3;
+  min-height: 2.5rem;
+  padding: 0.375rem 1rem;
+  font-size: clamp(0.8125rem, 3cqi, 0.9375rem);
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out),
+    scale var(--duration-fast) var(--ease-out);
+}
+
+@starting-style {
+  .post__save {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
+}
+
+@media (pointer: coarse) {
+  .post__save {
+    min-height: var(--target-min);
+  }
+}
+
+/* The label: the file's name and a line about it; then, before any drop, how to use it. */
+.post__label {
+  font-variant-numeric: tabular-nums;
+}
+
+.post__line a {
+  font-weight: 700;
+}
+
+.post__hint {
+  display: block;
+  margin-top: 0.2em;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.obj--postcard:not([data-post="idle"]) .post__hint,
+.post__hint-tap {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .post__hint-drop {
+    display: none;
+  }
+
+  .post__hint-tap {
+    display: inline;
+  }
+}
+
+/* ---------- home: three facts under the desk ----------
+ * The fine print of the hero, in a row on wide screens. The marker is the logo's sea line. */
+.facts {
+  display: grid;
+  gap: var(--space-2) var(--space-6);
+  padding-block: clamp(2.5rem, 1rem + 4vw, 4.5rem) 0;
+  list-style: none;
+}
+
+.facts li {
+  position: relative;
+  max-width: 24rem;
+  padding-left: 1.75rem;
+  font-size: var(--text-base);
+  line-height: 1.45;
+}
+
+.facts li::before {
+  content: "";
+  position: absolute;
+  top: 0.68em;
+  left: 0;
+  width: 1rem;
+  height: var(--sea-line);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+}
+
+@media (min-width: 52rem) {
+  .facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---------- home: the live counter, in the verify band ----------
+ * A readout: the figure large in the band's stamp ink, the words beside it, the list on demand. */
+.verify__intro > .counter {
+  margin-top: var(--space-6);
+}
+
+.counter__toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "n label"
+    "n more";
+  align-items: center;
+  gap: 0 var(--space-4);
+  min-height: var(--target-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink-block-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.counter__n {
+  grid-area: n;
+  min-width: 1ch;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 2rem + 4vw, 4.5rem);
+  font-stretch: 112%;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  color: var(--ink-on-dark);
+}
+
+.counter__label {
+  grid-area: label;
+  align-self: end;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.counter__more {
+  grid-area: more;
+  align-self: start;
+  width: fit-content;
+  color: var(--sea-300);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-thickness var(--duration-fast) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .counter__toggle:hover .counter__more {
+    color: var(--sea-200);
+    text-decoration-thickness: 2px;
+  }
+}
+
+.counter__panel {
+  margin-top: var(--space-3);
+}
+
+.counter__list {
+  display: grid;
+  gap: var(--space-1);
+  padding: 0;
+  list-style: none;
+  overflow-wrap: anywhere;
+}
+
+.counter__list li {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-ink-block-text) 8%, transparent);
+  color: var(--color-ink-block-text);
+}
+
+.counter .counter__none,
+.counter .counter__how {
+  font-size: var(--text-base);
+}
+
+.counter .counter__none {
+  color: var(--color-ink-block-text);
+}
+
+.counter .counter__how {
+  max-width: 34rem;
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}

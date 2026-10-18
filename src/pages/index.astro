@@ -1,14 +1,15 @@
 ---
 /**
  * Home: "postcards that never get posted". A desk over the sea-depth contours of the islands, with
- * the visitor's kinds of files lying on it (Desk.astro) and the real image compressor running on it
- * (LiveTool.astro), then the tools, the formats as a sheet of postage stamps, how it works, the
- * checks, the maker. Rubber stamps (Stamp.astro) annotate; the postcard back is the Footer.
+ * the visitor's kinds of files lying on it (Desk.astro). The postcard is the real image compressor:
+ * drop a photo on it (src/scripts/desk-post.ts). Then the tools, the formats as a sheet of postage
+ * stamps, how it works, the checks with a live count of the other servers this page has talked to
+ * (src/scripts/net-counter.ts), the maker. Rubber stamps (Stamp.astro) annotate; the postcard back
+ * is the Footer.
  */
 import Base from "../layouts/Base.astro";
 import Desk from "../components/Desk.astro";
 import HowItWorks from "../components/HowItWorks.astro";
-import LiveTool from "../components/LiveTool.astro";
 import SeaContours from "../components/SeaContours.astro";
 import Stamp from "../components/Stamp.astro";
 import ToolIndex from "../components/ToolIndex.astro";
@@ -16,12 +17,12 @@ import { directive } from "../components/csp";
 import { localePath, t } from "../i18n";
 import { getTool, publishedTools } from "../tools/registry";
 import type { Category, Locale } from "../tools/types";
+import "../styles/desk-post.css";
 
 const locale: Locale = "en";
 const facts = ["free", "open", "offline"];
 const checks = ["network", "csp", "offline", "code"];
 const connectSrc = directive("connect-src");
-const compressSlug = getTool("image-compress")?.slug[locale] ?? "compress-image";
 
 /**
  * The stamp sheet: formats the tools really accept, filed under the tools that take them. Checked
@@ -66,7 +67,7 @@ const formatCount = sheet.reduce((n, row) => n + row.formats.length, 0);
         <div class="desk__intro">
           <p class="lede desk__lede">{t(locale, "home.lede")}</p>
           <div class="desk__actions">
-            <a class="btn btn--primary desk__cta" href="#try">{t(locale, "home.cta.try")}</a>
+            <a class="btn btn--primary desk__cta" href="#postcard">{t(locale, "home.cta.try")}</a>
             <a class="link-strong" href="#tools">{t(locale, "home.cta.tools")}</a>
           </div>
         </div>
@@ -74,24 +75,13 @@ const formatCount = sheet.reduce((n, row) => n + row.formats.length, 0);
       </div>
     </section>
 
-    <section id="try" class="try container" aria-labelledby="try-h">
-      <div class="try__head" data-reveal data-reveal-stagger>
-        <h2 id="try-h">{t(locale, "home.try.h2")}</h2>
-        <p class="try__lede">{t(locale, "home.try.lede")}</p>
-        <ul class="try__facts" aria-label={t(locale, "home.facts.label")}>
-          {
-            facts.map((id) => (
-              <li>{t(locale, `home.fact.${id}`)}</li>
-            ))
-          }
-        </ul>
-      </div>
-      <div class="try__stage">
-        <Stamp class="try__stamp" text={t(locale, "home.try.stamp")} ink="sea" tilt={3} />
-        <LiveTool locale={locale} toolId="image-compress" />
-        <p class="try__more"><a class="link-strong" href={localePath(locale, compressSlug)}>{t(locale, "home.try.more")}</a></p>
-      </div>
-    </section>
+    <ul class="facts container" aria-label={t(locale, "home.facts.label")} data-reveal data-reveal-stagger>
+      {
+        facts.map((id) => (
+          <li>{t(locale, `home.fact.${id}`)}</li>
+        ))
+      }
+    </ul>
   </div>
 
   <section id="tools" class="section container" aria-labelledby="tools-h">
@@ -165,6 +155,23 @@ const formatCount = sheet.reduce((n, row) => n + row.formats.length, 0);
             </div>
           )
         }
+        <div
+          class="counter"
+          data-counter
+          data-show={t(locale, "home.counter.show")}
+          data-hide={t(locale, "home.counter.hide")}
+          data-none={t(locale, "home.counter.none")}
+          data-list-label={t(locale, "home.counter.listLabel")}
+          hidden
+        >
+          <button type="button" class="counter__toggle" aria-expanded="false" aria-controls="counter-panel">
+            <span class="counter__label">{t(locale, "home.counter.label")}</span>
+            <span class="counter__n">0</span>
+            <span class="counter__more">{t(locale, "home.counter.show")}</span>
+          </button>
+          <div class="counter__panel" id="counter-panel" hidden></div>
+          <p class="counter__how">{t(locale, "home.counter.how")}</p>
+        </div>
         <a class="verify__more link-strong" href={localePath(locale, "security")}>{t(locale, "home.verify.more")}</a>
       </div>
       <ul class="verify__list" data-reveal data-reveal-stagger>
@@ -197,3 +204,9 @@ const formatCount = sheet.reduce((n, row) => n + row.formats.length, 0);
     </div>
   </section>
 </Base>
+
+<script>
+  // Bundled to external modules (assetsInlineLimit: 0), so the CSP stays free of inline scripts.
+  import "../scripts/desk-post";
+  import "../scripts/net-counter";
+</script>
