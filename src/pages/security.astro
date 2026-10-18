@@ -1,5 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
+import SeaContours from "../components/SeaContours.astro";
+import Stamp from "../components/Stamp.astro";
 import { CSP_DIRECTIVES, directive } from "../components/csp";
 import { localePath, t } from "../i18n";
 import { siteConfig } from "../site.config";
@@ -17,6 +19,8 @@ const rules = ["script", "worker", "media", "frame", "form"];
   <header class="page-head container">
     <h1>{t(locale, "security.h1")}</h1>
     <p class="lede">{t(locale, "security.lede")}</p>
+    <Stamp class="page-head__stamp" text={t(locale, "security.stamp")} ink="sea" tilt={-2} land="load" />
+    <SeaContours />
   </header>
 
   <div class="container doc">

@@ -1,5 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
+import SeaContours from "../components/SeaContours.astro";
+import Stamp from "../components/Stamp.astro";
 import WaitlistForm from "../components/WaitlistForm.astro";
 import { localePath, t } from "../i18n";
 import type { Locale } from "../tools/types";
@@ -13,6 +15,8 @@ const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
   <header class="page-head container">
     <h1>{t(locale, "pricing.h1")}</h1>
     <p class="lede">{t(locale, "pricing.lede")}</p>
+    <Stamp class="page-head__stamp" text={t(locale, "pricing.stamp")} ink="ember" tilt={2} land="load" />
+    <SeaContours />
   </header>
 
   <div class="container plans">
@@ -34,7 +38,7 @@ const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
       <div class="plan__head">
         <h2 id="plan-pro">{t(locale, "pricing.pro.name")}</h2>
         <p class="plan__price">
-          <span class="plan__amount">{t(locale, "pricing.pro.price")}</span>
+          <Stamp as="span" class="plan__stamp" text={t(locale, "pricing.pro.price")} ink="ochre" tilt={-3} />
           <span class="plan__period">{t(locale, "pricing.pro.period")}</span>
         </p>
       </div>

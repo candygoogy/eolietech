@@ -1,5 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
+import SeaContours from "../components/SeaContours.astro";
+import Stamp from "../components/Stamp.astro";
 import { localePath, t } from "../i18n";
 import type { Locale } from "../tools/types";
 
@@ -18,6 +20,8 @@ const palette = ["white", "black", "sea", "ember"];
   <header class="page-head container">
     <h1>{t(locale, "about.h1")}</h1>
     <p class="lede">{t(locale, "about.lede")}</p>
+    <Stamp class="page-head__stamp" text={t(locale, "about.stamp")} sub={t(locale, "about.stamp.sub")} shape="circle" ink="ochre" tilt={-4} land="load" />
+    <SeaContours />
   </header>
 
   <section class="container palette-strip" aria-labelledby="palette-h">

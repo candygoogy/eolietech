@@ -1923,6 +1923,8 @@ a.tool-index__row:focus-visible::after {
 /* Tools, pricing, about, security: the h1 at page size with its lede, more air above than the tool
    pages get (those are instruments; these are read once). */
 .page-head {
+  position: relative;
+  isolation: isolate;
   padding-block: clamp(3rem, 1rem + 5vw, 6rem) var(--space-6);
 }
 
@@ -1934,6 +1936,46 @@ a.tool-index__row:focus-visible::after {
   margin-top: var(--space-4);
 }
 
+/* The head's one annotation: a rubber stamp that says something true about the page. Phones and
+   tablets: under the lede, in the flow. Wide screens: beside the heading, struck on the chart. */
+.page-head__stamp {
+  margin-top: var(--space-5);
+}
+
+/* The home's sea chart, cropped to a patch on the right of the head and faded out on every side, so
+   it sits under the stamp and only grazes the text. Inline SVG (never the LCP element), absolutely
+   placed (moves nothing), and still: it is the ground, not an entrance. */
+.page-head > .contours,
+.not-found > .contours {
+  inset: 0 0 0 auto;
+  width: min(100%, 46rem);
+  height: 100%;
+  mask-image: radial-gradient(closest-side, #000 35%, #0000);
+  mask-composite: add;
+  animation: none;
+}
+
+@media (min-width: 60rem) {
+  .page-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--space-6);
+    align-items: center;
+  }
+
+  .page-head > h1,
+  .page-head > .lede {
+    grid-column: 1;
+  }
+
+  .page-head__stamp {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0 clamp(0rem, 9vw - 5rem, 7rem) 0 0;
+    font-size: var(--text-base);
+  }
+}
+
 @media (max-width: 30rem) {
   .page-head {
     padding-bottom: var(--space-5);
@@ -1941,6 +1983,10 @@ a.tool-index__row:focus-visible::after {
 
   .page-head h1 {
     font-stretch: 112%;
+  }
+
+  .page-head__stamp {
+    margin-top: var(--space-4);
   }
 }
 
@@ -1953,7 +1999,7 @@ a.tool-index__row:focus-visible::after {
   }
 
   .page-head > h1,
-  .not-found > .not-found__code,
+  .not-found > .not-found__mark,
   .not-found > h1 {
     animation-name: settle;
   }
@@ -1970,6 +2016,11 @@ a.tool-index__row:focus-visible::after {
 
   .not-found > :nth-child(n + 4) {
     animation-delay: calc(3 * var(--stagger));
+  }
+
+  /* The stamp comes down once the heading and lede have arrived (stamp-land, global.css). */
+  .page-head > .page-head__stamp {
+    animation: stamp-land 180ms var(--ease-out) 520ms backwards;
   }
 }
 
@@ -2019,9 +2070,11 @@ a.tool-index__row:focus-visible::after {
   font-variant-numeric: tabular-nums;
 }
 
-/* "Later" is not a price yet, so it does not speak at full ink. */
-.plan--later .plan__amount {
-  color: var(--color-text-muted);
+/* "Later" is not a price yet, so it is stamped in the price's place instead of set as a figure: real
+   text in ochre ink (AA in both themes), read as "Later, price not set yet". */
+.plan__stamp {
+  margin-block: 0.15em;
+  font-size: var(--text-lg);
 }
 
 .plan__period {
@@ -2503,7 +2556,34 @@ a.tool-index__row:focus-visible::after {
 /* ---------- 404 ---------- */
 /* The one place the wide face is enormous. The code is decoration (aria-hidden); the h1 carries it. */
 .not-found {
+  position: relative;
+  isolation: isolate;
   padding-block: clamp(3rem, 1rem + 5vw, 6rem) var(--space-6);
+}
+
+/* The 404 and the stamp struck across it, the way a returned postcard gets marked over its address. */
+.not-found__mark {
+  position: relative;
+  width: fit-content;
+}
+
+.not-found__stamp {
+  --land-delay: 520ms;
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 52%;
+  translate: 0 -50%;
+  inline-size: max-content;
+  font-size: clamp(var(--text-xs), 0.6rem + 0.8vw, var(--text-lg));
+}
+
+/* Light: where the stamp crosses the grey numeral the plain ember drops to 3.7:1, so this one uses
+   the darker paper ink and multiplies like ink on paper (4.5:1 or more on the grey, 7:1 on white). */
+@media (prefers-color-scheme: light) {
+  .not-found__stamp {
+    --stamp-ink: var(--ink-ember-paper);
+    mix-blend-mode: multiply;
+  }
 }
 
 .not-found__code {
