@@ -1,0 +1,13 @@
+/* Background remover only: larger result previews (the checkerboard comes from .tool-item__thumb). */
+.tool--bg-remover .tool-item__thumb {
+  width: 6.5rem;
+  height: 6.5rem;
+  object-fit: contain;
+}
+
+@media (max-width: 36rem) {
+  .tool--bg-remover .tool-item__thumb {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}

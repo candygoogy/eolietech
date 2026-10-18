@@ -5,6 +5,9 @@ node_modules/
 dist/
 .astro/
 
+# AI model files: downloaded, verified and chunked by scripts/fetch-models.mjs (never committed)
+public/models/
+
 # cloudflare
 .wrangler/
 .dev.vars

@@ -1,0 +1,34 @@
+/* Audio transcription only: the transcript panel. Colours and spacing come from the design tokens. */
+.tool--audio-transcribe .asr-result {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.tool--audio-transcribe .asr-transcript {
+  max-height: 28rem;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.tool--audio-transcribe .asr-transcript:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tool--audio-transcribe .asr-transcript p {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: var(--space-2);
+  max-width: var(--measure);
+  padding-block: 0.3rem;
+}
+
+.tool--audio-transcribe .asr-time {
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}

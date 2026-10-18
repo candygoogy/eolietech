@@ -9,3 +9,35 @@ The AGPL covers the source code only. The name "Eolietech", the logo, the site c
 design are not licensed under the AGPL; see TRADEMARK.md.
 
 Third-party packages keep their own licenses (see node_modules/<package>/LICENSE).
+
+AI models
+---------
+The AI tools download model files from this website (fetched at build time by
+scripts/fetch-models.mjs; pinned revisions and checksums in src/tools/ai-shared/models.json).
+They are not part of this repository and keep their own licenses:
+
+- BiRefNet_lite, 512x512 ONNX export (background remover)
+  https://huggingface.co/studioludens/birefnet-lite-512
+  Based on BiRefNet by Peng Zheng, Dehong Gao, Deng-Ping Fan, Li Liu, Jorma Laaksonen,
+  Wanli Ouyang and Nicu Sebe (https://github.com/ZhengPeng7/BiRefNet).
+  MIT License. Copyright (c) 2024 ZhengPeng; Copyright (c) 2026 Studio Ludens V.O.F.
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+  and associated documentation files (the "Software"), to deal in the Software without
+  restriction, including without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions: The above copyright
+  notice and this permission notice shall be included in all copies or substantial portions of
+  the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  DEALINGS IN THE SOFTWARE.
+
+- Whisper base, multilingual (audio transcription)
+  https://huggingface.co/onnx-community/whisper-base (ONNX conversion of openai/whisper-base)
+  Whisper by OpenAI (https://github.com/openai/whisper), MIT License, Copyright (c) 2022 OpenAI.
+  The Hugging Face model card of openai/whisper-base lists Apache-2.0.
+
+The models run with ONNX Runtime Web (MIT, Microsoft) and Transformers.js (Apache-2.0,
+Hugging Face).

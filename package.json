@@ -9,10 +9,10 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "node scripts/fetch-models.mjs && astro dev",
     "dev:api": "wrangler dev",
-    "build": "astro build",
-    "preview": "astro build && wrangler dev",
+    "build": "node scripts/fetch-models.mjs && astro build",
+    "preview": "npm run build && wrangler dev",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "astro check && tsc -p src/worker/tsconfig.json"
