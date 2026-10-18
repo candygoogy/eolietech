@@ -312,12 +312,9 @@ a.tool-index__row:focus-visible::after {
   }
 }
 
-/* /tools/: format converters under the image tool. */
+/* /tools/: format converters under the image tool, in aligned columns so ten short links scan as
+   one set rather than a ragged run of text. */
 .tool-index__converters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 var(--space-3);
   padding-block: var(--space-1) var(--space-3);
 }
 
@@ -328,8 +325,8 @@ a.tool-index__row:focus-visible::after {
 }
 
 .tool-index__converters ul {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.25rem, 1fr));
   gap: 0 var(--space-3);
   padding: 0;
   list-style: none;
@@ -534,7 +531,6 @@ a.tool-index__row:focus-visible::after {
 }
 
 .flow__step-title {
-  padding-right: 2rem;
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-stretch: 112%;
@@ -547,6 +543,11 @@ a.tool-index__row:focus-visible::after {
   font-size: var(--text-sm);
   line-height: 1.45;
   color: var(--color-text-muted);
+}
+
+/* Only the file step carries a glyph; only its title keeps clear of it. */
+.flow__glyph + .flow__step-title {
+  padding-right: 2rem;
 }
 
 .flow__glyph {
@@ -670,7 +671,8 @@ a.tool-index__row:focus-visible::after {
 
   /* The code lane enters the device at the level of its title; the server sits at that level too. */
   .flow__grid {
-    grid-template-columns: minmax(13rem, 1fr) minmax(14rem, 1.2fr) minmax(0, 2.6fr);
+    /* The device gets the width its three chips need, so "Web Worker" holds to one line at 1440. */
+    grid-template-columns: minmax(12.5rem, 0.8fr) minmax(14rem, 1.2fr) minmax(0, 2.8fr);
     grid-template-rows: repeat(6, auto) 1fr;
     grid-template-areas:
       "a t1 b"
@@ -1021,32 +1023,11 @@ a.tool-index__row:focus-visible::after {
   }
 }
 
-/* Pricing ("Why the free tools are free") still uses the old item style; restyled in its own pass. */
-.closing__item {
-  padding-top: var(--space-4);
-  border-top: 2px solid var(--color-text);
-}
-
-.closing__item h2 {
-  font-size: var(--text-xl);
-  font-stretch: 112%;
-}
-
-.closing__item p {
-  max-width: 34rem;
-  margin-top: var(--space-3);
-}
-
-.closing__item a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-min);
-  font-weight: 700;
-}
-
-/* ---------- inner pages ---------- */
+/* ---------- inner pages: head ---------- */
+/* Tools, pricing, about, security: the h1 at page size with its lede, more air above than the tool
+   pages get (those are instruments; these are read once). */
 .page-head {
-  padding-block: var(--space-6) var(--space-5);
+  padding-block: clamp(3rem, 1rem + 5vw, 6rem) var(--space-6);
 }
 
 .page-head h1 {
@@ -1057,45 +1038,94 @@ a.tool-index__row:focus-visible::after {
   margin-top: var(--space-4);
 }
 
+@media (max-width: 30rem) {
+  .page-head {
+    padding-bottom: var(--space-5);
+  }
+
+  .page-head h1 {
+    font-stretch: 112%;
+  }
+}
+
+/* Entrance, once per visit, same pacing as the home hero. The h1 is the likely LCP element: it
+   settles without fading so it paints at full strength on the first frame. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-head > *,
+  .not-found > * {
+    animation: rise var(--duration-reveal) var(--ease-out) both;
+  }
+
+  .page-head > h1,
+  .not-found > .not-found__code,
+  .not-found > h1 {
+    animation-name: settle;
+  }
+
+  .page-head > :nth-child(2),
+  .not-found > :nth-child(2) {
+    animation-delay: var(--stagger);
+  }
+
+  .page-head > :nth-child(3),
+  .not-found > :nth-child(3) {
+    animation-delay: calc(2 * var(--stagger));
+  }
+
+  .not-found > :nth-child(n + 4) {
+    animation-delay: calc(3 * var(--stagger));
+  }
+}
+
 /* ---------- pricing ---------- */
+/* Two plans, because there are two. Free is the product today: a filled tile in the wider column.
+   Pro is not built yet: a dashed outline on the page ground (the dash's one written purpose). The
+   7:5 split repeats the home closing row, and the waitlist form below sits under the Pro column. */
 .plans {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
 }
 
 .plan {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  padding: clamp(var(--space-4), 3vw, var(--space-5));
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
+  align-items: flex-start;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
   background: var(--color-surface);
 }
 
-/* Pro is not available yet: the dashed edge says "not built". */
 .plan--later {
   border: 2px dashed var(--color-border-strong);
   background: transparent;
 }
 
-.plan h2 {
-  font-size: var(--text-xl);
-  font-stretch: 112%;
+.plan__head {
+  display: grid;
+  gap: var(--space-3);
 }
 
 .plan__price {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
+/* Figure style: the price is the largest thing in the tile. */
 .plan__amount {
   font-family: var(--font-display);
   font-size: var(--text-3xl);
   font-stretch: 125%;
-  font-weight: 760;
+  font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* "Later" is not a price yet, so it does not speak at full ink. */
+.plan--later .plan__amount {
+  color: var(--color-text-muted);
 }
 
 .plan__period {
@@ -1109,9 +1139,10 @@ a.tool-index__row:focus-visible::after {
   list-style: none;
 }
 
+/* Markers are the logo's sea line (the site's one motif); grey on the plan that does not exist yet. */
 .plan li {
   position: relative;
-  padding-left: var(--space-5);
+  padding-left: 2.25rem;
 }
 
 .plan li::before {
@@ -1120,8 +1151,8 @@ a.tool-index__row:focus-visible::after {
   left: 0;
   top: 0.75em;
   width: 1.25rem;
-  height: 3px;
-  border-radius: 2px;
+  height: var(--sea-line);
+  border-radius: var(--radius-full);
   background: var(--color-accent);
 }
 
@@ -1130,26 +1161,37 @@ a.tool-index__row:focus-visible::after {
 }
 
 .plan .btn {
-  align-self: flex-start;
   margin-top: auto;
 }
 
-@media (max-width: 44rem) {
+@media (min-width: 48rem) {
   .plans {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--space-4);
   }
 }
 
+@media (max-width: 30rem) {
+  .plan {
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* Waitlist: the intro reads left, the form tile sits under the Pro column it belongs to. */
 .waitlist {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: var(--space-4) var(--space-6);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5) var(--space-4);
   align-items: start;
 }
 
 .waitlist__intro p {
+  max-width: 34rem;
   margin-top: var(--space-3);
-  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  line-height: 1.5;
 }
 
 .waitlist-form {
@@ -1157,14 +1199,13 @@ a.tool-index__row:focus-visible::after {
   gap: var(--space-3);
   /* Narrow enough at 375px for Turnstile's 300px minimum width. */
   padding: clamp(var(--space-3), 3vw, var(--space-5));
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background: var(--color-surface);
 }
 
 .waitlist-form fieldset {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .waitlist-form label {
@@ -1177,18 +1218,33 @@ a.tool-index__row:focus-visible::after {
   gap: var(--space-2);
 }
 
+/* A field on the tile: page ground in light, sunken in dark, so it reads as a place to type. */
 .waitlist-form__row input {
   flex: 1 1 14rem;
   min-width: 0;
+  background: var(--color-bg);
 }
 
-/* Reserve the Turnstile widget's height (65px) to avoid a layout shift when it appears. */
+/* Reserve the Turnstile widget's height (65px) so it appears without a shift. It is the widget's
+   slot, directly above the button it gates. */
 .waitlist-form__check {
   min-height: 65px;
+  margin-top: var(--space-2);
 }
 
 .waitlist-form__status {
   font-weight: 700;
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+/* The status arrives (from display: none) with a short rise; opacity only under reduced motion. */
+@starting-style {
+  .waitlist-form__status {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
 }
 
 .waitlist-form__status:empty {
@@ -1208,13 +1264,31 @@ a.tool-index__row:focus-visible::after {
   color: var(--color-text-muted);
 }
 
-@media (max-width: 52rem) {
-  .waitlist {
-    grid-template-columns: 1fr;
+@media (prefers-color-scheme: dark) {
+  .waitlist-form__row input {
+    background: var(--color-sunken);
   }
 }
 
-/* ---------- long-form pages (about, security) ---------- */
+@media (min-width: 48rem) {
+  .waitlist {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+}
+
+/* "Why the free tools are free": a closing statement, not another tile. */
+.statement h2 {
+  max-width: 20ch;
+}
+
+.statement p {
+  max-width: 36ch;
+  margin-top: var(--space-3);
+  font-size: var(--text-xl);
+  line-height: 1.4;
+}
+
+/* ---------- long-form pages (security; about shares its reading column) ---------- */
 .doc {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure));
@@ -1222,6 +1296,7 @@ a.tool-index__row:focus-visible::after {
   align-items: start;
 }
 
+/* Table of contents: quiet text links, no rail. Muted at rest, full ink on intent. */
 .doc__aside {
   position: sticky;
   top: var(--space-4);
@@ -1232,29 +1307,34 @@ a.tool-index__row:focus-visible::after {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-stretch: 100%;
-  color: var(--color-text-muted);
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--color-text);
 }
 
-.doc__aside ol,
-.doc__aside ul {
+.doc__aside ol {
   margin-top: var(--space-2);
   padding: 0;
   list-style: none;
-  border-left: 2px solid var(--color-border);
 }
 
 .doc__aside li a {
   display: flex;
   align-items: center;
   min-height: 2.25rem;
-  padding-left: var(--space-3);
-  color: var(--color-text);
+  color: var(--color-text-muted);
   text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-color);
 }
 
-.doc__aside li a:hover {
-  color: var(--color-accent);
-  text-decoration: underline;
+.doc__aside li a:focus-visible {
+  color: var(--color-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .doc__aside li a:hover {
+    color: var(--color-text);
+  }
 }
 
 .doc__body > section + section {
@@ -1265,9 +1345,10 @@ a.tool-index__row:focus-visible::after {
   margin-top: var(--space-3);
 }
 
+/* Prose h2: the role the tool pages use for their long-form sections. */
 .doc__body h2 {
-  font-size: var(--text-xl);
-  font-stretch: 112%;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-2xl);
   scroll-margin-top: var(--space-4);
 }
 
@@ -1279,9 +1360,27 @@ a.tool-index__row:focus-visible::after {
   margin-top: var(--space-2);
 }
 
+.doc__body ul:not([class]) li::marker {
+  color: var(--color-text-muted);
+}
+
 .doc__body .code-block + p,
 .doc__body .code-block + ul {
   margin-top: var(--space-4);
+}
+
+/* The one directive that keeps files on the device, set large: it is the proof this page is about. */
+.code-block--lead {
+  width: fit-content;
+  max-width: 100%;
+  font-size: var(--text-xl);
+  line-height: 1.3;
+}
+
+@media (min-width: 48rem) {
+  .doc__body > section + section {
+    margin-top: var(--space-7);
+  }
 }
 
 .note {
@@ -1333,29 +1432,27 @@ a.tool-index__row:focus-visible::after {
   counter-increment: step;
 }
 
+/* Real order, quiet markers: the numbers are reading aids, not decoration, so no accent. */
 .steps li::before {
-  content: counter(step);
-  font-family: var(--font-display);
-  font-stretch: 125%;
-  font-weight: 760;
-  color: var(--color-accent);
+  content: counter(step) ".";
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
 }
 
-/* Never-list: what the site does not do. */
+/* Never-list: what the site does not do. Space separates the items; the cross stays (it is the
+   list's meaning). */
 .never {
   display: grid;
-  gap: 0;
+  gap: var(--space-3);
   padding: 0;
   list-style: none;
-  border-top: var(--border-width) solid var(--color-border);
 }
 
 .never li {
   display: flex;
   gap: var(--space-3);
   align-items: baseline;
-  padding-block: var(--space-3);
-  border-bottom: var(--border-width) solid var(--color-border);
 }
 
 .never li::before {
@@ -1364,46 +1461,61 @@ a.tool-index__row:focus-visible::after {
   width: 1.25rem;
   font-family: var(--font-display);
   font-size: var(--text-lg);
-  font-weight: 760;
+  font-weight: 800;
   line-height: 1;
   color: var(--color-danger);
 }
 
-/* About: the palette, named after the places it comes from. */
-.palette,
-.doc__aside .palette {
+/* ---------- about ---------- */
+/* The palette as whole fields of colour: the about page's one picture. Fixed colours, named after
+   what they are (raw values on purpose: a swatch shows the colour itself, in both themes). */
+.palette-strip {
+  margin-bottom: var(--section-space);
+}
+
+.palette {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-3);
   padding: 0;
   list-style: none;
-  border-left: 0;
-}
-
-.palette li {
-  min-width: 0;
 }
 
 .palette li {
   display: grid;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  align-content: start;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
 .palette li::before {
   content: "";
-  height: 3.5rem;
-  border-radius: var(--radius-md);
-  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+  aspect-ratio: 4 / 3;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-lg);
 }
 
-.palette__basalt::before {
-  background: var(--basalt-800);
+.palette__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-stretch: 112%;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
 }
 
-.palette__pumice::before {
-  background: var(--pumice-200);
+.palette__use {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.palette__white::before {
+  background: var(--neutral-0);
+}
+
+.palette__black::before {
+  background: var(--neutral-1000);
 }
 
 .palette__sea::before {
@@ -1414,34 +1526,119 @@ a.tool-index__row:focus-visible::after {
   background: var(--ember);
 }
 
-@media (max-width: 30rem) {
+/* A ring only where the swatch matches the page: white in light mode, black in dark mode. */
+@media (prefers-color-scheme: light) {
+  .palette__white::before {
+    box-shadow: inset 0 0 0 1px var(--color-border);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .palette__black::before {
+    box-shadow: inset 0 0 0 1px var(--color-border);
+  }
+}
+
+@media (min-width: 48rem) {
   .palette {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+/* The strip joins the head's entrance, one swatch a step after the lede. */
+@media (prefers-reduced-motion: no-preference) {
+  .palette > li {
+    animation: rise var(--duration-reveal) calc(2 * var(--stagger)) var(--ease-out) both;
+  }
+
+  .palette > li:nth-child(2) {
+    animation-delay: calc(3 * var(--stagger));
+  }
+
+  .palette > li:nth-child(3) {
+    animation-delay: calc(4 * var(--stagger));
+  }
+
+  .palette > li:nth-child(4) {
+    animation-delay: calc(5 * var(--stagger));
+  }
+}
+
+/* Sections as an editorial spread: the heading in the left column, the text in the same reading
+   column the security page uses, so the two long pages share one geometry. */
+.about__section + .about__section {
+  margin-top: var(--space-6);
+}
+
+.about__section h2 {
+  max-width: 14ch;
+}
+
+.about__text > p + p {
+  margin-top: var(--space-3);
+}
+
+.about__section h2 + .about__text {
+  margin-top: var(--space-3);
+}
+
+@media (min-width: 56rem) {
+  .about__section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure));
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .about__section + .about__section {
+    margin-top: var(--space-7);
+  }
+
+  .about__section h2 + .about__text {
+    margin-top: 0;
+  }
+
+  .about__section > .about__text:only-child {
+    grid-column: 2;
   }
 }
 
 /* ---------- 404 ---------- */
+/* The one place the wide face is enormous. The code is decoration (aria-hidden); the h1 carries it. */
 .not-found {
-  padding-block: var(--space-7) var(--space-6);
+  padding-block: clamp(3rem, 1rem + 5vw, 6rem) var(--space-6);
 }
 
 .not-found__code {
+  margin-left: -0.04em;
   font-family: var(--font-display);
-  font-size: clamp(4rem, 3rem + 6vw, 8rem);
+  font-size: clamp(6rem, 2rem + 14vw, 15rem);
   font-stretch: 125%;
   font-weight: 800;
-  line-height: 1;
-  color: var(--color-border-strong);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  /* A backdrop, not a second headline: one tone above the page, so the h1 stays the thing read. */
+  color: var(--color-border);
 }
 
 .not-found h1 {
-  margin-top: var(--space-3);
-}
-
-.not-found p {
-  margin-top: var(--space-3);
-}
-
-.not-found .btn-row {
   margin-top: var(--space-5);
+}
+
+.not-found .lede {
+  margin-top: var(--space-3);
+}
+
+.not-found__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.not-found__actions .btn--primary {
+  min-height: 3.25rem;
+  padding-inline: 1.75rem;
 }

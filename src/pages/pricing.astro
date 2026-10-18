@@ -17,11 +17,13 @@ const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
 
   <div class="container plans">
     <section class="plan" aria-labelledby="plan-free">
-      <h2 id="plan-free">{t(locale, "pricing.free.name")}</h2>
-      <p class="plan__price">
-        <span class="plan__amount">{t(locale, "pricing.free.price")}</span>
-        <span class="plan__period">{t(locale, "pricing.free.period")}</span>
-      </p>
+      <div class="plan__head">
+        <h2 id="plan-free">{t(locale, "pricing.free.name")}</h2>
+        <p class="plan__price">
+          <span class="plan__amount">{t(locale, "pricing.free.price")}</span>
+          <span class="plan__period">{t(locale, "pricing.free.period")}</span>
+        </p>
+      </div>
       <ul>
         {free.map((key) => <li>{t(locale, key)}</li>)}
       </ul>
@@ -29,11 +31,13 @@ const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
     </section>
 
     <section class="plan plan--later" aria-labelledby="plan-pro">
-      <h2 id="plan-pro">{t(locale, "pricing.pro.name")}</h2>
-      <p class="plan__price">
-        <span class="plan__amount">{t(locale, "pricing.pro.price")}</span>
-        <span class="plan__period">{t(locale, "pricing.pro.period")}</span>
-      </p>
+      <div class="plan__head">
+        <h2 id="plan-pro">{t(locale, "pricing.pro.name")}</h2>
+        <p class="plan__price">
+          <span class="plan__amount">{t(locale, "pricing.pro.price")}</span>
+          <span class="plan__period">{t(locale, "pricing.pro.period")}</span>
+        </p>
+      </div>
       <ul>
         {pro.map((key) => <li>{t(locale, key)}</li>)}
       </ul>
@@ -41,7 +45,7 @@ const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
     </section>
   </div>
 
-  <section id="waitlist" class="section container waitlist" aria-labelledby="waitlist-h">
+  <section id="waitlist" class="section container waitlist" aria-labelledby="waitlist-h" data-reveal data-reveal-stagger>
     <div class="waitlist__intro">
       <h2 id="waitlist-h">{t(locale, "waitlist.h2")}</h2>
       <p>{t(locale, "waitlist.lede")}</p>
@@ -49,10 +53,8 @@ const pro = ["pricing.pro.f1", "pricing.pro.f2", "pricing.pro.f3"];
     <WaitlistForm locale={locale} />
   </section>
 
-  <section class="section container" aria-labelledby="why-h">
-    <div class="closing__item">
-      <h2 id="why-h">{t(locale, "pricing.why.h2")}</h2>
-      <p>{t(locale, "pricing.why.body")}</p>
-    </div>
+  <section class="section container statement" aria-labelledby="why-h" data-reveal>
+    <h2 id="why-h">{t(locale, "pricing.why.h2")}</h2>
+    <p>{t(locale, "pricing.why.body")}</p>
   </section>
 </Base>

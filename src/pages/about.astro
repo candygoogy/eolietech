@@ -10,7 +10,8 @@ const sections = [
   { id: "open", paragraphs: ["about.open.p1", "about.open.p2"] },
   { id: "money", paragraphs: ["about.money.p1"] },
 ];
-const palette = ["basalt", "pumice", "sea", "ember"];
+/** The site's real colours: the two neutral grounds and the two island colours. */
+const palette = ["white", "black", "sea", "ember"];
 ---
 
 <Base locale={locale} title={t(locale, "about.title")} description={t(locale, "about.description")} path={localePath(locale, "about")}>
@@ -19,31 +20,38 @@ const palette = ["basalt", "pumice", "sea", "ember"];
     <p class="lede">{t(locale, "about.lede")}</p>
   </header>
 
-  <div class="container doc">
-    <aside class="doc__aside" aria-labelledby="palette-h">
-      <h2 id="palette-h">{t(locale, "about.palette.label")}</h2>
-      <ul class="palette">
-        {palette.map((name) => <li class={`palette__${name}`}>{t(locale, `about.palette.${name}`)}</li>)}
-      </ul>
-    </aside>
-
-    <div class="doc__body">
+  <section class="container palette-strip" aria-labelledby="palette-h">
+    <h2 id="palette-h" class="visually-hidden">{t(locale, "about.palette.label")}</h2>
+    <ul class="palette">
       {
-        sections.map((s) => (
-          <section aria-labelledby={`about-${s.id}`}>
-            <h2 id={`about-${s.id}`}>{t(locale, `about.${s.id}.h2`)}</h2>
+        palette.map((name) => (
+          <li class={`palette__${name}`}>
+            <span class="palette__name">{t(locale, `about.palette.${name}`)}</span>
+            <span class="palette__use">{t(locale, `about.palette.${name}.use`)}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <div class="container about">
+    {
+      sections.map((s) => (
+        <section class="about__section" aria-labelledby={`about-${s.id}`}>
+          <h2 id={`about-${s.id}`}>{t(locale, `about.${s.id}.h2`)}</h2>
+          <div class="about__text">
             {s.paragraphs.map((key) => (
               <p>{t(locale, key)}</p>
             ))}
-          </section>
-        ))
-      }
-      <section>
-        <ul class="links">
-          <li><a href={localePath(locale, "security")}>{t(locale, "about.cta.security")}</a></li>
-          <li><a href={localePath(locale, "pricing")}>{t(locale, "about.cta.pricing")}</a></li>
-        </ul>
-      </section>
+          </div>
+        </section>
+      ))
+    }
+    <div class="about__section">
+      <ul class="links about__text">
+        <li><a href={localePath(locale, "security")}>{t(locale, "about.cta.security")}</a></li>
+        <li><a href={localePath(locale, "pricing")}>{t(locale, "about.cta.pricing")}</a></li>
+      </ul>
     </div>
   </div>
 </Base>
