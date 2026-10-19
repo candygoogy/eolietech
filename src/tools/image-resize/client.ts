@@ -48,7 +48,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   for (const control of [mode.select, width.input, height.input, percent.input, keepAspect.input, enlarge.input]) {
     control.setAttribute("aria-describedby", sizeNote.id);
   }
-  size.append(mode.wrap, width.wrap, height.wrap, percent.wrap, keepAspect.wrap, enlarge.wrap, sizeNote);
+  // The note describes the fields but changes silently; a missing size is also said once, out loud.
+  const sizeAlert = document.createElement("p");
+  sizeAlert.className = "visually-hidden";
+  sizeAlert.setAttribute("aria-live", "polite");
+  size.append(mode.wrap, width.wrap, height.wrap, percent.wrap, keepAspect.wrap, enlarge.wrap, sizeNote, sizeAlert);
 
   const format = selectField(
     t("img.option.format"),
@@ -79,6 +83,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     quality: quality.input.value,
   });
 
+  let missingKey = "";
   /** Show the fields the mode needs and describe the result in words; flag what is missing. */
   const syncSize = () => {
     const form = readForm();
@@ -96,8 +101,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       const key = missing.length > 1 ? "both" : missing[0]!;
       const n = new Intl.NumberFormat(ctx.locale);
       sizeNote.textContent = t(`img.note.missing.${key}`, { max: n.format(MAX_SIDE), maxPercent: n.format(MAX_PERCENT) });
+      // Once per new problem, not on every keystroke.
+      if (key !== missingKey) sizeAlert.textContent = sizeNote.textContent;
+      missingKey = key;
       return;
     }
+    missingKey = "";
+    sizeAlert.textContent = "";
     const what =
       spec.mode === "width"
         ? t("img.note.width", { width: spec.width })

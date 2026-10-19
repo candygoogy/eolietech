@@ -53,6 +53,15 @@ async function open(page: Page, url: string) {
 
 const done = (row: Locator) => expect(row).toHaveAttribute("data-state", "done", { timeout: 60_000 });
 
+test("keyboard focus on a row's Remove button survives the row finishing", async ({ page }) => {
+  await open(page, "/resize-image/");
+  await page.locator('.tool-drop input[type="file"]').setInputFiles(fixture("sample.png"));
+  // The codec worker is still starting, so the row is rebuilt after this focus.
+  await page.getByRole("button", { name: "Remove sample.png" }).focus();
+  await done(page.locator(".tool-item").first());
+  await expect(page.getByRole("button", { name: "Remove sample.png" })).toBeFocused();
+});
+
 test("/resize-image/ resizes by width, does not enlarge unless allowed, and converts", async ({ page, baseURL }) => {
   const w = watch(page, baseURL!);
   await open(page, "/resize-image/");
@@ -96,6 +105,8 @@ test("/resize-image/ resizes by width, does not enlarge unless allowed, and conv
   await page.getByLabel("Width (px)").fill("");
   await expect(page.getByLabel("Width (px)")).toHaveAttribute("aria-invalid", "true");
   await expect(page.locator(".tool-options .tool-note").first()).toContainText("Type a width");
+  // ...and says so once to screen readers, not only in the field's description.
+  await expect(page.locator('.tool-options [aria-live="polite"]')).toHaveText("Type a width from 1 to 20,000 px.");
   w.assertPrivate();
 });
 

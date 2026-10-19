@@ -252,6 +252,8 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
     if (item.state === "done" && result?.preferOriginal) li.dataset.outcome = "kept-original";
     else if (item.state === "done" && opts.resize && result?.notEnlarged) li.dataset.outcome = "not-enlarged";
     else delete li.dataset.outcome;
+    // The row is rebuilt below; focus inside it would drop to the page, so it goes to the new Remove.
+    const hadFocus = li.contains(document.activeElement);
     li.replaceChildren();
 
     if (item.state === "done" && result) {
@@ -336,7 +338,10 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
     });
     row.append(remove);
     li.append(row);
+    if (hadFocus) remove.focus();
   }
+
+  let quietTimer: ReturnType<typeof setTimeout> | undefined;
 
   /** Summary, progress bar and global actions. */
   function render() {
@@ -349,11 +354,21 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
     progress.hidden = total === 0 || finished === total;
     progress.max = Math.max(1, total);
     progress.value = finished;
+    if (total === 0 || finished === total) {
+      clearTimeout(quietTimer);
+      quietTimer = undefined;
+      status.removeAttribute("aria-live");
+    }
     if (total === 0) {
       status.textContent = "";
       return;
     }
     if (finished < total) {
+      // Said once when work starts, then counted silently (the progress bar has the number too);
+      // the result is said again at the end. Per-file announcements are too much for 50 images.
+      if (!quietTimer && status.getAttribute("aria-live") !== "off") {
+        quietTimer = setTimeout(() => status.setAttribute("aria-live", "off"), 1000);
+      }
       status.textContent = tPlural(ctx, "img.summary.working", total, { done: finished, total });
       return;
     }
@@ -437,6 +452,8 @@ export function rangeField(label: string, value: number, min = 1, max = 100) {
   const out = document.createElement("output");
   out.htmlFor.add(id);
   out.textContent = input.value;
+  // An <output> is a live region; the slider already says its value, so the copy stays silent.
+  out.setAttribute("aria-live", "off");
   input.addEventListener("input", () => (out.textContent = input.value));
   wrap.append(l, input, out);
   return { wrap, input };

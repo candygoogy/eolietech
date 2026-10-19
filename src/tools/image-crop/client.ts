@@ -147,10 +147,14 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   // Stage: the preview, a shade with a hole where the box is, and the box with its handles.
   const hintId = domId("crop-hint");
+  const stateId = domId("crop-state");
   const canvas = h("canvas", { className: "crop-canvas", role: "img" });
   const hole = h("div", { className: "crop-hole" });
   const shade = h("div", { className: "crop-shade", "aria-hidden": "true" }, hole);
   const sizeTag = h("span", { className: "crop-size", "aria-hidden": "true" });
+  // Read with the box's name on focus: its size and position now, then how to move it. Hidden: a
+  // description is still read from it, and browse mode does not meet it a second time.
+  const boxState = h("span", { id: stateId, hidden: true });
   const box = h(
     "div",
     {
@@ -158,12 +162,12 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       tabindex: 0,
       role: "application",
       "aria-label": t("crop.box.label"),
-      "aria-describedby": hintId,
+      "aria-describedby": `${stateId} ${hintId}`,
     },
     ...HANDLES.map((handle) => h("span", { className: "crop-handle", "data-handle": handle, "aria-hidden": "true" })),
     sizeTag,
   );
-  const frame = h("div", { className: "crop-frame" }, canvas, shade, box);
+  const frame = h("div", { className: "crop-frame" }, canvas, shade, box, boxState);
   const stage = h("div", { className: "crop-stage" }, frame);
   const hint = h("p", { className: "tool-note crop-hint", id: hintId, text: t("crop.box.hint") });
 
@@ -254,7 +258,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       text.textContent = id === "free" ? t("crop.aspect.free") : id === "original" ? t("crop.aspect.original") : ratioLabel(id, turned);
     }
     turnBtn.disabled = !canTurn(aspect);
-    turnBtn.setAttribute("aria-label", t("crop.aspect.turnLabel", { ratio: ratioLabel(aspect, !turned) }));
+    // The name starts with the visible text (speech input), and names a ratio only when there is one.
+    if (canTurn(aspect)) turnBtn.setAttribute("aria-label", t("crop.aspect.turnLabel", { ratio: ratioLabel(aspect, !turned) }));
+    else turnBtn.removeAttribute("aria-label");
   }
 
   function syncQuality() {
@@ -291,6 +297,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       node.style.height = pct(rect.h, H);
     }
     sizeTag.textContent = `${rect.w} × ${rect.h}`;
+    boxState.textContent = t("crop.box.state", { width: rect.w, height: rect.h, x: rect.x, y: rect.y });
     const values: Record<Field, number> = { x: rect.x, y: rect.y, w: rect.w, h: rect.h };
     for (const [field, input] of fieldInputs) {
       input.value = String(values[field]);
@@ -454,6 +461,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     render();
     setBusy(false);
     status.set("");
+    clearTimeout(announceTimer);
+    live.textContent = t("crop.opened", { name: f.name, width: src.W, height: src.H });
     tool.dataset.loaded = "";
     if (dropLabel) dropLabel.textContent = t("crop.drop.replace");
     editor.hidden = false;
@@ -473,6 +482,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     if (!src || !file || busy) return;
     errors.clear();
     const startedWith = settingsKey();
+    // Disabling the focused Crop button drops focus to the page; it is put back below.
+    const hadFocus = tool.contains(document.activeElement);
     const f = file;
     const out = outFormat();
     setBusy(true);
@@ -513,6 +524,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       if (file === f) {
         setBusy(false);
         if (!downloadBtn.hidden) downloadBtn.focus();
+        else if (hadFocus && !tool.contains(document.activeElement)) cropBtn.focus();
       }
     }
   }

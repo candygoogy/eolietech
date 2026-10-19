@@ -108,12 +108,16 @@ test("aspect presets, keyboard moves and resizes, and the mouse drags a corner",
   const w = watch(page, baseURL!);
   await openTool(page);
   await choose(page, fixture("sample.jpg"));
+  // Screen readers hear that the image is open; Rotate's name starts with its visible text and only
+  // names a ratio when there is one to rotate.
+  await expect(page.locator(".tool--image-crop > [aria-live]").last()).toContainText("Opened sample.jpg, 64 × 48 px");
+  await expect(page.getByRole("button", { name: "Rotate ratio", exact: true })).toBeDisabled();
 
   await page.locator(".crop-aspect__option", { hasText: "1:1" }).click();
   expect(await fields(page)).toEqual([8, 0, 48, 48]);
   await page.locator(".crop-aspect__option", { hasText: "16:9" }).click();
   expect(await fields(page)).toEqual([0, 6, 64, 36]);
-  await page.getByRole("button", { name: "Rotate the ratio to 9:16" }).click();
+  await page.getByRole("button", { name: "Rotate ratio to 9:16" }).click();
   await expect(page.locator(".crop-aspect__option", { hasText: "9:16" })).toBeVisible();
   const [, , tw, th] = await fields(page);
   expect(th).toBe(48);
@@ -125,6 +129,8 @@ test("aspect presets, keyboard moves and resizes, and the mouse drags a corner",
   expect(await fields(page)).toEqual([8, 0, 48, 48]);
   const box = page.getByRole("application", { name: "Crop area" });
   await expect(box).toBeFocused();
+  // On focus the box says where it is before how to move it.
+  await expect(box).toHaveAccessibleDescription(/^48 × 48 px, 8 px from the left and 0 px from the top\. Drag the box/);
   const url = page.url();
   await box.press("ArrowLeft");
   expect(await fields(page)).toEqual([7, 0, 48, 48]);
@@ -180,7 +186,10 @@ test("a sideways phone photo is cropped where the preview shows it", async ({ pa
       const bytes = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
       const mean = async (blob: Blob) => {
         const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
-        const c = new OffscreenCanvas(bmp.width, bmp.height);
+        // A DOM canvas: Playwright's WebKit has no OffscreenCanvas on the main thread.
+        const c = document.createElement("canvas");
+        c.width = bmp.width;
+        c.height = bmp.height;
         const g = c.getContext("2d")!;
         g.drawImage(bmp, 0, 0);
         const d = g.getImageData(0, 0, 8, 8).data;
