@@ -16,6 +16,7 @@ type Node = Record<string, unknown>;
 const APPLICATION_CATEGORY: Record<Category, string> = {
   image: "MultimediaApplication",
   pdf: "UtilitiesApplication",
+  document: "BusinessApplication",
   audio: "MultimediaApplication",
 };
 

@@ -149,3 +149,19 @@
   Cross-Origin-Embedder-Policy: credentialless
 /it/pdf-in-png/
   Cross-Origin-Embedder-Policy: credentialless
+/open-p7m-file/
+  Cross-Origin-Embedder-Policy: credentialless
+/p7m-to-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/fatturapa-viewer/
+  Cross-Origin-Embedder-Policy: credentialless
+/fatturapa-to-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/aprire-file-p7m/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/p7m-in-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/visualizzare-fattura-elettronica/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/fattura-elettronica-in-pdf/
+  Cross-Origin-Embedder-Policy: credentialless

@@ -22,7 +22,7 @@ interface Props {
 const { locale, level = 2, detailed = false, reveal = false } = Astro.props;
 const Heading = `h${level}` as "h2" | "h3";
 const published = new Set(publishedTools().map((tool) => tool.id));
-const categories: Category[] = ["image", "pdf", "audio"];
+const categories: Category[] = ["image", "pdf", "document", "audio"];
 
 const groups = categories
   .map((category) => ({

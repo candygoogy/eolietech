@@ -7,7 +7,7 @@ export const LOCALES = ["en", "it"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 
-export type Category = "image" | "pdf" | "audio";
+export type Category = "image" | "pdf" | "document" | "audio";
 
 /** Release 1 ships client-side tools only. "server" / "hybrid" are reserved for Release 2. */
 export type Runtime = "client" | "server" | "hybrid";

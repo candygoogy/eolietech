@@ -43,6 +43,8 @@ The registry is `src/tools/registry.ts`. Every tool below has `status: "live"`.
 | Compress PDF | `/compress-pdf/` | Ghostscript compiled to WebAssembly (`@okathira/ghostpdl-wasm`, AGPL-3.0) |
 | JPG to PDF | `/jpg-to-pdf/` | `pdf-lib` (JPG and PNG embedded as they are); jSquash and `heic-to` to decode other formats |
 | PDF to JPG | `/pdf-to-jpg/` | `pdfjs-dist` to render pages, jSquash MozJPEG or OxiPNG to encode, `client-zip` |
+| Open P7M files | `/open-p7m-file/` | None: the CMS (PKCS#7) container is read with a small DER parser and the signature is checked with the browser's Web Crypto API |
+| Italian e-invoice viewer | `/fatturapa-viewer/` | The browser's `DOMParser` to read FatturaPA XML; `pdf-lib` for the PDF copy; `client-zip` |
 | Remove background | `/remove-background/` | BiRefNet lite (512x512, fp16 ONNX) on ONNX Runtime Web (`onnxruntime-web`, installed as a dependency of `@huggingface/transformers`) |
 | Transcribe audio | `/transcribe-audio/` | Whisper base (multilingual ONNX) through `@huggingface/transformers` on ONNX Runtime Web |
 
