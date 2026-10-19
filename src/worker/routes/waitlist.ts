@@ -1,24 +1,26 @@
 import { Hono, type Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { Env } from "../index";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "../../tools/types";
 
 /**
  * POST /api/v1/waitlist — Pro waitlist signup.
  *
  * Contract (the site form depends on it):
- *   body  { email: string, turnstileToken: string }, Content-Type: application/json
+ *   body  { email: string, turnstileToken: string, locale?: "en" | "it" }, Content-Type: application/json
+ *         (locale is the language of the page the form is on; missing or unknown values store "en")
  *   201 {ok:true}                              success, also when already registered (no enumeration)
  *   400 {ok:false,error:"invalid_email"|"bad_request"}
  *   403 {ok:false,error:"turnstile_failed"}    (also "bad_request" for a cross-origin Origin header)
  *   429 {ok:false,error:"rate_limited"}
  *   405 other methods, 500 {ok:false,error:"server_error"}
  *
- * Privacy: only email, UTC day and consent version are stored. The client IP is used in memory
+ * Privacy: only email, UTC day, consent version and page locale are stored. The client IP is used in memory
  * as the rate-limit key and forwarded to Turnstile siteverify, never persisted.
  */
 
-/** Bump when the consent text shown next to the form changes. */
-export const CONSENT_VERSION = "2026-10-v1";
+/** Bump when the consent text shown next to the form, or the stored fields, change. */
+export const CONSENT_VERSION = "2026-10-v2";
 
 const SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const SITEVERIFY_TIMEOUT_MS = 5000;
@@ -49,6 +51,11 @@ export function normalizeEmail(raw: unknown): string | null {
   const local = email.slice(0, email.indexOf("@"));
   if (local.length > 64) return null;
   return EMAIL_RE.test(email) ? email : null;
+}
+
+/** Whitelists the page locale sent by the form; anything else is stored as the default ("en"). */
+export function normalizeLocale(raw: unknown): Locale {
+  return (LOCALES as readonly unknown[]).includes(raw) ? (raw as Locale) : DEFAULT_LOCALE;
 }
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
@@ -138,7 +145,7 @@ waitlist.post("/", async (c) => {
       return fail(c, 400, "bad_request");
     }
     if (typeof body !== "object" || body === null || Array.isArray(body)) return fail(c, 400, "bad_request");
-    const { email: rawEmail, turnstileToken } = body as Record<string, unknown>;
+    const { email: rawEmail, turnstileToken, locale: rawLocale } = body as Record<string, unknown>;
     if (typeof rawEmail !== "string") return fail(c, 400, "bad_request");
     if (typeof turnstileToken !== "string" || turnstileToken.length === 0 || turnstileToken.length > MAX_TOKEN_LENGTH) {
       return fail(c, 400, "bad_request");
@@ -146,6 +153,7 @@ waitlist.post("/", async (c) => {
 
     const email = normalizeEmail(rawEmail);
     if (email === null) return fail(c, 400, "invalid_email");
+    const locale = normalizeLocale(rawLocale);
 
     const ip = c.req.header("CF-Connecting-IP");
     const { success: underLimit } = await c.env.RL_WAITLIST.limit({ key: ip ?? "unknown" });
@@ -156,9 +164,9 @@ waitlist.post("/", async (c) => {
 
     const day = new Date().toISOString().slice(0, 10);
     await c.env.DB.prepare(
-      "INSERT INTO waitlist (email, created_at, consent_version) VALUES (?1, ?2, ?3) ON CONFLICT(email) DO NOTHING",
+      "INSERT INTO waitlist (email, created_at, consent_version, locale) VALUES (?1, ?2, ?3, ?4) ON CONFLICT(email) DO NOTHING",
     )
-      .bind(email, day, CONSENT_VERSION)
+      .bind(email, day, CONSENT_VERSION, locale)
       .run();
 
     return reply(c, 201, { ok: true });

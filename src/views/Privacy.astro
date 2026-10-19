@@ -1,7 +1,7 @@
 ---
 /**
  * Privacy policy. Every statement here is backed by code: the waitlist columns
- * (migrations/0001_waitlist.sql, src/worker/routes/waitlist.ts), the CSP (public/_headers), the model
+ * (migrations/0001_waitlist.sql, 0002_waitlist_locale.sql, src/worker/routes/waitlist.ts), the CSP (public/_headers), the model
  * cache (src/tools/ai-shared/model-files.ts, Cache API only) and the Turnstile loader (WaitlistForm.astro,
  * /pricing/ only). Change the copy in en.json when any of those change. If the waitlist's purpose or the
  * stored fields change, bump CONSENT_VERSION in waitlist.ts too.
@@ -22,7 +22,7 @@ const email = t(locale, "privacy.email");
 const mailto = `mailto:${email}`;
 const toc = ["short", "who", "files", "browser", "waitlist", "turnstile", "hosting", "email", "never", "transfers", "rights", "changes"];
 const summary = ["files", "cookies", "tracking", "waitlist"];
-const kept = ["email", "day", "consent"];
+const kept = ["email", "day", "locale", "consent"];
 const rights = ["access", "rectify", "erase", "restrict", "object", "port", "withdraw"];
 ---
 

@@ -42,9 +42,9 @@ afterEach(() => {
 });
 
 describe("POST /api/v1/waitlist", () => {
-  it("valid signup -> 201, stores only email/day/consent version", async () => {
+  it("valid signup -> 201, stores only email/day/consent version/locale", async () => {
     const fetchSpy = mockSiteverify();
-    const res = await send(post({ email: "  Alice@Example.COM ", turnstileToken: "pass" }));
+    const res = await send(post({ email: "  Alice@Example.COM ", turnstileToken: "pass", locale: "it" }));
     expect(res.status).toBe(201);
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(res.headers.get("access-control-allow-origin")).toBeNull();
@@ -52,8 +52,8 @@ describe("POST /api/v1/waitlist", () => {
 
     const stored = await rows();
     expect(stored).toHaveLength(1);
-    expect(Object.keys(stored[0]!).sort()).toEqual(["consent_version", "created_at", "email"]);
-    expect(stored[0]).toMatchObject({ email: "alice@example.com", consent_version: CONSENT_VERSION });
+    expect(Object.keys(stored[0]!).sort()).toEqual(["consent_version", "created_at", "email", "locale"]);
+    expect(stored[0]).toMatchObject({ email: "alice@example.com", consent_version: CONSENT_VERSION, locale: "it" });
     expect(stored[0]!.created_at).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
     // siteverify got the secret, the token and the client IP, form-encoded.
@@ -61,6 +61,20 @@ describe("POST /api/v1/waitlist", () => {
     expect(form.get("secret")).toBe("1x0000000000000000000000000000000AA");
     expect(form.get("response")).toBe("pass");
     expect(form.get("remoteip")).toMatch(/^203\.0\.113\./);
+  });
+
+  it.each([
+    ["unknown locale", { locale: "fr" }, "en"],
+    ["non-string locale", { locale: ["it"] }, "en"],
+    ["missing locale", {}, "en"],
+    ["English", { locale: "en" }, "en"],
+  ])("%s %j -> 201, stored locale %s", async (_name, extra, expected) => {
+    mockSiteverify();
+    const res = await send(post({ email: "lia@example.com", turnstileToken: "pass", ...extra }));
+    expect(res.status).toBe(201);
+    const stored = await rows();
+    expect(stored).toHaveLength(1);
+    expect(stored[0]!.locale).toBe(expected);
   });
 
   it("duplicate email -> 201 and still one row", async () => {

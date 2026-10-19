@@ -206,7 +206,8 @@ const messages = {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, turnstileToken }),
+          // The page's language, stored so the launch email can be written in it.
+          body: JSON.stringify({ email, turnstileToken, locale: form.dataset.locale }),
         });
         const body = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
 
