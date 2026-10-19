@@ -15,7 +15,8 @@ const fattura = (name: string) => path.join(DOCS, "fattura", name);
 const isPdf = (b: Buffer) => b.subarray(0, 5).toString("latin1") === "%PDF-";
 const isZip = (b: Buffer) => b[0] === 0x50 && b[1] === 0x4b;
 
-function watch(page: Page, baseURL: string) {
+/** brokenXml: the test feeds malformed XML, so the browsers' own messages about it are allowed (see assertPrivate). */
+function watch(page: Page, baseURL: string, { brokenXml = false } = {}) {
   const origin = new URL(baseURL).origin;
   const requests: { url: string; method: string }[] = [];
   const errors: string[] = [];
@@ -29,8 +30,10 @@ function watch(page: Page, baseURL: string) {
       const offOrigin = requests.filter((r) => !/^(data|blob):/.test(r.url) && new URL(r.url).origin !== origin);
       expect(offOrigin, "requests to other origins").toEqual([]);
       expect(requests.filter((r) => r.method !== "GET"), "non-GET requests").toEqual([]);
-      // Firefox logs "XML Parsing Error" itself whenever DOMParser meets malformed XML (the broken fixture).
-      expect(errors.filter((e) => !/favicon|XML Parsing Error/i.test(e)), "console errors / CSP violations").toEqual([]);
+      // On malformed XML, DOMParser builds an error document: Firefox logs "XML Parsing Error", and Chromium
+      // gives that document inline styles, which the CSP blocks (nothing is rendered). Only the broken-XML test allows them.
+      const browserNoise = brokenXml ? /favicon|XML Parsing Error|Applying inline style violates/i : /favicon/i;
+      expect(errors.filter((e) => !browserNoise.test(e)), "console errors / CSP violations").toEqual([]);
     },
   };
 }
@@ -86,7 +89,7 @@ test("/fatturapa-viewer/ shows an invoice, opens it and saves its PDF and attach
 });
 
 test("/fatturapa-viewer/ reads a signed .p7m, several bodies and other formats, and flags broken XML", async ({ page, baseURL }) => {
-  const w = watch(page, baseURL!);
+  const w = watch(page, baseURL!, { brokenXml: true });
   await open(page, "/fatturapa-viewer/");
   await upload(page, [
     path.join(DOCS, "IT01234567890_00001.xml.p7m"),
