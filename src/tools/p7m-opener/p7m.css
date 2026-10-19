@@ -1,0 +1,76 @@
+/*
+ * P7M opener only: the signer details inside an opened file's row. A row holds a whole signature
+ * report, so its buttons move under the text instead of squeezing it from the right. The check
+ * result is the line that matters: success green when it holds, danger red and bold when it does
+ * not, plain ink when it could not be checked.
+ */
+[data-tool-id="p7m-opener"] .tool-item[data-check] > .tool-actions {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  justify-content: flex-start;
+  margin-top: var(--space-2);
+}
+
+/* The meta line is the type and size, not the outcome: plain muted text whatever the check says. */
+[data-tool-id="p7m-opener"] .tool-item[data-check] .tool-item__meta {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.p7m-signatures {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.p7m-layer {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.p7m-signer {
+  display: grid;
+  gap: 0.125rem;
+  overflow-wrap: anywhere;
+}
+
+.p7m-signer__name {
+  font-weight: 700;
+}
+
+.p7m-facts {
+  display: grid;
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.p7m-check {
+  margin-top: 0.25rem;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.p7m-check[data-check="valid"] {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.p7m-check[data-check="invalid"] {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.p7m-hint {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+/* What the check covers: small print in size only; it stays in full ink so it is read. */
+.tool > .p7m-note {
+  color: var(--color-text);
+}
