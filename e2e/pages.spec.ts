@@ -37,3 +37,18 @@ for (const path of ["/tools/", "/it/strumenti/"]) {
     await expect(page.locator(`.tool-index__converters a[href$="${path === "/tools/" ? "/resize-image-for-email/" : "/ridimensionare-immagini-per-email/"}"]`)).toHaveCount(1);
   });
 }
+
+test("a tool page links its presets, and a preset page links back and marks itself current", async ({ page }) => {
+  await page.goto("/resize-image/");
+  const row = page.getByRole("navigation", { name: en["tools.presets"] });
+  await expect(row.locator('a[href$="/resize-image-for-email/"]')).toBeVisible();
+  await expect(row.locator('a[href$="/resize-image-for-instagram/"]')).toBeVisible();
+
+  await page.goto("/resize-image-for-email/");
+  const variantRow = page.getByRole("navigation", { name: en["tools.presets"] });
+  await expect(variantRow.locator('a[href$="/resize-image/"]')).toBeVisible();
+  const current = variantRow.locator('[aria-current="page"]');
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveText(en["tools.image-resize.variant.for-email"]);
+  await expect(variantRow.locator('a[href$="/resize-image-for-email/"]')).toHaveCount(0);
+});

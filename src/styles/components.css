@@ -321,6 +321,14 @@
   }
 }
 
+/* Narrow tablets: labels stop shrinking at their 13px floor, so the PDF's caption runs to three lines
+ * and reaches down to the memo's tilted corner. The memo slides left, still under the postcard. */
+@media (min-width: 40rem) and (max-width: 47.99rem) {
+  .obj--memo {
+    --x: 11%;
+  }
+}
+
 @media (min-width: 75rem) {
   .obj--postcard {
     --x: 41%;

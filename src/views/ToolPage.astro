@@ -11,6 +11,7 @@ import JsonLd from "../components/JsonLd.astro";
 import { getDictionary, localePath, t } from "../i18n";
 import { pagePath } from "../i18n/routes";
 import { breadcrumbs, graph, webApplication } from "../lib/structured-data";
+import { variantLinks } from "../lib/tool-variants";
 import { getTool, publishedTools } from "../tools/registry";
 import { contentEntryId } from "../tools/content-files";
 import type { Locale } from "../tools/types";
@@ -52,6 +53,17 @@ const related = (
       }),
   )
 ).filter((r) => r !== null);
+
+// The tool's other pages, under the panel: format converters and presets, each kind in its own row.
+// On a variant page the row also leads back to the plain tool, and names this page as the current one.
+const { converters, presets } = variantLinks(tool, locale);
+const baseLink = { id: "", href: localePath(locale, tool.slug[locale]!), label: baseEntry.data.h1 };
+const variantRows = [
+  { kind: "converters", label: t(locale, "tools.converters"), links: converters },
+  { kind: "presets", label: t(locale, "tools.presets"), links: presets },
+]
+  .filter((row) => row.links.length > 0)
+  .map((row, i) => ({ ...row, links: variant && i === 0 ? [baseLink, ...row.links] : row.links }));
 
 // Strings shipped to the island: shared `tool.*` site strings, then the tool's own `ui` strings.
 const siteToolStrings = Object.fromEntries(Object.entries(getDictionary(locale)).filter(([k]) => k.startsWith("tool.")));
@@ -110,6 +122,33 @@ const structuredData = graph([
         </div>
         <noscript><p class="tool-note">{t(locale, "tool.noscript")}</p></noscript>
       </div>
+      {
+        variantRows.map((row) => (
+          <nav
+            class:list={["tool-variants", { "tool-variants--grid": row.links.length > 4 }]}
+            aria-labelledby={`tool-variants-${row.kind}`}
+          >
+            <p class="tool-variants__label" id={`tool-variants-${row.kind}`}>
+              {row.label}
+            </p>
+            <ul class="tool-variants__list">
+              {row.links.map((link) => (
+                <li class:list={{ "tool-variants__base": link === baseLink }}>
+                  {link.id === (variant?.id ?? "") ? (
+                    <span class="tool-variants__item" aria-current="page">
+                      {link.label}
+                    </span>
+                  ) : (
+                    <a class="tool-variants__item" href={link.href}>
+                      {link.label}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
+      }
       <p class="tool-page__private">
         <span>{t(locale, "toolPage.private")}</span>
         <a href={pagePath(locale, "security")}>{t(locale, "toolPage.verify")}</a>

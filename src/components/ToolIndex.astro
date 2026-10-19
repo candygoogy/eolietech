@@ -5,8 +5,9 @@
  */
 import { localePath, t } from "../i18n";
 import { formatBytes } from "../lib/tool-ui";
+import { variantLinks } from "../lib/tool-variants";
 import { publishedTools, tools } from "../tools/registry";
-import type { Category, Locale, ToolVariant } from "../tools/types";
+import type { Category, Locale } from "../tools/types";
 
 interface Props {
   locale: Locale;
@@ -22,29 +23,6 @@ const { locale, level = 2, detailed = false, reveal = false } = Astro.props;
 const Heading = `h${level}` as "h2" | "h3";
 const published = new Set(publishedTools().map((tool) => tool.id));
 const categories: Category[] = ["image", "pdf", "audio"];
-
-/** File format names as written (data, not copy). */
-const formatName = (f: unknown) => (f === "webp" ? "WebP" : String(f).toUpperCase());
-
-/**
- * A tool's variant pages for this locale: format converters (preset { from, to }, labelled "PNG to WebP")
- * and presets (anything else, labelled by tools.<id>.variant.<variantId>).
- */
-function variantLinks(variants: ToolVariant[], toolId: string) {
-  const converters: { href: string; label: string }[] = [];
-  const presets: { href: string; label: string }[] = [];
-  for (const v of variants) {
-    const slug = v.slug[locale];
-    if (!slug) continue;
-    const href = localePath(locale, slug);
-    if (v.preset.from && v.preset.to) {
-      converters.push({ href, label: t(locale, "tools.convert", { from: formatName(v.preset.from), to: formatName(v.preset.to) }) });
-    } else {
-      presets.push({ href, label: t(locale, `tools.${toolId}.variant.${v.id}`) });
-    }
-  }
-  return { converters, presets };
-}
 
 const groups = categories
   .map((category) => ({
@@ -65,7 +43,7 @@ const groups = categories
             maxFiles === 1
               ? t(locale, "tools.limits.one", { size })
               : t(locale, "tools.limits.many", { files: maxFiles, size }),
-          ...variantLinks(live ? (tool.variants ?? []) : [], tool.id),
+          ...(live ? variantLinks(tool, locale) : { converters: [], presets: [] }),
         };
       }),
   }))
