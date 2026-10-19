@@ -22,7 +22,7 @@ faq:
 ui:
   img.drop.hint: "JPG, PNG, WebP o AVIF. Elaborate sul tuo dispositivo; non viene caricato niente."
   img.option.format: "Formato di uscita"
-  img.format.original: "Mantieni il formato originale"
+  img.format.original: "Come l'originale"
   img.option.quality: "Qualità"
   img.option.qualityNote: "Vale per JPG, WebP e AVIF. Più è bassa, più i file sono leggeri; 75 va bene per la maggior parte delle foto."
   img.option.qualityPng: "Il PNG è senza perdita, quindi la qualità non si applica."
@@ -64,7 +64,7 @@ ui:
 
 Questo strumento ricodifica le immagini con gli stessi encoder open source che fanno funzionare Squoosh di Google: MozJPEG per i JPG, libwebp per i WebP, libavif per gli AVIF e oxipng per i PNG. Sono compilati in WebAssembly e girano in un worker in background dentro questa scheda, così la pagina resta reattiva mentre elabora un gruppo di file e nessun file passa mai dalla rete.
 
-Con **Mantieni il formato originale** selezionato, ogni file viene compresso nel suo formato. Un JPG resta un JPG, un PNG resta un PNG. Se invece vuoi convertire tutto il gruppo, scegli un formato dall'elenco.
+Con **Come l'originale** selezionato, ogni file viene compresso nel suo formato. Un JPG resta un JPG, un PNG resta un PNG. Se invece vuoi convertire tutto il gruppo, scegli un formato dall'elenco.
 
 ## Quale formato scegliere
 
