@@ -188,6 +188,25 @@
   --tool-shell-rest: 0rem;
 }
 
+/* Tools that are only the drop well: the shell reserves the well with a two-line label (375px). On
+ * wider phones (412px and up) the label fits on one line and the well would come out 16.5px shorter
+ * than the shell, so it keeps the reserved height. Crop's loaded strip overrides this (crop.css). */
+@media (max-width: 47.99rem) {
+  :where(
+      [data-tool-id="pdf-split"],
+      [data-tool-id="pdf-organize"],
+      [data-tool-id="pdf-compress"],
+      [data-tool-id="image-crop"],
+      [data-tool-id="pdf-to-image"],
+      [data-tool-id="p7m-opener"],
+      [data-tool-id="fattura-viewer"]
+    )
+    > .tool
+    > .tool-drop {
+    min-height: var(--tool-shell);
+  }
+}
+
 /* Resizer: an image too small to enlarge is finished but unchanged in size, so plain ink, not success green. */
 [data-tool-id="image-resize"] .tool-item[data-state="done"][data-outcome="not-enlarged"] .tool-item__meta {
   color: var(--color-text);

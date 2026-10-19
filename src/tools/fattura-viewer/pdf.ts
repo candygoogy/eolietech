@@ -8,8 +8,13 @@
  */
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage, type RGB } from "pdf-lib";
 import type { Locale } from "../types";
-import { fill } from "./labels";
 import type { Column, FieldGroup, PartyBlock, Presented, Row, Table } from "./present";
+
+/* Same as labels.ts fill(). Kept local on purpose: this module is loaded lazily, and a runtime import
+ * from a module the client chunk also uses made the bundler load pdf-lib's chunk with the page. */
+function fill(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m));
+}
 
 const PAGE: [number, number] = [595.28, 841.89];
 const M = { left: 42, right: 42, top: 48, bottom: 66 };

@@ -20,7 +20,7 @@ faq:
   - q: "Legge anche le fatture semplificate e quelle verso la pubblica amministrazione?"
     a: "Sì: i formati FPR12 (tra privati), FPA12 (verso la PA) e FSM10 (fattura semplificata). Codici come TD01, N2.2 o MP05 diventano parole, secondo le specifiche tecniche 1.9 dell'Agenzia delle Entrate. Un codice che la pagina non conosce viene mostrato così com'è."
 ui:
-  fv.drop.hint: "File .xml o .xml.p7m. Letti sul tuo dispositivo; non viene caricato niente."
+  fv.drop.hint: "File .xml o .xml.p7m. Restano sul tuo dispositivo."
   fv.progress: "Avanzamento"
   fv.list: "Le tue fatture"
   fv.view: "Visualizza"

@@ -20,7 +20,7 @@ faq:
   - q: "Does it read simplified invoices and invoices to public bodies?"
     a: "Yes: FPR12 (between businesses and to consumers), FPA12 (to the public administration) and FSM10 (simplified invoice). Codes such as TD01, N2.2 or MP05 are turned into words, following version 1.9 of the Agenzia delle Entrate technical specifications. A code the page does not know is shown as it is."
 ui:
-  fv.drop.hint: ".xml or .xml.p7m files. Read on your device; nothing is uploaded."
+  fv.drop.hint: ".xml or .xml.p7m files. They never leave your device."
   fv.progress: "Progress"
   fv.list: "Your invoices"
   fv.view: "View"
