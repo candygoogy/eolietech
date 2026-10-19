@@ -165,3 +165,19 @@
   Cross-Origin-Embedder-Policy: credentialless
 /it/fattura-elettronica-in-pdf/
   Cross-Origin-Embedder-Policy: credentialless
+/redact-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/sign-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/image-to-text/
+  Cross-Origin-Embedder-Policy: credentialless
+/ocr-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/oscurare-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/firmare-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/estrarre-testo-da-immagine/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ocr-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
