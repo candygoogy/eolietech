@@ -126,7 +126,7 @@ test("/image-to-text/ reads English text from a screenshot, same-origin only", a
   const loaded = w.requests.map((r) => new URL(r.url).pathname);
   expect(loaded.some((p) => /\/tessdata\/[0-9a-f]{12}\/eng\.traineddata$/.test(p))).toBe(true);
   expect(loaded.some((p) => /ita\.traineddata/.test(p))).toBe(false);
-  expect(loaded.some((p) => /tesseract-core-(relaxedsimd-|simd-)?lstm\.wasm/.test(p))).toBe(true);
+  expect(loaded.some((p) => /tesseract-core-(relaxedsimd-|simd-)?lstm(\.[\w-]+)?\.wasm$/.test(p))).toBe(true);
   // The worker entry and the scripts it imports were served with the production headers too.
   expect(w.routed.some((u) => /tess-worker[^/]*\.js/.test(u))).toBe(true);
   expect(w.routed.some((u) => /worker\.min[^/]*\.js/.test(u))).toBe(true);
