@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic FPA12 invoice to a public body: 6-character office code, CIG and CUP, split payment (S), a service period. No real body or company. -->
+<p:FatturaElettronica versione="FPA12" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00005</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>UFABCD</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdFiscaleIVA>
+        <Anagrafica><Denominazione>Verde Esempio Soc. Coop.</Denominazione></Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Via dei Giardini 4</Indirizzo><CAP>98122</CAP><Comune>Messina</Comune><Provincia>ME</Provincia><Nazione>IT</Nazione></Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>80000000000</CodiceFiscale>
+        <Anagrafica><Denominazione>Comune di Esempio</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Piazza del Municipio 1</Indirizzo><CAP>98000</CAP><Comune>Esempio</Comune><Provincia>ME</Provincia><Nazione>IT</Nazione></Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-11-02</Data>
+        <Numero>PA-19</Numero>
+        <ImportoTotaleDocumento>1220.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto><IdDocumento>DET-2026-118</IdDocumento><Data>2026-03-10</Data><CodiceCUP>J00X00000000000</CodiceCUP><CodiceCIG>Z0A1B2C3D4</CodiceCIG></DatiOrdineAcquisto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Manutenzione del verde pubblico</Descrizione>
+        <DataInizioPeriodo>2026-10-01</DataInizioPeriodo>
+        <DataFinePeriodo>2026-10-31</DataFinePeriodo>
+        <PrezzoUnitario>1000.00</PrezzoUnitario>
+        <PrezzoTotale>1000.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>1000.00</ImponibileImporto>
+        <Imposta>220.00</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento><ModalitaPagamento>MP05</ModalitaPagamento><DataScadenzaPagamento>2026-12-02</DataScadenzaPagamento><ImportoPagamento>1000.00</ImportoPagamento><IBAN>IT60X0542811101000000123456</IBAN></DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

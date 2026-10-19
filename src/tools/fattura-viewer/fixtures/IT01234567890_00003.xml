@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Synthetic FPR12 invoice saved as ISO-8859-1, default namespace on the root (no prefix), flat-rate seller (RF19), N2.2. No real person. -->
+<FatturaElettronica versione="FPR12" xmlns="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00003</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>0000000</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdFiscaleIVA>
+        <CodiceFiscale>SMPNCC80A01F839X</CodiceFiscale>
+        <Anagrafica><Nome>Niccolò</Nome><Cognome>Esempio</Cognome></Anagrafica>
+        <RegimeFiscale>RF19</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Via Sant'Agata 3</Indirizzo><CAP>98050</CAP><Comune>Santa Marina Salina</Comune><Provincia>ME</Provincia><Nazione>IT</Nazione></Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>PRVLCU90A41F205X</CodiceFiscale>
+        <Anagrafica><Nome>Lucia</Nome><Cognome>Prova</Cognome></Anagrafica>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Piazza Città 1</Indirizzo><CAP>20100</CAP><Comune>Milano</Comune><Provincia>MI</Provincia><Nazione>IT</Nazione></Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-10-02</Data>
+        <Numero>7</Numero>
+        <DatiBollo><BolloVirtuale>SI</BolloVirtuale><ImportoBollo>2.00</ImportoBollo></DatiBollo>
+        <ImportoTotaleDocumento>150.00</ImportoTotaleDocumento>
+        <Causale>Lezioni di ceramica: perché è più facile imparare così, caffè compreso. Più dettagli all'ultima pagina.</Causale>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Corso di ceramica, cinque lezioni (è già tutto compreso)</Descrizione>
+        <Quantita>5.00</Quantita>
+        <UnitaMisura>lezioni</UnitaMisura>
+        <PrezzoUnitario>30.00000000</PrezzoUnitario>
+        <PrezzoTotale>150.00</PrezzoTotale>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N2.2</Natura>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N2.2</Natura>
+        <ImponibileImporto>150.00</ImponibileImporto>
+        <Imposta>0.00</Imposta>
+        <RiferimentoNormativo>Operazione in franchigia da IVA, art. 1 c. 54-89 L. 190/2014</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento><ModalitaPagamento>MP08</ModalitaPagamento><ImportoPagamento>150.00</ImportoPagamento></DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</FatturaElettronica>

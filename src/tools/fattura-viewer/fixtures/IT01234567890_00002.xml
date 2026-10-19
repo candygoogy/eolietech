@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic FPR12 invoice for tests: several lines (one with a discount and an article code), withholding tax, virtual stamp duty, pension fund, order and delivery note refs, a tiny PDF attachment. No real company or person. -->
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00002</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>0000000</CodiceDestinatario>
+      <PECDestinatario>bottega.prova@pec.example.it</PECDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdFiscaleIVA>
+        <CodiceFiscale>01234567890</CodiceFiscale>
+        <Anagrafica><Denominazione>Studio Tecnico Esempio S.r.l.</Denominazione></Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Via Vulcano</Indirizzo><NumeroCivico>12</NumeroCivico><CAP>98055</CAP><Comune>Lipari</Comune><Provincia>ME</Provincia><Nazione>IT</Nazione></Sede>
+      <IscrizioneREA><Ufficio>ME</Ufficio><NumeroREA>123456</NumeroREA><StatoLiquidazione>LN</StatoLiquidazione></IscrizioneREA>
+      <Contatti><Email>amministrazione@example.com</Email></Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>09876543210</IdCodice></IdFiscaleIVA>
+        <Anagrafica><Denominazione>Bottega di Prova S.n.c.</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Corso Esempio 5</Indirizzo><CAP>90100</CAP><Comune>Palermo</Comune><Provincia>PA</Provincia><Nazione>IT</Nazione></Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-10-15</Data>
+        <Numero>2026/118</Numero>
+        <DatiRitenuta><TipoRitenuta>RT01</TipoRitenuta><ImportoRitenuta>290.00</ImportoRitenuta><AliquotaRitenuta>20.00</AliquotaRitenuta><CausalePagamento>A</CausalePagamento></DatiRitenuta>
+        <DatiBollo><BolloVirtuale>SI</BolloVirtuale><ImportoBollo>2.00</ImportoBollo></DatiBollo>
+        <DatiCassaPrevidenziale><TipoCassa>TC04</TipoCassa><AlCassa>4.00</AlCassa><ImportoContributoCassa>58.00</ImportoContributoCassa><ImponibileCassa>1450.00</ImponibileCassa><AliquotaIVA>22.00</AliquotaIVA></DatiCassaPrevidenziale>
+        <ImportoTotaleDocumento>1841.76</ImportoTotaleDocumento>
+        <Causale>Progetto impianto fotovoltaico per il laboratorio di via Marina.</Causale>
+        <Causale>Riferimento preventivo n. 31 del 2 settembre 2026.</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto><IdDocumento>ORD-77</IdDocumento><Data>2026-09-20</Data></DatiOrdineAcquisto>
+      <DatiDDT><NumeroDDT>15</NumeroDDT><DataDDT>2026-09-28</DataDDT></DatiDDT>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Progetto impianto fotovoltaico, relazione tecnica e schemi elettrici</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>1200.00</PrezzoUnitario>
+        <PrezzoTotale>1200.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>Sopralluogo in cantiere</Descrizione>
+        <Quantita>3.00</Quantita>
+        <UnitaMisura>ore</UnitaMisura>
+        <PrezzoUnitario>80.00</PrezzoUnitario>
+        <ScontoMaggiorazione><Tipo>SC</Tipo><Percentuale>10.00</Percentuale></ScontoMaggiorazione>
+        <PrezzoTotale>216.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <CodiceArticolo><CodiceTipo>INTERNO</CodiceTipo><CodiceValore>RIMB-01</CodiceValore></CodiceArticolo>
+        <Descrizione>Rimborso spese di trasferta</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>34.00</PrezzoUnitario>
+        <PrezzoTotale>34.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>4</NumeroLinea>
+        <Descrizione>Rimborso imposta di bollo</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>2.00</PrezzoUnitario>
+        <PrezzoTotale>2.00</PrezzoTotale>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N1</Natura>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>1508.00</ImponibileImporto>
+        <Imposta>331.76</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N1</Natura>
+        <ImponibileImporto>2.00</ImponibileImporto>
+        <Imposta>0.00</Imposta>
+        <RiferimentoNormativo>Escluso art. 15 DPR 633/72</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <Beneficiario>Studio Tecnico Esempio S.r.l.</Beneficiario>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2026-11-30</DataScadenzaPagamento>
+        <ImportoPagamento>1551.76</ImportoPagamento>
+        <IstitutoFinanziario>Banca di Esempio</IstitutoFinanziario>
+        <IBAN>IT60X0542811101000000123456</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+    <Allegati>
+      <NomeAttachment>relazione-tecnica.pdf</NomeAttachment>
+      <FormatoAttachment>PDF</FormatoAttachment>
+      <DescrizioneAttachment>Relazione tecnica</DescrizioneAttachment>
+      <Attachment>JVBERi0xLjcKJYGBgYEKCjYgMCBvYmoKPDwKL0ZpbHRlciAvRmxhdGVEZWNvZGUKL0xlbmd0aCAx
+MDYKPj4Kc3RyZWFtCnicK+RyCuEyUADBonQufY/UnLLUkszkRF1zA0sLEwsDcwtLBUMLhZA0LiMT
+hRAfLkOwUkMFEwMFYyAOyeWyMTcxNzdzM3IxNzAzNDM3MzU3NjKAsY0MjA3tFEKyuEK0uFxDuAK5
+AKVYGHIKZW5kc3RyZWFtCmVuZG9iagoKOCAwIG9iago8PAovRmlsdGVyIC9GbGF0ZURlY29kZQov
+TGVuZ3RoIDEwNgo+PgpzdHJlYW0KeJwr5HIK4TJQAMGidC59j9ScstSSzOREXUtzEyMzCyNTMwsF
+QwuFkDQuIxOFEB8uQ7BSQwUTAwVjIA7J5bIxNzE3N3MzcjE3MDM0MzczNTc2MoCxjQyMjewUQrK4
+QrS4XEO4ArkApIkYcAplbmRzdHJlYW0KZW5kb2JqCgo5IDAgb2JqCjw8Ci9GaWx0ZXIgL0ZsYXRl
+RGVjb2RlCi9UeXBlIC9PYmpTdG0KL04gNgovRmlyc3QgMzIKL0xlbmd0aCAzODEKPj4Kc3RyZWFt
+Cnic1VLBTsMwDL3nK3yEA4qXtUmKpklja0FCE9NAAoE4lDaailCC2gzB32O3g4kD4oA40MhNbD87
+tvNGgKAgRRiDTSCBdGwhBa0QDJgsg8lEyKu3ZwdyVW5cJ+R5U3dwRxiENWH4fy/kPGx9BCWmU7GP
+mJexfAobMYTCiMEfiFUb6m3lWpgUeVEgGkTUCYlGVAva5yQZiSKdfMrSmcQkOyGbGSOOZ+QrBtFm
+iGF/j0138TnthNWMWQzYxA765718Vz7kUD/Vk02FXIZ6UUYHB4tjhUrjiFb/3R7SOFpXxvB/m+vr
+b4L/tsMv71wEH4W83D7EXmXjSMiTsnPsAXnmnl5cbKpSyNxXoW78BuR142e+az4MXzMyYZg2raP4
+gTdy7bqwbSsiEuP6zHz4TH5kMLPUubEZ8XhHNXlz8fDoqh7Kav4aTy8jdzUY2LZ0dVOehFdiNdKi
+WQLNhlk98z5EZnvPcB+pGtb0jvW/LzkzidJWpdr+ccl2X/I7d5f3wAplbmRzdHJlYW0KZW5kb2Jq
+CgoxMCAwIG9iago8PAovU2l6ZSAxMQovUm9vdCAyIDAgUgovSW5mbyAzIDAgUgovRmlsdGVyIC9G
+bGF0ZURlY29kZQovVHlwZSAvWFJlZgovTGVuZ3RoIDQ3Ci9XIFsgMSAyIDIgXQovSW5kZXggWyAw
+IDExIF0KPj4Kc3RyZWFtCnicJcmxFQAQEETBv3cEMu1pRIMKO/ZJJhmgKhhgZMKkaWL+6OKAtB+5
+4AKBvAP6CmVuZHN0cmVhbQplbmRvYmoKCnN0YXJ0eHJlZgo4NTcKJSVFT0Y=</Attachment>
+    </Allegati>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

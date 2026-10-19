@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic FSM10 simplified invoice (fattura semplificata): amounts include VAT, buyer identified by tax code. No real company or person. -->
+<p:FatturaElettronicaSemplificata versione="FSM10" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00006</ProgressivoInvio>
+      <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+      <CodiceDestinatario>0000000</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdFiscaleIVA>
+      <Denominazione>Ferramenta Esempio S.r.l.</Denominazione>
+      <Sede><Indirizzo>Via Porto 2</Indirizzo><CAP>98055</CAP><Comune>Lipari</Comune><Provincia>ME</Provincia><Nazione>IT</Nazione></Sede>
+      <RegimeFiscale>RF01</RegimeFiscale>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <IdentificativiFiscali><CodiceFiscale>PRVLCU90A41F205X</CodiceFiscale></IdentificativiFiscali>
+      <AltriDatiIdentificativi><Nome>Lucia</Nome><Cognome>Prova</Cognome><Sede><Indirizzo>Piazza Città 1</Indirizzo><CAP>20100</CAP><Comune>Milano</Comune><Provincia>MI</Provincia><Nazione>IT</Nazione></Sede></AltriDatiIdentificativi>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD07</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-10-05</Data>
+        <Numero>S-12</Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <Descrizione>Viti e tasselli</Descrizione>
+      <Importo>24.40</Importo>
+      <DatiIVA><Aliquota>22.00</Aliquota></DatiIVA>
+    </DatiBeniServizi>
+    <DatiBeniServizi>
+      <Descrizione>Nastro isolante</Descrizione>
+      <Importo>6.10</Importo>
+      <DatiIVA><Imposta>1.10</Imposta></DatiIVA>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

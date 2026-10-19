@@ -1,0 +1,249 @@
+/*
+ * E-invoice viewer only. A row's extra lines (file name, signature) sit under the usual meta line;
+ * the opened invoice spans the whole row below its buttons, on the field colour so it reads as a
+ * sheet of paper inside the well. Tables become labelled stacks when the sheet is narrow (container
+ * query), so every line stays readable on a 375px phone without sideways scrolling.
+ */
+.fv-file,
+.fv-signature {
+  margin: 0.125rem 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.fv-signature[data-check="valid"] {
+  color: var(--color-text);
+}
+
+.fv-signature[data-check="invalid"] {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.tool-item > .fv-invoice {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  margin-top: var(--space-3);
+}
+
+.fv-invoice {
+  container-type: inline-size;
+  display: grid;
+  gap: var(--space-4);
+  padding: clamp(var(--space-3), 3cqi, var(--space-5));
+  border-radius: var(--radius-lg);
+  background: var(--tool-field, var(--color-bg));
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.fv-invoice :is(h2, h3, h4, p, dl, dd) {
+  margin: 0;
+}
+
+.fv-title {
+  font-size: var(--text-xl);
+  line-height: 1.2;
+}
+
+.fv-subtitle {
+  margin-top: calc(var(--space-4) * -1 + var(--space-1)) !important;
+  color: var(--color-text-muted);
+}
+
+.fv-parties {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+
+.fv-party__role,
+.fv-section > h3 {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.fv-section > h3 {
+  margin-bottom: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-base);
+}
+
+.fv-party__name {
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.fv-group {
+  margin: var(--space-2) 0 var(--space-1) !important;
+  font-size: var(--text-sm);
+}
+
+.fv-fields,
+.fv-totals {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.fv-fields > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.fv-fields dt {
+  color: var(--color-text-muted);
+}
+
+.fv-text {
+  white-space: pre-line;
+}
+
+.fv-text + .fv-text {
+  margin-top: var(--space-2);
+}
+
+/* ---------- tables ---------- */
+.fv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.fv-table th,
+.fv-table td {
+  padding: 0.375rem 0.5rem;
+  text-align: start;
+  vertical-align: top;
+  white-space: pre-line;
+}
+
+.fv-table th {
+  font-weight: 700;
+  background: var(--tool-well, var(--color-sunken));
+}
+
+.fv-table td {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.fv-table .fv-num {
+  text-align: end;
+  white-space: nowrap;
+}
+
+.fv-totals {
+  justify-content: end;
+  margin-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.fv-totals > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.fv-totals dt {
+  color: var(--color-text-muted);
+}
+
+.fv-totals dd {
+  font-weight: 700;
+}
+
+/* Narrow sheet: each table row becomes a small card of "label  value" lines. */
+@container (max-width: 36rem) {
+  .fv-fields > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .fv-fields > div + div {
+    margin-top: 0.25rem;
+  }
+
+  .fv-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .fv-table,
+  .fv-table tbody,
+  .fv-table tr,
+  .fv-table td {
+    display: block;
+  }
+
+  .fv-table tr {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .fv-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0.125rem 0;
+    border: 0;
+    text-align: end;
+  }
+
+  .fv-table td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--color-text-muted);
+    text-align: start;
+  }
+
+  .fv-table td:empty {
+    display: none;
+  }
+
+  /* The description (or the rate) heads the card, without its label. */
+  .fv-table td.fv-main {
+    display: block;
+    font-weight: 700;
+    text-align: start;
+  }
+
+  .fv-table td.fv-main::before {
+    content: none;
+  }
+
+  .fv-table .fv-num {
+    white-space: normal;
+  }
+}
+
+/* ---------- attachments ---------- */
+.fv-attachments {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fv-attachments > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+
+.fv-attachment__name {
+  font-weight: 700;
+}
+
+.fv-attachment__detail,
+.fv-note {
+  color: var(--color-text-muted);
+}
