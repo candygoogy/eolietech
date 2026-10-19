@@ -10,9 +10,9 @@ howTo:
   - "Check the new size next to each photo, for example 1080 × 1350 px for a 4:5 portrait, then download them one by one or use Download all to get a .zip."
 faq:
   - q: "What size should an Instagram photo be?"
-    a: "For feed posts, 1080 pixels wide. The height depends on the shape: 1080 × 1080 px for a square, 1080 × 1350 px for a 4:5 portrait and about 1080 × 566 px for a 1.91:1 landscape. Instagram changes its formats from time to time, so check the preview in the app before you post."
+    a: "For feed posts, 1080 pixels wide. The height depends on the shape: 1080 × 1080 px for a square, 1080 × 1350 px for a 4:5 portrait, 1080 × 1440 px for a 3:4 portrait and about 1080 × 566 px for a 1.91:1 landscape. Instagram changes its formats from time to time, so check the preview in the app before you post."
   - q: "Will Instagram crop my photo?"
-    a: "It can. Feed posts have long been limited to shapes between 1.91:1 landscape and 4:5 portrait, and a photo outside that range may be cropped when you post it. A phone photo taken upright is usually 3:4, which is taller than 4:5. To choose exactly what stays in the frame, crop it to 4:5 with the image cropper on this site first, then resize it here."
+    a: "It can. Feed posts accept shapes from 1.91:1 landscape to 3:4 portrait, and a photo outside that range is cropped to fit when you post it. A phone photo taken upright is usually 3:4, so it fits as it is. To choose exactly what stays in the frame, crop it with the image cropper on this site first, then resize it here."
   - q: "Does resizing first make my photo look better on Instagram?"
     a: "It can help, but Instagram compresses every upload again, whatever you do. Resizing first gives you a smaller upload and a file that already matches the width Instagram uses. Keep the quality at 85 or higher, so the photo is in good shape before that second compression."
   - q: "Does this work for Stories?"

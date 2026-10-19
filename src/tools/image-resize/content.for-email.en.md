@@ -10,7 +10,7 @@ howTo:
   - "Check the total size in the summary, then download the photos one by one or use Download all to get a .zip you can attach."
 faq:
   - q: "How big can an email attachment be?"
-    a: "It depends on the provider. Gmail allows up to 25 MB of attachments per message, and Outlook usually 20 MB. Attachments also grow by about a third when they are encoded for sending, and the recipient's mail server may have a lower limit than yours, so staying well under the limit is safer."
+    a: "It depends on the provider. Gmail and Outlook.com both allow up to 25 MB per message, and on a work or school account the limit can be different. Attachments also grow by about a third when they are encoded for sending, and the recipient's mail server may have a lower limit than yours, so staying well under the limit is safer."
   - q: "Is 1600 px enough?"
     a: "For looking at photos on a screen, yes. An email window on a laptop is narrower than that, and a phone shows the photo smaller still. It is also enough for a standard 10 × 15 cm print. If someone needs the full resolution to edit or print large, share the originals through a cloud link instead."
   - q: "Why JPG?"

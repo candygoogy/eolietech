@@ -10,7 +10,7 @@ howTo:
   - "Controlla il peso totale nel riepilogo, poi scarica le foto una per una o usa Scarica tutto per avere un .zip da allegare."
 faq:
   - q: "Quanto può pesare un allegato?"
-    a: "Dipende dal servizio. Gmail accetta fino a 25 MB di allegati per messaggio, Outlook di solito 20 MB. In più, quando l'email parte gli allegati crescono di circa un terzo per la codifica, e il server di chi riceve può avere un limite più basso del tuo: meglio restare ben sotto la soglia."
+    a: "Dipende dal servizio. Gmail e Outlook.com accettano fino a 25 MB per messaggio, e con un account di lavoro o di scuola il limite può essere diverso. In più, quando l'email parte gli allegati crescono di circa un terzo per la codifica, e il server di chi riceve può avere un limite più basso del tuo: meglio restare ben sotto la soglia."
   - q: "1600 px bastano?"
     a: "Per guardare le foto su uno schermo, sì. La finestra di un'email sul portatile è più stretta, e sul telefono la foto appare ancora più piccola. Bastano anche per una stampa classica 10 × 15 cm. Se a qualcuno serve la risoluzione piena per modificare o stampare in grande, condividi gli originali con un link al cloud."
   - q: "Perché proprio JPG?"

@@ -10,7 +10,7 @@ howTo:
   - "Premi Ritaglia, controlla le misure in pixel e scarica il file."
 faq:
   - q: "Quanto deve essere grande la copertina di un video YouTube?"
-    a: "YouTube consiglia 1280 × 720 px, cioè 16:9, e almeno 640 px di larghezza. Ritaglia prima qui, poi imposta la larghezza a 1280 px nello strumento per ridimensionare le immagini di questo sito: se il ritaglio è largo almeno 1280 px, l'altezza diventa 720. Il limite di peso aggiornato lo trovi nelle pagine di aiuto di YouTube."
+    a: "YouTube consiglia 3840 × 2160 px, cioè 16:9, e almeno 640 px di larghezza, quindi va bene anche un'immagine 16:9 più piccola come 1280 × 720 px. Ritaglia prima qui, poi imposta la larghezza nello strumento per ridimensionare le immagini di questo sito: con 3840 px l'altezza diventa 2160, con 1280 px diventa 720, purché il ritaglio sia largo almeno così. Il file può pesare fino a 50 MB se lo carichi dal computer e 2 MB dal telefono."
   - q: "Un'immagine 16:9 riempie le mie slide?"
     a: "Sì, se le slide sono in 16:9, che è il formato predefinito di PowerPoint e Presentazioni Google. Una presentazione più vecchia impostata in 4:3 è più quadrata, quindi un'immagine 16:9 lascia spazio vuoto sopra e sotto, a meno di deformarla o tagliarla."
   - q: "Posso fare uno sfondo per il mio schermo?"

@@ -10,9 +10,9 @@ howTo:
   - "Controlla la nuova misura accanto a ogni foto, per esempio 1080 × 1350 px per una verticale 4:5, poi scaricale una per una o usa Scarica tutto per avere un .zip."
 faq:
   - q: "Che misura deve avere una foto per Instagram?"
-    a: "Per i post del feed, 1080 pixel di larghezza. L'altezza dipende dalla forma: 1080 × 1080 px per una foto quadrata, 1080 × 1350 px per una verticale 4:5 e circa 1080 × 566 px per un'orizzontale 1,91:1. Instagram cambia i formati ogni tanto, quindi prima di pubblicare controlla l'anteprima nell'app."
+    a: "Per i post del feed, 1080 pixel di larghezza. L'altezza dipende dalla forma: 1080 × 1080 px per una foto quadrata, 1080 × 1350 px per una verticale 4:5, 1080 × 1440 px per una verticale 3:4 e circa 1080 × 566 px per un'orizzontale 1,91:1. Instagram cambia i formati ogni tanto, quindi prima di pubblicare controlla l'anteprima nell'app."
   - q: "Instagram taglierà la mia foto?"
-    a: "Può succedere. Da tempo i post del feed accettano forme tra l'orizzontale 1,91:1 e la verticale 4:5, e una foto fuori da questo intervallo può essere tagliata quando la pubblichi. Una foto scattata col telefono in verticale di solito è 3:4, cioè più alta di 4:5. Per scegliere tu cosa resta nell'inquadratura, ritagliala prima in 4:5 con lo strumento per ritagliare immagini di questo sito, poi ridimensionala qui."
+    a: "Può succedere. I post del feed accettano forme dall'orizzontale 1,91:1 alla verticale 3:4, e una foto fuori da questo intervallo viene tagliata per farla rientrare quando la pubblichi. Una foto scattata col telefono in verticale di solito è 3:4, quindi entra così com'è. Per scegliere tu cosa resta nell'inquadratura, ritagliala prima con lo strumento per ritagliare immagini di questo sito, poi ridimensionala qui."
   - q: "Ridimensionare prima rende la foto più bella su Instagram?"
     a: "Può aiutare, ma Instagram comprime di nuovo ogni foto caricata, qualunque cosa tu faccia. Ridimensionando prima carichi un file più leggero e già della larghezza che usa Instagram. Tieni la qualità a 85 o più, così la foto arriva in buone condizioni a quella seconda compressione."
   - q: "Funziona anche per le Storie?"

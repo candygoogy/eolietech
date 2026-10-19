@@ -10,7 +10,7 @@ howTo:
   - "Press Crop image, check the size in pixels, then download the file."
 faq:
   - q: "What size is a YouTube thumbnail?"
-    a: "YouTube recommends 1280 × 720 px, which is 16:9, and at least 640 px wide. Crop here first, then set the width to 1280 px in the image resizer on this site: if your crop is at least 1280 px wide, the height comes out at 720. YouTube's help pages list the current file size limit."
+    a: "YouTube recommends 3840 × 2160 px, which is 16:9, and at least 640 px wide, so a smaller 16:9 image such as 1280 × 720 px works too. Crop here first, then set the width in the image resizer on this site: 3840 px gives a height of 2160 and 1280 px gives 720, as long as your crop is at least that wide. The file can weigh up to 50 MB when you upload from a computer and 2 MB from a phone."
   - q: "Will a 16:9 image fill my slides?"
     a: "Yes, if the slides are 16:9, which is the default size in PowerPoint and Google Slides. An older deck set to 4:3 is squarer, so a 16:9 image leaves empty space above and below unless you stretch or cut it."
   - q: "Can I make a wallpaper for my screen?"
