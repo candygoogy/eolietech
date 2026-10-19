@@ -21,6 +21,8 @@ const TOOLS = {
   "pdf-compress": "compress-pdf",
   "image-to-pdf": "jpg-to-pdf",
   "pdf-to-image": "pdf-to-jpg",
+  "p7m-opener": "open-p7m-file",
+  "fattura-viewer": "fatturapa-viewer",
   "background-remover": "remove-background",
   "audio-transcribe": "transcribe-audio",
 } as const;
