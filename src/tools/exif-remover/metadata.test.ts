@@ -7,7 +7,7 @@ import { cleanPng, crc32, inspectPng, walkPng } from "./png";
 import { cleanWebp, inspectWebp, walkWebp, FLAG_EXIF, FLAG_XMP } from "./webp";
 import { readExif, removeGpsInPlace, orientationOnlyExif } from "./tiff";
 import { parseXmpCoordinate, xmpGps } from "./xmp";
-import { DEFAULT_META, exifTiff, jpegWithMetadata, pngWithMetadata, webpWithMetadata } from "./test-fixtures";
+import { DEFAULT_META, exifTiff, jpegWithMetadata, jpegWithMpf, pngWithMetadata, webpWithMetadata } from "./test-fixtures";
 import type { Report } from "./types";
 
 const FIXTURES = path.resolve(__dirname, "../../../e2e/fixtures/image");
@@ -165,6 +165,49 @@ describe("JPEG", () => {
     expect(inspectJpeg(second).exif?.model).toBe("Pixel 7");
     const all = cleanJpeg(withTrailer, "all").bytes;
     expect(walkJpeg(all).end).toBe(all.length);
+  });
+
+  describe("multi-picture photo (HDR gain map, MPO)", () => {
+    // The secondary image carries its own EXIF with GPS and its own XMP, as a gain map or the second
+    // view of a 3D photo can.
+    const secondary = jpegWithMetadata(JPG, { ...DEFAULT_META, extras: false });
+    const primary = jpegWithMetadata(JPG, { ...DEFAULT_META, extras: false, xmp: false });
+    const imageAt = (b: Uint8Array) => b.length - secondary.length;
+
+    it("drops the secondary images and the MPF index in full mode, leaving a plain photo", () => {
+      const file = jpegWithMpf(primary, secondary);
+      expect(inspectJpeg(file).blocks).toContain("extra");
+      const { bytes } = cleanJpeg(file, "all");
+      const kinds = walkJpeg(bytes).segments.map((s) => s.kind);
+      expect(kinds).not.toContain("mpf");
+      expect(kinds).not.toContain("xmp");
+      expect(walkJpeg(bytes).end).toBe(bytes.length);
+      // Only the orientation-only EXIF block is left (the primary is rotated).
+      expect(inspectJpeg(bytes).exif).toMatchObject({ orientation: 6, otherTags: 0, hasGpsBlock: false });
+      for (const s of ["MPF\0", "GPS", "Pixel 7", "Google", "2024:07:14", "http://ns.adobe.com/xap"]) {
+        expect(has(bytes, s), s).toBe(false);
+      }
+      expect(Buffer.from(scanSpan(bytes)).equals(Buffer.from(scanSpan(file)))).toBe(true);
+    });
+
+    it("removes GPS from every image the MPF index lists in GPS mode, even with other data between them", () => {
+      // A vendor trailer between the images (with 0xFF bytes, so the next image is not found by just
+      // reading on after EOI).
+      const gap = new Uint8Array([...Buffer.from("VENDOR", "latin1"), 0xff, 0x00, 0xff, 0xe1, 0x12, 0x34, 0, 0]);
+      const file = jpegWithMpf(primary, secondary, gap);
+      expect(inspectJpeg(file.subarray(imageAt(file))).gps).not.toBeNull();
+      const { bytes } = cleanJpeg(file, "gps");
+      expect(bytes.length).toBe(file.length);
+      expect(has(bytes, "GPSLatitude")).toBe(false);
+      const second = inspectJpeg(bytes.subarray(imageAt(bytes)));
+      expect(second.gps).toBeNull();
+      expect(second.exif).toMatchObject({ model: "Pixel 7", hasGpsBlock: false });
+      expect(inspectJpeg(bytes).gps).toBeNull();
+      // Everything else, the MPF index and the gap included, is untouched.
+      const mpf = walkJpeg(file).segments.find((s) => s.kind === "mpf")!;
+      expect(Buffer.from(bytes.subarray(mpf.start, mpf.end)).equals(Buffer.from(file.subarray(mpf.start, mpf.end)))).toBe(true);
+      expect(Buffer.from(bytes.subarray(imageAt(bytes) - gap.length, imageAt(bytes))).equals(Buffer.from(gap))).toBe(true);
+    });
   });
 
   it("handles an unreadable EXIF block without throwing", () => {

@@ -177,6 +177,38 @@ export function inspectJpeg(b: Uint8Array): Report {
   return { format: "jpg", exif, exifUnreadable, gps: exif?.gps ?? xmp ?? null, blocks: [...blocks] };
 }
 
+/**
+ * Where the images listed in the primary image's MPF index (APP2 "MPF\0") start, those after the
+ * primary only. Offsets count from the index's TIFF header. An unreadable index gives what was read.
+ */
+function mpfImageStarts(b: Uint8Array, primary: JpegLayout): number[] {
+  const seg = primary.segments.find((s) => s.kind === "mpf");
+  if (!seg) return [];
+  const t = seg.data + 4;
+  const starts: number[] = [];
+  try {
+    const dv = new DataView(b.buffer, b.byteOffset + t, seg.end - t);
+    const order = dv.getUint16(0);
+    if (order !== 0x4949 && order !== 0x4d4d) return [];
+    const le = order === 0x4949;
+    const ifd = dv.getUint32(4, le);
+    const n = Math.min(dv.getUint16(ifd, le), 64);
+    for (let i = 0; i < n; i++) {
+      const e = ifd + 2 + i * 12;
+      if (dv.getUint16(e, le) !== 0xb002) continue;
+      const count = Math.min(Math.floor(dv.getUint32(e + 4, le) / 16), 64);
+      const list = dv.getUint32(e + 8, le);
+      for (let k = 0; k < count; k++) {
+        const at = t + dv.getUint32(list + k * 16 + 8, le);
+        if (at >= primary.end && at + 3 <= b.length && b[at] === 0xff && b[at + 1] === 0xd8 && b[at + 2] === 0xff) starts.push(at);
+      }
+    }
+  } catch (err) {
+    if (!(err instanceof RangeError)) throw err;
+  }
+  return starts;
+}
+
 const KEEP_ALL_MODE = new Set<SegmentKind>(["soi", "eoi", "scan", "core", "jfif", "icc", "adobe"]);
 
 export function cleanJpeg(b: Uint8Array, mode: Mode): Cleaned {
@@ -218,7 +250,9 @@ function cleanAll(b: Uint8Array): Cleaned {
 function cleanGps(b: Uint8Array): Cleaned {
   const out = b.slice();
   const drop: Segment[] = [];
-  const cleanImage = (from: number): number => {
+  const done = new Set<number>();
+  const cleanImage = (from: number): JpegLayout => {
+    done.add(from);
     const layout = walkJpeg(out, from);
     for (const s of layout.segments) {
       if (s.kind === "exif") {
@@ -232,26 +266,37 @@ function cleanGps(b: Uint8Array): Cleaned {
         blankXmpGps(out.subarray(s.data, s.end));
       }
     }
-    return layout.end;
+    return layout;
   };
 
-  let p = cleanImage(0);
+  const primary = cleanImage(0);
   // Images stored after the main one (Multi-Picture Format): clean each while they parse.
+  let p = primary.end;
   for (let guard = 0; guard < 64 && p + 4 <= out.length; guard++) {
     const next = out.indexOf(0xff, p);
     if (next < 0 || out[next + 1] !== 0xd8 || out[next + 2] !== 0xff) break;
     try {
-      p = cleanImage(next);
+      p = cleanImage(next).end;
     } catch (err) {
       if (!(err instanceof JpegError)) throw err;
       break;
+    }
+  }
+  // Then every image the MPF index points to, in case other data sits between the images.
+  for (const at of mpfImageStarts(out, primary)) {
+    if (done.has(at)) continue;
+    try {
+      cleanImage(at);
+    } catch (err) {
+      if (!(err instanceof JpegError)) throw err;
     }
   }
 
   if (drop.length === 0) return { bytes: out, keptOrientation: null, droppedUnreadable: false };
   const parts: Uint8Array[] = [];
   let at = 0;
-  for (const s of drop) {
+  for (const s of drop.sort((x, y) => x.start - y.start)) {
+    if (s.start < at) continue; // an index pointing into an image already cut: skip the overlap
     parts.push(out.subarray(at, s.start));
     at = s.end;
   }

@@ -159,6 +159,43 @@ export function jpegWithMetadata(base: Uint8Array, meta: FixtureMeta = DEFAULT_M
   return cat([base.subarray(0, at), ...segs, base.subarray(at)]);
 }
 
+/**
+ * A multi-picture JPEG like a phone's HDR photo: `primary` with an MPF index (APP2) inserted after its
+ * APP0, then `gap` (bytes some phones store between the images), then `secondary` (say, a gain map),
+ * which the index points to.
+ */
+export function jpegWithMpf(primary: Uint8Array, secondary: Uint8Array, gap: Uint8Array = new Uint8Array()): Uint8Array {
+  let at = 2;
+  if (primary[2] === 0xff && primary[3] === 0xe0) at = 4 + ((primary[4]! << 8) | primary[5]!);
+  // Big-endian TIFF: header, IFD (version, image count, MP entry pointer), then two 16-byte entries.
+  const tiff = new Uint8Array(8 + 2 + 3 * 12 + 4 + 32);
+  const dv = new DataView(tiff.buffer);
+  tiff.set(enc("MM\0*"));
+  dv.setUint32(4, 8);
+  dv.setUint16(8, 3);
+  const entry = (i: number, tag: number, type: number, n: number, value: number) => {
+    const e = 10 + i * 12;
+    dv.setUint16(e, tag);
+    dv.setUint16(e + 2, type);
+    dv.setUint32(e + 4, n);
+    dv.setUint32(e + 8, value);
+  };
+  entry(0, 0xb000, 7, 4, 0x30313030); // "0100"
+  entry(1, 0xb001, 4, 1, 2);
+  entry(2, 0xb002, 7, 32, 50);
+  const seg = segment(0xe2, [...enc("MPF\0"), ...tiff]);
+  const head = cat([primary.subarray(0, at), seg, primary.subarray(at)]);
+  const tiffStart = at + 4 + 4;
+  const out = cat([head, gap, secondary]);
+  const mp = new DataView(out.buffer, tiffStart + 50, 32);
+  mp.setUint32(0, 0x030000); // baseline primary image
+  mp.setUint32(4, head.length);
+  mp.setUint32(8, 0);
+  mp.setUint32(20, secondary.length);
+  mp.setUint32(24, head.length + gap.length - tiffStart);
+  return out;
+}
+
 let crcTable: number[] | undefined;
 function crc(b: Uint8Array): number {
   crcTable ??= Array.from({ length: 256 }, (_, n) => {
