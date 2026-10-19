@@ -45,7 +45,10 @@ async function enforceHeaders(context: BrowserContext, origin: string): Promise<
 
 async function watch(page: Page, baseURL: string) {
   const origin = new URL(baseURL).origin;
-  const routed = await enforceHeaders(page.context(), origin);
+  // Only locally: a deployed site sends its own headers, and routing remote pages through route.fetch
+  // stops Firefox from mounting the tool.
+  const local = new URL(baseURL).hostname === "localhost";
+  const routed = local ? await enforceHeaders(page.context(), origin) : [];
   const requests: { url: string; method: string }[] = [];
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
@@ -128,8 +131,10 @@ test("/image-to-text/ reads English text from a screenshot, same-origin only", a
   expect(loaded.some((p) => /ita\.traineddata/.test(p))).toBe(false);
   expect(loaded.some((p) => /tesseract-core-(relaxedsimd-|simd-)?lstm(\.[\w-]+)?\.wasm$/.test(p))).toBe(true);
   // The worker entry and the scripts it imports were served with the production headers too.
-  expect(w.routed.some((u) => /tess-worker[^/]*\.js/.test(u))).toBe(true);
-  expect(w.routed.some((u) => /worker\.min[^/]*\.js/.test(u))).toBe(true);
+  if (new URL(baseURL!).hostname === "localhost") {
+    expect(w.routed.some((u) => /tess-worker[^/]*\.js/.test(u))).toBe(true);
+    expect(w.routed.some((u) => /worker\.min[^/]*\.js/.test(u))).toBe(true);
+  }
   w.assertPrivate();
 });
 
