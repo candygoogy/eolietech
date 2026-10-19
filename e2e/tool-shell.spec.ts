@@ -23,6 +23,9 @@ const TOOLS = {
   "pdf-to-image": "pdf-to-jpg",
   "p7m-opener": "open-p7m-file",
   "fattura-viewer": "fatturapa-viewer",
+  "pdf-redact": "redact-pdf",
+  "pdf-sign": "sign-pdf",
+  "ocr": "image-to-text",
   "background-remover": "remove-background",
   "audio-transcribe": "transcribe-audio",
 } as const;

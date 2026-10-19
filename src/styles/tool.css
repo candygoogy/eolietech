@@ -183,7 +183,10 @@
 
 [data-tool-id="pdf-to-image"],
 [data-tool-id="p7m-opener"],
-[data-tool-id="fattura-viewer"] {
+[data-tool-id="fattura-viewer"],
+[data-tool-id="pdf-redact"],
+[data-tool-id="pdf-sign"],
+[data-tool-id="ocr"] {
   --tool-shell: 13.0313rem;
   --tool-shell-rest: 0rem;
 }
@@ -199,7 +202,10 @@
       [data-tool-id="image-crop"],
       [data-tool-id="pdf-to-image"],
       [data-tool-id="p7m-opener"],
-      [data-tool-id="fattura-viewer"]
+      [data-tool-id="fattura-viewer"],
+      [data-tool-id="pdf-redact"],
+      [data-tool-id="pdf-sign"],
+      [data-tool-id="ocr"]
     )
     > .tool
     > .tool-drop {
