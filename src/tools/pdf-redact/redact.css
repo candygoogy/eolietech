@@ -1,0 +1,386 @@
+/*
+ * Redact PDF only. Pages sit in a well like the cropper's photo, each on white paper with a 1px
+ * ring (paper in both themes, as in Organize PDF). Boxes are see-through ink so you can check what
+ * they cover; the saved file paints them solid. The box you are working on gets the sulphur
+ * brackets of the image tools. Sizes and positions come from client.ts (element.style), never
+ * from inline style attributes.
+ */
+
+/* Once a PDF is open, the drop well shrinks to a "choose another" strip (as in the cropper). */
+.tool--pdf-redact[data-loaded] > .tool-drop {
+  min-height: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.tool--pdf-redact[data-loaded] > .tool-drop::before {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0;
+}
+
+.tool--pdf-redact[data-loaded] .tool-drop__label {
+  font-size: var(--text-lg);
+}
+
+@media (max-width: 36rem) {
+  .tool--pdf-redact[data-loaded] .tool-drop__hint {
+    display: none;
+  }
+}
+
+.redact-editor {
+  display: grid;
+  gap: var(--space-4);
+}
+
+[data-settled] .redact-editor {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  [data-settled] .redact-editor {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
+}
+
+/* ---------- search ---------- */
+.redact-search {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--tool-well, var(--color-sunken));
+}
+
+.redact-search legend {
+  float: left;
+  width: 100%;
+  padding-bottom: var(--space-1);
+  font-weight: 700;
+}
+
+.redact-search > label,
+.redact-search__quick-label {
+  clear: both;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.redact-search__quick-label {
+  margin-top: var(--space-2);
+}
+
+.redact-search__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.redact-search__row input {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.redact-search__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* The notes explain the controls right above them. */
+.redact-search > .tool-note {
+  margin-top: var(--space-1);
+}
+
+.redact-editor > .tool-note + .tool-note {
+  margin-top: calc(var(--space-1) - var(--space-4));
+}
+
+/* ---------- pages ---------- */
+.redact-pages {
+  display: grid;
+  gap: var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.redact-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.redact-page__name {
+  font-weight: 700;
+}
+
+.redact-page__meta {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Matches found on this page: ink on paper, like a stamp count. */
+.redact-page__found {
+  padding: 0.0625rem 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.redact-page__head .btn {
+  margin-inline-start: auto;
+  padding-inline: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.redact-stage {
+  --redact-max-h: min(85vh, 60rem);
+  display: grid;
+  justify-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--tool-well, var(--color-sunken));
+}
+
+@media (max-width: 36rem) {
+  .redact-stage {
+    padding: var(--space-2);
+  }
+}
+
+.redact-frame {
+  position: relative;
+  width: min(100%, calc(var(--redact-max-h) * var(--redact-r, 0.7071)));
+  aspect-ratio: var(--redact-ratio, 210 / 297);
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--color-border);
+  cursor: crosshair;
+  /* A finger on the page still scrolls up and down; sideways drags draw. Boxes take every gesture. */
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.redact-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.redact-canvas[data-enter] {
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  .redact-canvas[data-enter] {
+    opacity: 0;
+  }
+}
+
+.redact-frame__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--text-sm);
+  color: #5c5c5c;
+}
+
+/* ---------- boxes ---------- */
+.redact-box {
+  --redact-hit: 0.75rem;
+  --redact-mark: #f6cf2c; /* --sulphur-400: the same in both themes, it sits on white paper */
+  position: absolute;
+  z-index: 1;
+  background: rgb(0 0 0 / 0.62);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5);
+  cursor: move;
+  touch-action: none;
+}
+
+@media (pointer: coarse) {
+  .redact-box {
+    --redact-hit: 1.25rem;
+  }
+}
+
+.redact-box[data-selected] {
+  z-index: 2;
+  background: rgb(0 0 0 / 0.5);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 0 0 2px var(--redact-mark),
+    0 0 0 3px rgb(0 0 0 / 0.6);
+}
+
+.redact-box:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Handles sit outside the box, so even a box one line of text high can be moved from inside. */
+.redact-handle {
+  position: absolute;
+  display: none;
+}
+
+.redact-box[data-selected] .redact-handle {
+  display: block;
+}
+
+.redact-handle[data-handle="n"],
+.redact-handle[data-handle="s"] {
+  left: 0;
+  right: 0;
+  height: var(--redact-hit);
+  cursor: ns-resize;
+}
+
+.redact-handle[data-handle="e"],
+.redact-handle[data-handle="w"] {
+  top: 0;
+  bottom: 0;
+  width: var(--redact-hit);
+  cursor: ew-resize;
+}
+
+.redact-handle[data-handle="n"] {
+  bottom: 100%;
+}
+
+.redact-handle[data-handle="s"] {
+  top: 100%;
+}
+
+.redact-handle[data-handle="w"] {
+  right: 100%;
+}
+
+.redact-handle[data-handle="e"] {
+  left: 100%;
+}
+
+.redact-handle[data-handle="nw"],
+.redact-handle[data-handle="ne"],
+.redact-handle[data-handle="se"],
+.redact-handle[data-handle="sw"] {
+  width: var(--redact-hit);
+  height: var(--redact-hit);
+}
+
+.redact-handle[data-handle="nw"] {
+  right: 100%;
+  bottom: 100%;
+  cursor: nwse-resize;
+}
+
+.redact-handle[data-handle="ne"] {
+  left: 100%;
+  bottom: 100%;
+  cursor: nesw-resize;
+}
+
+.redact-handle[data-handle="se"] {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
+
+.redact-handle[data-handle="sw"] {
+  right: 100%;
+  top: 100%;
+  cursor: nesw-resize;
+}
+
+/* Corner marks: small sulphur squares with a dark edge, readable on white paper and on the box. */
+.redact-handle[data-handle$="w"]:not([data-handle="w"])::after,
+.redact-handle[data-handle$="e"]:not([data-handle="e"])::after {
+  content: "";
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--redact-mark);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.7);
+}
+
+.redact-handle[data-handle="nw"]::after {
+  right: -0.25rem;
+  bottom: -0.25rem;
+}
+
+.redact-handle[data-handle="ne"]::after {
+  left: -0.25rem;
+  bottom: -0.25rem;
+}
+
+.redact-handle[data-handle="se"]::after {
+  left: -0.25rem;
+  top: -0.25rem;
+}
+
+.redact-handle[data-handle="sw"]::after {
+  right: -0.25rem;
+  top: -0.25rem;
+}
+
+/* Remove: a small round ink button off the top-right corner, shown for the box you are working on. */
+.redact-box__remove {
+  position: absolute;
+  z-index: 3;
+  bottom: calc(100% + var(--redact-hit));
+  left: calc(100% + var(--redact-hit) - 1.5rem);
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  .redact-box__remove {
+    width: 2rem;
+    height: 2rem;
+    left: calc(100% + var(--redact-hit) - 2rem);
+  }
+}
+
+.redact-box[data-selected] .redact-box__remove,
+.redact-box__remove:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.redact-box__remove:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* While drawing or dragging, the remove button would only get in the way. */
+.redact-box[data-dragging] .redact-box__remove {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- result ---------- */
+.tool--pdf-redact > .redact-note {
+  max-width: var(--measure, 65ch);
+}
