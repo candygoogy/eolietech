@@ -1,0 +1,33 @@
+/*
+ * EXIF remover only: the "what this photo reveals" lines inside a file row. Small, muted text like
+ * the row's meta line; the location is set in full ink and bold, since it matters most. Once a photo
+ * is cleaned, the lines that were removed are struck through (all of them, or only the location).
+ */
+.exif-facts {
+  display: grid;
+  gap: 0.125rem;
+  margin: 0.25rem 0 0.375rem;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.exif-facts > [data-kind="location"] {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.exif-facts[data-removed="all"] > :is([data-kind="found"], [data-kind="location"]),
+.exif-facts[data-removed="gps"] > [data-kind="location"] {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+/* The note under "What to remove" changes with the choice; two lines reserved so switching (or the
+   location page, which starts on the other choice) never moves the list below. */
+.tool-options > .tool-note.exif-mode-note {
+  min-height: 2lh;
+}

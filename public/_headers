@@ -73,6 +73,20 @@
   Cross-Origin-Embedder-Policy: credentialless
 /transcribe-audio/
   Cross-Origin-Embedder-Policy: credentialless
+/remove-exif/
+  Cross-Origin-Embedder-Policy: credentialless
+/remove-location-from-photo/
+  Cross-Origin-Embedder-Policy: credentialless
+/jpg-to-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/png-to-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/heic-to-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/pdf-to-jpg/
+  Cross-Origin-Embedder-Policy: credentialless
+/pdf-to-png/
+  Cross-Origin-Embedder-Policy: credentialless
 /it/comprimere-immagini/
   Cross-Origin-Embedder-Policy: credentialless
 /it/webp-in-png/
@@ -120,4 +134,18 @@
 /it/rimuovere-sfondo/
   Cross-Origin-Embedder-Policy: credentialless
 /it/trascrivere-audio/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/rimuovere-exif/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/rimuovere-posizione-dalle-foto/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/jpg-in-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/png-in-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/heic-in-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/pdf-in-jpg/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/pdf-in-png/
   Cross-Origin-Embedder-Policy: credentialless

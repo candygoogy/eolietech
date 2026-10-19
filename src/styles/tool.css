@@ -171,6 +171,21 @@
   --tool-shell-rest: 0rem;
 }
 
+[data-tool-id="exif-remover"] {
+  --tool-shell: 28.9785rem;
+  --tool-shell-rest: 14.4941rem;
+}
+
+[data-tool-id="image-to-pdf"] {
+  --tool-shell: 36.2969rem;
+  --tool-shell-rest: 14.2813rem;
+}
+
+[data-tool-id="pdf-to-image"] {
+  --tool-shell: 13.0313rem;
+  --tool-shell-rest: 0rem;
+}
+
 /* Resizer: an image too small to enlarge is finished but unchanged in size, so plain ink, not success green. */
 [data-tool-id="image-resize"] .tool-item[data-state="done"][data-outcome="not-enlarged"] .tool-item__meta {
   color: var(--color-text);

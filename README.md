@@ -36,10 +36,13 @@ The registry is `src/tools/registry.ts`. Every tool below has `status: "live"`.
 | HEIC to JPG | `/heic-to-jpg/` | `heic-to` (libheif, its CSP build), then jSquash MozJPEG or OxiPNG to encode |
 | Resize images | `/resize-image/` | jSquash codecs and `@jsquash/resize` (Lanczos3), shared with Compress images |
 | Crop image | `/crop-image/` | jSquash codecs to decode and encode; the crop is a plain pixel copy in a Web Worker |
+| Remove EXIF data | `/remove-exif/` | None: JPEG, PNG and WebP metadata is removed by rewriting the file's own segments, so the image data is never re-encoded |
 | Merge PDF | `/merge-pdf/` | `pdf-lib` |
 | Split PDF | `/split-pdf/` | `pdf-lib` |
 | Organize PDF | `/organize-pdf/` | `pdf-lib`, plus `pdfjs-dist` for page thumbnails |
 | Compress PDF | `/compress-pdf/` | Ghostscript compiled to WebAssembly (`@okathira/ghostpdl-wasm`, AGPL-3.0) |
+| JPG to PDF | `/jpg-to-pdf/` | `pdf-lib` (JPG and PNG embedded as they are); jSquash and `heic-to` to decode other formats |
+| PDF to JPG | `/pdf-to-jpg/` | `pdfjs-dist` to render pages, jSquash MozJPEG or OxiPNG to encode, `client-zip` |
 | Remove background | `/remove-background/` | BiRefNet lite (512x512, fp16 ONNX) on ONNX Runtime Web (`onnxruntime-web`, installed as a dependency of `@huggingface/transformers`) |
 | Transcribe audio | `/transcribe-audio/` | Whisper base (multilingual ONNX) through `@huggingface/transformers` on ONNX Runtime Web |
 

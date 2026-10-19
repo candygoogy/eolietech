@@ -26,6 +26,9 @@ const pages: [it: string, en: string][] = [
   ["/it/comprimere-pdf/", "/compress-pdf/"],
   ["/it/rimuovere-sfondo/", "/remove-background/"],
   ["/it/trascrivere-audio/", "/transcribe-audio/"],
+  ["/it/rimuovere-exif/", "/remove-exif/"],
+  ["/it/jpg-in-pdf/", "/jpg-to-pdf/"],
+  ["/it/pdf-in-jpg/", "/pdf-to-jpg/"],
 ];
 
 for (const [it, en] of pages) {

@@ -2,7 +2,7 @@ import type { Locale, ToolDef, ToolVariant } from "./types";
 
 const MiB = 1024 * 1024;
 
-/** Image format conversion variant (preset consumed by the image-compress client). */
+/** Format conversion variant ({ from, to } preset, read by the tool's client; labelled "PNG to WebP" on /tools/). */
 const convert = (from: string, to: string): ToolVariant => ({
   id: `${from}-to-${to}`,
   slug: { en: `${from}-to-${to}`, it: `${from}-in-${to}` },
@@ -31,7 +31,7 @@ export const tools: ToolDef[] = [
       convert("avif", "jpg"),
       convert("avif", "png"),
     ],
-    related: ["image-resize", "image-crop", "heic-to-jpg", "background-remover"],
+    related: ["image-resize", "image-crop", "exif-remover", "heic-to-jpg", "background-remover"],
     updated: "2026-10-17",
   },
   {
@@ -95,6 +95,25 @@ export const tools: ToolDef[] = [
     updated: "2026-10-18",
   },
   {
+    id: "exif-remover",
+    slug: { en: "remove-exif", it: "rimuovere-exif" },
+    category: "image",
+    runtime: "client",
+    status: "live",
+    wave: 1,
+    locales: ["en", "it"],
+    limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
+    variants: [
+      {
+        id: "location",
+        slug: { en: "remove-location-from-photo", it: "rimuovere-posizione-dalle-foto" },
+        preset: { only: "gps" },
+      },
+    ],
+    related: ["image-compress", "image-resize", "heic-to-jpg"],
+    updated: "2026-10-19",
+  },
+  {
     id: "pdf-merge",
     slug: { en: "merge-pdf", it: "unire-pdf" },
     category: "pdf",
@@ -103,7 +122,7 @@ export const tools: ToolDef[] = [
     wave: 1,
     locales: ["en", "it"],
     limits: { free: { maxBytes: 500 * MiB, maxFiles: 50 } },
-    related: ["pdf-split", "pdf-organize", "pdf-compress"],
+    related: ["pdf-split", "pdf-organize", "pdf-compress", "image-to-pdf"],
     updated: "2026-10-17",
   },
   {
@@ -141,6 +160,32 @@ export const tools: ToolDef[] = [
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 10 } },
     related: ["pdf-merge", "pdf-split", "image-compress"],
     updated: "2026-10-17",
+  },
+  {
+    id: "image-to-pdf",
+    slug: { en: "jpg-to-pdf", it: "jpg-in-pdf" },
+    category: "pdf",
+    runtime: "client",
+    status: "live",
+    wave: 1,
+    locales: ["en", "it"],
+    limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
+    variants: [convert("png", "pdf"), convert("heic", "pdf")],
+    related: ["pdf-to-image", "pdf-merge", "pdf-compress"],
+    updated: "2026-10-19",
+  },
+  {
+    id: "pdf-to-image",
+    slug: { en: "pdf-to-jpg", it: "pdf-in-jpg" },
+    category: "pdf",
+    runtime: "client",
+    status: "live",
+    wave: 1,
+    locales: ["en", "it"],
+    limits: { free: { maxBytes: 500 * MiB, maxFiles: 1 } },
+    variants: [convert("pdf", "png")],
+    related: ["image-to-pdf", "pdf-split", "image-compress"],
+    updated: "2026-10-19",
   },
   {
     id: "background-remover",

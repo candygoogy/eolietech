@@ -14,10 +14,13 @@ const TOOLS = {
   "heic-to-jpg": "heic-to-jpg",
   "image-resize": "resize-image",
   "image-crop": "crop-image",
+  "exif-remover": "remove-exif",
   "pdf-merge": "merge-pdf",
   "pdf-split": "split-pdf",
   "pdf-organize": "organize-pdf",
   "pdf-compress": "compress-pdf",
+  "image-to-pdf": "jpg-to-pdf",
+  "pdf-to-image": "pdf-to-jpg",
   "background-remover": "remove-background",
   "audio-transcribe": "transcribe-audio",
 } as const;
