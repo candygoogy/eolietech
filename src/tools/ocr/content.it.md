@@ -1,0 +1,101 @@
+---
+title: "Estrarre testo da immagine (OCR) senza caricarla | Eolietech"
+description: "Ricava il testo da screenshot, foto di documenti e pagine scansionate, in italiano o in inglese. Tesseract gira nel tuo browser: le immagini non vengono mai caricate."
+h1: "Estrarre testo da un'immagine"
+intro: "Trascina uno screenshot, la foto di una lettera o una pagina scansionata e ottieni le parole come testo da copiare, modificare e cercare. La lettura avviene sul tuo dispositivo, quindi l'immagine non esce mai da lì."
+howTo:
+  - "Scegli una o più immagini (JPG, PNG o WebP), oppure trascinale nel riquadro qui sopra. Vanno bene anche i PDF scansionati."
+  - "Scegli la lingua del testo: italiano, inglese, oppure entrambe se la pagina le mescola."
+  - "Premi Leggi il testo. La prima volta il browser scarica da questo sito il motore di lettura e i dati della lingua: circa 5,5 MB per l'italiano."
+  - "Leggi il testo sotto ogni file, copialo o scaricalo come file .txt. Con più file, Scarica tutto salva tutti i testi in un unico .zip."
+faq:
+  - q: "Le mie immagini vengono caricate?"
+    a: "No. Il browser apre ogni immagine e Tesseract, un motore open source di riconoscimento del testo, la legge dentro questa scheda. Gli unici download sono il motore e i dati della lingua, entrambi da questo sito. Il testo nasce sul tuo dispositivo e resta lì finché non lo copi o lo salvi."
+  - q: "Quanto è preciso?"
+    a: "Stampati puliti e screenshot di solito escono con pochi errori o nessuno: lettere, scontrini, pagine di libri, slide, messaggi di errore. La precisione cala con foto mosse o buie, testo piccolo fotografato da lontano, pagine curve, caratteri decorativi e scritte su sfondi pieni di dettagli. La scrittura a mano quasi sempre non funziona, perché Tesseract è addestrato sul testo stampato. Quando un file viene letto male, lo strumento te lo dice. In ogni caso controlla nomi, numeri e importi sull'originale prima di fidarti."
+  - q: "Come ottengo risultati migliori?"
+    a: "Inquadra solo la pagina, fotografala dritta, con buona luce e ben distesa. Se la foto è girata, ruotala prima di aggiungerla. Se il testo è minuscolo, un'immagine più grande o più nitida aiuta più di qualsiasi altra cosa. E scegli la lingua giusta: con l'italiano selezionato, parole come perché e città mantengono gli accenti."
+  - q: "Perché la prima volta scarica circa 5,5 MB?"
+    a: "È Tesseract compilato in WebAssembly (circa 3 MB) più il modello addestrato per la tua lingua: 2,6 MB per l'italiano, 3,9 MB per l'inglese, poco meno di 10 MB con entrambe. Non viene scaricato niente finché non premi Leggi il testo, e il browser tiene i file nella sua normale cache, così la volta dopo parte molto prima."
+  - q: "Legge anche i PDF?"
+    a: "Sì, trascina qui un PDF scansionato e ottieni il suo testo. OCR PDF fa lo stesso e in più ti restituisce una copia del PDF in cui puoi cercare, con il testo nascosto sotto la scansione."
+  - q: "E le foto HEIC dell'iPhone?"
+    a: "Questo strumento non apre i file HEIC. Convertili prima con da HEIC a JPG: ci vogliono pochi secondi e anche quello lavora sul tuo dispositivo."
+ui:
+  ocr.drop.label: "Scegli le immagini o trascinale qui"
+  ocr.drop.hint: "JPG, PNG, WebP o PDF. Lette sul tuo dispositivo, mai caricate."
+  ocr.drop.labelPdf: "Scegli un PDF o trascinalo qui"
+  ocr.drop.hintPdf: "Vanno bene anche le immagini. Tutto resta sul tuo dispositivo."
+  ocr.lang.label: "Lingua del testo"
+  ocr.lang.eng: "Inglese"
+  ocr.lang.ita: "Italiano"
+  ocr.lang.both: "Italiano e inglese"
+  ocr.lang.note: "Se Tesseract conosce la lingua, sbaglia meno parole e accenti. Scegli entrambe solo per pagine che le mescolano, perché è un po' più lento."
+  ocr.allPages: "Leggi anche le pagine che hanno già del testo"
+  ocr.allPages.note: "Le pagine con testo già selezionabile restano come sono e quel testo finisce direttamente nel .txt. Spunta questa casella se esce pasticciato, o se le tue scansioni hanno solo un piccolo timbro o piè di pagina stampato."
+  ocr.firstRun: "La prima volta il browser scarica da questo sito il motore di lettura e i dati della lingua ({size}). Poi tutto gira sul tuo dispositivo."
+  ocr.start.one: "Leggi il testo di {count} file"
+  ocr.start.other: "Leggi il testo di {count} file"
+  ocr.stop: "Ferma"
+  ocr.engineProgress: "Download dei dati della lingua"
+  ocr.list: "File"
+  ocr.itemProgress: "Avanzamento di {name}"
+  ocr.engine.starting: "Avvio del motore di lettura…"
+  ocr.engine.downloading: "Download dei dati della lingua: {loaded} di {total}"
+  ocr.summary.working.one: "Lettura del file {current} di {total}…"
+  ocr.summary.working.other: "Lettura del file {current} di {total}…"
+  ocr.summary.done.one: "Testo di {count} file pronto."
+  ocr.summary.done.other: "Testo di {count} file pronto."
+  ocr.summary.ready.one: "{count} file pronto da leggere."
+  ocr.summary.ready.other: "{count} file pronti da leggere."
+  ocr.summary.failed.one: "{count} file non è stato letto."
+  ocr.summary.failed.other: "{count} file non sono stati letti."
+  ocr.summary.stopped: "Fermato. I file già letti tengono il loro testo."
+  ocr.status.pending: "{size}, pronto da leggere"
+  ocr.status.pendingPdf: "PDF, {size}, pronto da leggere"
+  ocr.status.starting: "Preparazione…"
+  ocr.status.reading: "Lettura… {percent}%"
+  ocr.status.page: "Pagina {page} di {pages}… {percent}%"
+  ocr.status.words.one: "{count} parola"
+  ocr.status.words.other: "{count} parole"
+  ocr.status.noWords: "Nessun testo trovato"
+  ocr.status.pages.one: "{count} pagina"
+  ocr.status.pages.other: "{count} pagine"
+  ocr.skipped.one: "La pagina {pages} aveva già del testo: è rimasta com'era e il suo testo è stato copiato così com'è."
+  ocr.skipped.other: "Le pagine {pages} avevano già del testo: sono rimaste com'erano e il loro testo è stato copiato così com'è."
+  ocr.skipped.all: "Ogni pagina di questo PDF ha già testo selezionabile, quindi non c'era niente da leggere. Eccolo qui."
+  ocr.empty: "Nessun testo trovato. Se ci vedi del testo, prova con una copia più nitida o più grande, oppure controlla la lingua."
+  ocr.lowConfidence: "Tesseract non era sicuro di alcune parti, quindi aspettati qualche parola letta male. Controlla nomi, numeri e importi sull'originale."
+  ocr.textLabel: "Testo di {name}"
+  ocr.downloadTxt: "Scarica .txt"
+  ocr.downloadTxtNamed: "Scarica il testo di {name}"
+  ocr.downloadPdf: "Scarica il PDF ricercabile"
+  ocr.downloadPdfNamed: "Scarica il PDF ricercabile di {name}"
+  ocr.copy: "Copia il testo"
+  ocr.copyNamed: "Copia il testo di {name}"
+  ocr.copied: "Testo di {name} copiato."
+  ocr.copyFailed: "La copia non è riuscita. Seleziona il testo e copialo a mano."
+  ocr.removeNamed: "Rimuovi {name}"
+  ocr.pageHeading: "[Pagina {page}]"
+  ocr.pdfName: "{name}-ocr.pdf"
+  ocr.zipName: "testo-dalle-immagini.zip"
+  ocr.error.load: "Non è stato possibile caricare il motore di lettura. Controlla la connessione e riprova. Se continua a succedere, ricarica la pagina."
+  ocr.error.image: "Non è stato possibile aprire {name} come immagine. Potrebbe essere danneggiato o in un formato che il tuo browser non sa mostrare."
+  ocr.error.heic: "{name} è una foto HEIC, che questo strumento non sa aprire. Convertila prima con"
+  ocr.error.heicLink: "da HEIC a JPG"
+  ocr.error.heicHref: "/it/heic-in-jpg/"
+---
+
+## Come funziona
+
+Questo strumento usa [Tesseract](https://github.com/tesseract-ocr/tesseract), un motore open source di riconoscimento del testo nato in HP e oggi curato dalla sua comunità, compilato in WebAssembly da [tesseract.js](https://github.com/naptha/tesseract.js). Il browser apre l'immagine, la raddrizza se la fotocamera l'ha salvata girata e la mette su uno sfondo bianco. Le immagini piccole, come gran parte degli screenshot, vengono lette al doppio delle dimensioni, perché Tesseract perde meno lettere quando sono più grandi. Poi Tesseract trova le righe di testo e legge ciascuna con una piccola rete neurale addestrata sul testo stampato.
+
+Usiamo i modelli "fast" di Tesseract per l'italiano e l'inglese. Sono molto più leggeri dei modelli più precisi e nel browser leggono più in fretta, in cambio di qualche errore in più sulle immagini difficili. Su screenshot e scansioni pulite la differenza è piccola.
+
+## Cosa aspettarti
+
+Il testo stampato è quello che Tesseract legge bene: documenti, lettere, scontrini, screenshot di chat e pagine web, pagine di libri, slide. Colonne e tabelle escono come testo nell'ordine di lettura, senza l'impaginazione. La scrittura a mano, le scritte su superfici curve o stropicciate, il testo minuscolo o sfocato e i caratteri artistici sono i casi in cui fa fatica. Se una pagina è importante, rileggi il risultato confrontandolo con l'originale.
+
+## Privacy, limiti e licenze
+
+Le tue immagini non escono mai dal tuo dispositivo. Puoi aggiungere fino a 20 file da 50 MB ciascuno, che vengono letti uno alla volta: la pagina resta reattiva e puoi fermarti quando vuoi. Il motore e i dati delle lingue arrivano da questo sito e non viene inviato niente a un server. Per i PDF scansionati che vuoi tenere come PDF, [OCR PDF](/it/ocr-pdf/) aggiunge un livello di testo invisibile, così puoi cercare nel file. Tesseract, tesseract.js e i modelli linguistici tessdata_fast sono rilasciati con licenza Apache 2.0.

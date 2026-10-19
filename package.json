@@ -9,9 +9,9 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "node scripts/fetch-models.mjs && astro dev",
+    "dev": "node scripts/fetch-models.mjs && node scripts/fetch-ocr-data.mjs && astro dev",
     "dev:api": "wrangler dev",
-    "build": "node scripts/fetch-models.mjs && astro build",
+    "build": "node scripts/fetch-models.mjs && node scripts/fetch-ocr-data.mjs && astro build",
     "preview": "npm run build && wrangler dev",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -33,7 +33,9 @@
     "heic-to": "1.6.6",
     "hono": "4.13.13",
     "pdf-lib": "1.17.1",
-    "pdfjs-dist": "6.4.299"
+    "pdfjs-dist": "6.4.299",
+    "tesseract.js": "7.0.0",
+    "tesseract.js-core": "7.0.0"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

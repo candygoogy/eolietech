@@ -8,6 +8,9 @@ dist/
 # AI model files: downloaded, verified and chunked by scripts/fetch-models.mjs (never committed)
 public/models/
 
+# OCR language data: downloaded and verified by scripts/fetch-ocr-data.mjs (never committed)
+public/tessdata/
+
 # cloudflare
 .wrangler/
 .dev.vars

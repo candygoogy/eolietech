@@ -1,0 +1,38 @@
+/*
+ * Image to text only: the recognised text sits under its file row, full width, as a well on the row
+ * (the panel surface, so it reads as a sheet laid on the row), keeping the line breaks Tesseract
+ * found. Scrolls inside itself so a long PDF does not push the other files off screen.
+ */
+.tool--ocr .tool-item > .ocr-result {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.tool--ocr .ocr-text {
+  max-height: 20rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: auto;
+  overscroll-behavior: contain;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.tool--ocr .ocr-text:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tool--ocr .ocr-result > .tool-actions {
+  justify-content: flex-start;
+}
+
+.tool--ocr .tool-item .tool-progress {
+  margin-top: var(--space-1);
+}
