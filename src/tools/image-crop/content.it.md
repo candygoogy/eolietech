@@ -5,7 +5,7 @@ h1: "Ritaglia un'immagine"
 intro: "Disegna un riquadro sulla parte della foto che vuoi tenere, a mano libera o con proporzioni fisse come 1:1 o 16:9, e salva solo quella, a piena risoluzione. Il ritaglio avviene sul tuo dispositivo, quindi l'immagine non viene mai caricata."
 howTo:
   - "Scegli un'immagine o trascinala nel riquadro qui sopra. Si ritaglia un'immagine alla volta, fino a 100 MB."
-  - "Scegli le proporzioni (Libero, Originale, 1:1, 4:5, 3:2 o 16:9), poi trascina il riquadro sulla parte da tenere e tira gli angoli o i bordi per cambiarne la misura. Ruota proporzioni trasforma 4:5 in 5:4."
+  - "Scegli le proporzioni (Libero, Originale, 1:1, 4:5, 3:4, 3:2 o 16:9), poi trascina il riquadro sulla parte da tenere e tira gli angoli o i bordi per cambiarne la misura. Ruota proporzioni trasforma 4:5 in 5:4."
   - "Per un taglio preciso, scrivi posizione e misure in pixel nei campi sotto l'immagine. In Salva come lascia il formato originale, oppure scegli JPG, PNG, WebP o AVIF."
   - "Premi Ritaglia, controlla le nuove misure in pixel e scarica il file."
 faq:
@@ -64,10 +64,11 @@ ui:
 
 - 1:1 va bene per foto profilo, avatar, foto di prodotti e post quadrati. [Ritaglia in quadrato](/it/ritagliare-immagine-quadrata/) si apre con queste proporzioni già impostate.
 - 4:5 è un formato verticale comune nei feed dei social, più alto di un quadrato ma molto più basso dello schermo di un telefono.
+- 3:4 è il formato di una foto scattata col telefono in verticale, ed è il più alto che un post nel feed di Instagram tiene senza ritagliare.
 - 3:2 è il formato delle foto di quasi tutte le reflex e le mirrorless, e della classica stampa 10 × 15 cm.
 - 16:9 va bene per copertine dei video, slide, televisori e sfondi panoramici. [Ritaglia in 16:9](/it/ritagliare-immagine-16-9/) si apre con queste proporzioni già impostate.
 
-**Originale** mantiene la forma della foto, comodo quando vuoi solo togliere un po' di bordo. **Libero** ti lascia disegnare qualsiasi rettangolo. Per girare un formato dall'altro lato premi **Ruota proporzioni**: 4:5 diventa 5:4, 3:2 diventa 2:3 e 16:9 diventa 9:16.
+**Originale** mantiene la forma della foto, comodo quando vuoi solo togliere un po' di bordo. **Libero** ti lascia disegnare qualsiasi rettangolo. Per girare un formato dall'altro lato premi **Ruota proporzioni**: 4:5 diventa 5:4, 3:4 diventa 4:3, 3:2 diventa 2:3 e 16:9 diventa 9:16.
 
 ## Pixel esatti e tastiera
 

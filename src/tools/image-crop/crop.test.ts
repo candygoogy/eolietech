@@ -31,6 +31,8 @@ describe("aspect choices", () => {
     expect(ratioOf("4:5", W, H)).toBeCloseTo(0.8);
     expect(ratioOf("4:5", W, H, true)).toBeCloseTo(1.25);
     expect(ratioOf("1:1", W, H, true)).toBe(1);
+    expect(ratioOf("3:4", W, H)).toBeCloseTo(0.75);
+    expect(ratioLabel("3:4", true)).toBe("4:3");
     expect(ratioLabel("16:9", true)).toBe("9:16");
     expect(ratioLabel("1:1", true)).toBe("1:1");
   });

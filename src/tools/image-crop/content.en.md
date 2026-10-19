@@ -5,7 +5,7 @@ h1: "Crop an image"
 intro: "Draw a box over the part of the photo you want to keep, freely or at a fixed ratio such as 1:1 or 16:9, and save only that part at full resolution. The cropping happens on your device, so the image is never uploaded."
 howTo:
   - "Choose an image or drop it on the box above. The cropper works on one image at a time, up to 100 MB."
-  - "Pick a ratio (Free, Original, 1:1, 4:5, 3:2 or 16:9), then drag the box over the part to keep and pull its corners or edges to change its size. Rotate ratio turns 4:5 into 5:4."
+  - "Pick a ratio (Free, Original, 1:1, 4:5, 3:4, 3:2 or 16:9), then drag the box over the part to keep and pull its corners or edges to change its size. Rotate ratio turns 4:5 into 5:4."
   - "For an exact cut, type the position and size in pixels in the fields under the image. Leave Save as on the original format, or pick JPG, PNG, WebP or AVIF."
   - "Press Crop image, check the new size in pixels, then download the file."
 faq:
@@ -64,10 +64,11 @@ ui:
 
 - 1:1 suits profile pictures, avatars, product photos and square posts. [Crop to a square](/crop-image-square/) opens with it already set.
 - 4:5 is a common portrait shape for social feeds, taller than a square but much shorter than a phone screen.
+- 3:4 is the shape of an upright phone photo, and the tallest portrait an Instagram feed post keeps without cropping.
 - 3:2 is the shape of most DSLR and mirrorless photos, and of a classic 10 × 15 cm print.
 - 16:9 fits video thumbnails, slides, TVs and widescreen wallpapers. [Crop to 16:9](/crop-image-16-9/) opens with it already set.
 
-**Original** keeps the photo's own shape, which is handy when you only want to trim the edges. **Free** lets you draw any rectangle. To turn a ratio the other way, press **Rotate ratio**: 4:5 becomes 5:4, 3:2 becomes 2:3 and 16:9 becomes 9:16.
+**Original** keeps the photo's own shape, which is handy when you only want to trim the edges. **Free** lets you draw any rectangle. To turn a ratio the other way, press **Rotate ratio**: 4:5 becomes 5:4, 3:4 becomes 4:3, 3:2 becomes 2:3 and 16:9 becomes 9:16.
 
 ## Exact pixels and the keyboard
 

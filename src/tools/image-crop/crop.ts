@@ -15,7 +15,7 @@ export type Handle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 export const HANDLES: readonly Handle[] = ["n", "e", "s", "w", "nw", "ne", "se", "sw"];
 
 /** Aspect choices in the order the UI lists them. "original" is the image's own ratio. */
-export const ASPECTS = ["free", "original", "1:1", "4:5", "3:2", "16:9"] as const;
+export const ASPECTS = ["free", "original", "1:1", "4:5", "3:4", "3:2", "16:9"] as const;
 export type AspectId = (typeof ASPECTS)[number];
 
 const isAspect = (v: unknown): v is AspectId => typeof v === "string" && (ASPECTS as readonly string[]).includes(v);
