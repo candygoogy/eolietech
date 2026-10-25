@@ -213,6 +213,15 @@
   }
 }
 
+/* Phones wider than 375px (Lighthouse uses 412px) wrap fewer lines of labels, hints and notes, so a
+ * tool measured at 375px comes out shorter there than its shell. The mounted tool keeps at least the
+ * shell's height, so mounting never pulls the page up; the spare space sits at the bottom of the panel. */
+@media (max-width: 47.99rem) {
+  [data-tool-root][data-mounted] {
+    min-height: var(--tool-shell, 0rem);
+  }
+}
+
 /* Resizer: an image too small to enlarge is finished but unchanged in size, so plain ink, not success green. */
 [data-tool-id="image-resize"] .tool-item[data-state="done"][data-outcome="not-enlarged"] .tool-item__meta {
   color: var(--color-text);

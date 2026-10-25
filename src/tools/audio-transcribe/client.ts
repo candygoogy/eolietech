@@ -13,7 +13,8 @@ import type { ToolCtx } from "../types";
 import { AudioDecodeError, decodeToMono16k } from "./audio";
 import { formatClock, toPlainText, toSegments, toSrt, toVtt, type Segment } from "./subtitles";
 import type { AsrRequest, AsrResponse } from "./worker";
-import "./transcribe.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./transcribe.css?url";
 
 const ACCEPT =
   "audio/*,video/mp4,video/webm,video/quicktime,video/x-matroska,.mp3,.wav,.m4a,.aac,.ogg,.oga,.opus,.flac,.weba,.webm,.mp4,.m4v,.mov,.mkv";

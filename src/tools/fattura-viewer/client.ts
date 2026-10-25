@@ -16,7 +16,8 @@ import type { Invoice, ParsedFile } from "./model";
 import { FatturaError, looksLikeXml, parseFattura } from "./parse";
 import { invoiceTitle, presentInvoice, type Presented } from "./present";
 import { renderInvoice } from "./view";
-import "./fattura.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./fattura.css?url";
 
 const ACCEPT = ".xml,.p7m,text/xml,application/xml,application/pkcs7-mime";
 

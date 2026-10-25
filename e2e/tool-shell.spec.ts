@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
  * server-rendered loading shell whose height is reserved per tool in tool.css (--tool-shell,
  * --tool-shell-rest). When the tool mounts, its first render must have that same height, or
  * everything below the panel jumps. This compares the shell (all scripts blocked) with the mounted
- * tool at a phone and a desktop width. If it fails after a change to a tool's initial UI,
+ * tool at two phone widths (412 is Lighthouse's mobile viewport) and a desktop width. If it fails after a change to a tool's initial UI,
  * re-measure and update the values in tool.css.
  */
 
@@ -30,7 +30,7 @@ const TOOLS = {
   "audio-transcribe": "transcribe-audio",
 } as const;
 
-const WIDTHS = [375, 1280] as const;
+const WIDTHS = [375, 412, 1280] as const;
 const TOLERANCE_PX = 2;
 
 const rootHeight = (page: Page) =>

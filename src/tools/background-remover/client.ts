@@ -12,7 +12,8 @@ import { entryTracker } from "../pdf-shared/dom";
 import type { ToolCtx } from "../types";
 import { outputName } from "./mask";
 import type { BgRequest, BgResponse } from "./worker";
-import "./bg.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./bg.css?url";
 
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif,image/bmp,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp";
 const MODEL_ID = "birefnet-lite-512";

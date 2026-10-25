@@ -30,7 +30,8 @@ import {
   type Rect,
 } from "./crop";
 import type { CropRequest, CropResponse } from "./worker";
-import "./crop.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./crop.css?url";
 
 const INPUTS: RasterFormat[] = ["jpg", "png", "webp", "avif"];
 const FORMAT_NAME: Record<RasterFormat, string> = { jpg: "JPG", png: "PNG", webp: "WebP", avif: "AVIF" };

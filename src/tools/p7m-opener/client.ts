@@ -11,7 +11,8 @@ import { uniqueNames } from "../image-shared/formats";
 import { P7mError, innerFileName, isP7m, openP7m, type P7mErrorCode, type SignerInfo } from "../signed-shared";
 import type { ToolCtx } from "../types";
 import { downloadName, isFatturaPa, overallCheck, signerId, signerName, sniffContent, withPreposition, type Sniffed } from "./inspect";
-import "./p7m.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./p7m.css?url";
 
 /** Every file is accepted and sniffed: .p7m files often arrive renamed, or with no type the picker knows. */
 const ACCEPT = "";

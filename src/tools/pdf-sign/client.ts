@@ -24,7 +24,8 @@ import {
   type ViewRect,
 } from "./geometry";
 import { extractSignature, strengthToThreshold, suggestThreshold, thresholdToStrength, trimToInk, type Rgba } from "./ink";
-import "./sign.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./sign.css?url";
 
 const ACCEPT = "application/pdf,.pdf";
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp";

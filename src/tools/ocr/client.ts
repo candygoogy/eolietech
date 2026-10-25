@@ -18,7 +18,8 @@ import type { ToolCtx } from "../types";
 import type { OcrEngine } from "./engine";
 import { linesFromBlocks, type PageLayer } from "./page-text";
 import { coreVariant, defaultChoice, firstRunBytes, langBytes, langsFor, type LangChoice } from "./sizes";
-import "./ocr.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./ocr.css?url";
 
 /** HEIC is accepted only to point to the converter. */
 const ACCEPT = `${acceptFor(["jpg", "png", "webp", "heic"])},application/pdf,.pdf`;

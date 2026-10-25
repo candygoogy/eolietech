@@ -21,7 +21,8 @@ import {
   statusRegion,
 } from "../pdf-shared/dom";
 import { normaliseAngle } from "../pdf-shared/rotation";
-import "./organize.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./organize.css?url";
 
 const ACCEPT = "application/pdf,.pdf";
 const THUMB_CSS_PX = 140;

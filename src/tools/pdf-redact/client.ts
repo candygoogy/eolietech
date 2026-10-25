@@ -31,7 +31,8 @@ import {
 } from "./geometry";
 import { PATTERNS, findPattern, findQuery, joinText, rangeBoxes, type PageText, type PatternId, type Range } from "./match";
 import type { RedactedPage } from "./build";
-import "./redact.css";
+// Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
+export { default as styles } from "./redact.css?url";
 
 const ACCEPT = "application/pdf,.pdf";
 /** PDF.js AnnotationMode.ENABLE: draw every annotation's appearance (filled-in forms too) into the page. */

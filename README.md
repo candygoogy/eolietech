@@ -87,6 +87,9 @@ credits and licences are in [NOTICE](NOTICE).
   `src/i18n/routes.ts`, page layouts in `src/views/` (each rendered by a thin file per locale in `src/pages/`).
   A new tool needs its slug and content file in both languages, a `public/_headers` entry for both paths
   and `npm run og`; the unit tests fail until all of them exist.
+- A tool's own stylesheet is not imported as CSS: its `client.ts` exports the URL
+  (`export { default as styles } from "./x.css?url"`) and `src/lib/tool-mount.ts` links it before mounting,
+  so each tool page loads only its own CSS.
 
 ## Development
 
