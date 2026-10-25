@@ -8,6 +8,9 @@ export const HEIC_ACCEPT = acceptFor(["heic"]);
 /** Photos: a little higher than the compressor's default, since people convert HEIC to keep the picture, not to shrink it. */
 export const HEIC_DEFAULT_QUALITY = 85;
 
+/** Variant preset -> the format the tool starts with: `{ to: "png" }` on /heic-to-png/, else JPG. */
+export const initialFormat = (preset: Record<string, unknown>): "jpg" | "png" => (preset.to === "png" ? "png" : "jpg");
+
 export function heicSettings(format: string, quality: string): JobSettings {
   const q = Math.round(Number(quality));
   return {

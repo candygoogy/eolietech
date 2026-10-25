@@ -49,6 +49,8 @@
   Cross-Origin-Embedder-Policy: credentialless
 /heic-to-jpg/
   Cross-Origin-Embedder-Policy: credentialless
+/heic-to-png/
+  Cross-Origin-Embedder-Policy: credentialless
 /resize-image/
   Cross-Origin-Embedder-Policy: credentialless
 /resize-image-for-email/
@@ -61,6 +63,10 @@
   Cross-Origin-Embedder-Policy: credentialless
 /crop-image-16-9/
   Cross-Origin-Embedder-Policy: credentialless
+/crop-image-9-16/
+  Cross-Origin-Embedder-Policy: credentialless
+/crop-image-for-instagram/
+  Cross-Origin-Embedder-Policy: credentialless
 /merge-pdf/
   Cross-Origin-Embedder-Policy: credentialless
 /split-pdf/
@@ -68,6 +74,8 @@
 /organize-pdf/
   Cross-Origin-Embedder-Policy: credentialless
 /compress-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/compress-pdf-for-email/
   Cross-Origin-Embedder-Policy: credentialless
 /remove-background/
   Cross-Origin-Embedder-Policy: credentialless
@@ -111,6 +119,8 @@
   Cross-Origin-Embedder-Policy: credentialless
 /it/heic-in-jpg/
   Cross-Origin-Embedder-Policy: credentialless
+/it/heic-in-png/
+  Cross-Origin-Embedder-Policy: credentialless
 /it/ridimensionare-immagini/
   Cross-Origin-Embedder-Policy: credentialless
 /it/ridimensionare-immagini-per-email/
@@ -123,6 +133,10 @@
   Cross-Origin-Embedder-Policy: credentialless
 /it/ritagliare-immagine-16-9/
   Cross-Origin-Embedder-Policy: credentialless
+/it/ritagliare-immagine-9-16/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/ritagliare-foto-per-instagram/
+  Cross-Origin-Embedder-Policy: credentialless
 /it/unire-pdf/
   Cross-Origin-Embedder-Policy: credentialless
 /it/dividere-pdf/
@@ -130,6 +144,8 @@
 /it/organizzare-pdf/
   Cross-Origin-Embedder-Policy: credentialless
 /it/comprimere-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-pdf-per-email/
   Cross-Origin-Embedder-Policy: credentialless
 /it/rimuovere-sfondo/
   Cross-Origin-Embedder-Policy: credentialless
@@ -173,6 +189,8 @@
   Cross-Origin-Embedder-Policy: credentialless
 /ocr-pdf/
   Cross-Origin-Embedder-Policy: credentialless
+/screenshot-to-text/
+  Cross-Origin-Embedder-Policy: credentialless
 /it/oscurare-pdf/
   Cross-Origin-Embedder-Policy: credentialless
 /it/firmare-pdf/
@@ -180,4 +198,6 @@
 /it/estrarre-testo-da-immagine/
   Cross-Origin-Embedder-Policy: credentialless
 /it/ocr-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/estrarre-testo-da-screenshot/
   Cross-Origin-Embedder-Policy: credentialless

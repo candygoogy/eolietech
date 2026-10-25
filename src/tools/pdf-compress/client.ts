@@ -10,7 +10,7 @@ import type { ToolCtx } from "../types";
 import { baseName, button, entryTracker, errorRegion, h, readFile, statusRegion } from "../pdf-shared/dom";
 import { looksLikePdf } from "../pdf-shared/pdf-errors";
 import type { GsRequest, GsResponse } from "./gs.worker";
-import { DEFAULT_PRESET, GS_WASM_BYTES, gsArgs, isPreset, PRESETS, type Preset } from "./presets";
+import { DEFAULT_PRESET, GS_WASM_BYTES, gsArgs, initialPreset, isPreset, PRESETS, type Preset } from "./presets";
 
 const ACCEPT = "application/pdf,.pdf";
 let uid = 0;
@@ -146,8 +146,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   });
 
   const presetName = `${id}-preset`;
+  const startPreset = initialPreset(ctx.preset);
   const presetRows = PRESETS.map((p) => {
-    const input = h("input", { type: "radio", name: presetName, value: p, id: `${id}-${p}`, checked: p === DEFAULT_PRESET });
+    const input = h("input", { type: "radio", name: presetName, value: p, id: `${id}-${p}`, checked: p === startPreset });
     input.addEventListener("change", resetResults);
     return h(
       "div",

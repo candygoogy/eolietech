@@ -43,8 +43,9 @@ export const tools: ToolDef[] = [
     wave: 1,
     locales: ["en", "it"],
     limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
+    variants: [convert("heic", "png")],
     related: ["image-compress"],
-    updated: "2026-10-17",
+    updated: "2026-10-25",
   },
   {
     id: "image-resize",
@@ -90,9 +91,19 @@ export const tools: ToolDef[] = [
         slug: { en: "crop-image-16-9", it: "ritagliare-immagine-16-9" },
         preset: { aspect: "16:9" },
       },
+      {
+        id: "9-16",
+        slug: { en: "crop-image-9-16", it: "ritagliare-immagine-9-16" },
+        preset: { aspect: "16:9", turned: true },
+      },
+      {
+        id: "for-instagram",
+        slug: { en: "crop-image-for-instagram", it: "ritagliare-foto-per-instagram" },
+        preset: { aspect: "4:5" },
+      },
     ],
     related: ["image-resize", "image-compress"],
-    updated: "2026-10-18",
+    updated: "2026-10-25",
   },
   {
     id: "exif-remover",
@@ -158,8 +169,15 @@ export const tools: ToolDef[] = [
     wave: 1,
     locales: ["en", "it"],
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 10 } },
+    variants: [
+      {
+        id: "for-email",
+        slug: { en: "compress-pdf-for-email", it: "comprimere-pdf-per-email" },
+        preset: { quality: "screen" },
+      },
+    ],
     related: ["pdf-merge", "pdf-split", "image-compress"],
-    updated: "2026-10-17",
+    updated: "2026-10-25",
   },
   {
     id: "image-to-pdf",
@@ -226,9 +244,14 @@ export const tools: ToolDef[] = [
         slug: { en: "ocr-pdf", it: "ocr-pdf" },
         preset: { input: "pdf" },
       },
+      {
+        id: "screenshot",
+        slug: { en: "screenshot-to-text", it: "estrarre-testo-da-screenshot" },
+        preset: {},
+      },
     ],
     related: ["pdf-to-image", "image-to-pdf", "fattura-viewer"],
-    updated: "2026-10-19",
+    updated: "2026-10-25",
   },
   {
     id: "p7m-opener",

@@ -1,10 +1,10 @@
 /**
- * HEIC/HEIF to JPG (or PNG) converter. HEIC decoding (heic-to / libheif) and encoding run in
+ * HEIC/HEIF to JPG (or PNG; the /heic-to-png/ variant starts on PNG) converter. HEIC decoding (heic-to / libheif) and encoding run in
  * ./worker.ts; files never leave the browser.
  */
 import type { ToolCtx } from "../types";
 import { createBatch, rangeField, selectField } from "../image-shared/batch-ui";
-import { HEIC_ACCEPT, HEIC_DEFAULT_QUALITY, heicSettings } from "./settings";
+import { HEIC_ACCEPT, HEIC_DEFAULT_QUALITY, heicSettings, initialFormat } from "./settings";
 
 export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   const t = ctx.t;
@@ -17,7 +17,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       { value: "jpg", label: "JPG" },
       { value: "png", label: "PNG" },
     ],
-    "jpg",
+    initialFormat(ctx.preset),
   );
   const quality = rangeField(t("img.option.quality"), HEIC_DEFAULT_QUALITY);
   const qualityNote = document.createElement("p");

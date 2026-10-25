@@ -28,6 +28,10 @@ export function aspectFromPreset(preset: Record<string, unknown>): AspectId {
 /** Fixed ratios that read differently when turned (4:5 -> 5:4). Free, original and 1:1 do not turn. */
 export const canTurn = (id: AspectId): boolean => id !== "free" && id !== "original" && id !== "1:1";
 
+/** Variant preset -> whether the ratio starts turned: `{ aspect: "16:9", turned: true }` opens at 9:16. */
+export const turnedFromPreset = (preset: Record<string, unknown>): boolean =>
+  preset.turned === true && canTurn(aspectFromPreset(preset));
+
 /** "4:5", or "5:4" when turned. Free and original have no numeric label. */
 export function ratioLabel(id: AspectId, turned: boolean): string {
   if (!id.includes(":")) return id;

@@ -25,7 +25,7 @@ ui:
 
 ## Thumbnails, slides and banners
 
-A 16:9 image fits a YouTube thumbnail, a widescreen slide, a TV or most video players without bars or stretching. Many website headers and banners are wide too; when a template doesn't state a size, 16:9 is a reasonable starting point. If you need the tall version for a phone story or a vertical video, press **Rotate ratio** and the box turns to 9:16.
+A 16:9 image fits a YouTube thumbnail, a widescreen slide, a TV or most video players without bars or stretching. Many website headers and banners are wide too; when a template doesn't state a size, 16:9 is a reasonable starting point. If you need the tall version for a phone story or a vertical video, press **Rotate ratio** and the box turns to 9:16, or open [Crop to 9:16](/crop-image-9-16/), which starts that way.
 
 ## Choosing what stays in the frame
 

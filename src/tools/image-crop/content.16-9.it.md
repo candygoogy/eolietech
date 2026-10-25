@@ -25,7 +25,7 @@ ui:
 
 ## Copertine, slide e banner
 
-Un'immagine 16:9 riempie la copertina di un video YouTube, una slide panoramica, un televisore o quasi tutti i player video, senza bande e senza deformazioni. Anche molte testate e molti banner dei siti sono larghi; quando il modello del sito non indica una misura, il 16:9 è un buon punto di partenza. Se ti serve la versione verticale per una storia o un video da telefono, premi **Ruota proporzioni** e il riquadro passa a 9:16.
+Un'immagine 16:9 riempie la copertina di un video YouTube, una slide panoramica, un televisore o quasi tutti i player video, senza bande e senza deformazioni. Anche molte testate e molti banner dei siti sono larghi; quando il modello del sito non indica una misura, il 16:9 è un buon punto di partenza. Se ti serve la versione verticale per una storia o un video da telefono, premi **Ruota proporzioni** e il riquadro passa a 9:16, oppure apri [Ritaglia in 9:16](/it/ritagliare-immagine-9-16/), che parte già così.
 
 ## Scegliere cosa resta nell'inquadratura
 

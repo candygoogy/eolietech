@@ -10,6 +10,7 @@ import {
   ratioOf,
   resizeRect,
   setField,
+  turnedFromPreset,
   type Rect,
 } from "./crop";
 
@@ -23,6 +24,13 @@ describe("aspect choices", () => {
     expect(aspectFromPreset({ aspect: "16:9" })).toBe("16:9");
     expect(aspectFromPreset({})).toBe("free");
     expect(aspectFromPreset({ aspect: "7:3" })).toBe("free");
+  });
+
+  it("starts turned only when the preset asks for it on a ratio that turns", () => {
+    expect(turnedFromPreset({ aspect: "16:9", turned: true })).toBe(true);
+    expect(turnedFromPreset({ aspect: "16:9" })).toBe(false);
+    expect(turnedFromPreset({ aspect: "1:1", turned: true })).toBe(false);
+    expect(turnedFromPreset({ turned: true })).toBe(false);
   });
 
   it("turns fixed ratios but not free, original or square", () => {

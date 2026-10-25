@@ -30,6 +30,14 @@ async function pageCount(download: Download): Promise<number> {
   return doc.getPageCount();
 }
 
+test("/compress-pdf-for-email/ starts on the Smallest file level", async ({ page }) => {
+  await page.goto("/compress-pdf-for-email/");
+  const root = page.locator("[data-tool-root][data-mounted]");
+  await root.locator('.tool-drop input[type="file"]').setInputFiles(fixture("five-pages.pdf"));
+  await expect(root.getByRole("radio", { name: /^Smallest file/ })).toBeChecked();
+  await expect(root.getByRole("radio", { name: /^Balanced/ })).not.toBeChecked();
+});
+
 test("merge two PDFs into one, entirely in the browser", async ({ page, baseURL }) => {
   const offending = watchNetwork(page, baseURL!);
   await page.goto("/merge-pdf/");

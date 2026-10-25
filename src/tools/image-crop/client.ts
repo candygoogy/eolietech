@@ -24,6 +24,7 @@ import {
   resizeRect,
   sameRect,
   setField,
+  turnedFromPreset,
   type AspectId,
   type Field,
   type Handle,
@@ -62,7 +63,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   let src: Source | null = null;
   let rect: Rect = { x: 0, y: 0, w: 1, h: 1 };
   let aspect: AspectId = aspectFromPreset(ctx.preset);
-  let turned = false;
+  let turned = turnedFromPreset(ctx.preset);
   let result: Result | null = null;
   let busy = false;
   let openGen = 0;

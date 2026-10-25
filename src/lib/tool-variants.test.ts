@@ -33,7 +33,7 @@ describe("variantLinks", () => {
   });
 
   it("returns nothing for a tool without variants", () => {
-    expect(variantLinks(getTool("heic-to-jpg")!, "en")).toEqual({ converters: [], presets: [] });
+    expect(variantLinks(getTool("pdf-merge")!, "en")).toEqual({ converters: [], presets: [] });
   });
 
   it("links no page of a tool that is not published", () => {

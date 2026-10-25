@@ -12,6 +12,9 @@ export const OUTPUT_PATH = "/out.pdf";
 
 export const isPreset = (v: unknown): v is Preset => typeof v === "string" && (PRESETS as readonly string[]).includes(v);
 
+/** Variant preset -> the quality the tool starts with: `{ quality: "screen" }` on /compress-pdf-for-email/. */
+export const initialPreset = (preset: Record<string, unknown>): Preset => (isPreset(preset.quality) ? preset.quality : DEFAULT_PRESET);
+
 /** Ghostscript command line (pdfwrite) for a preset. -dSAFER: no file access beyond what we pass in. */
 export function gsArgs(preset: Preset, input = INPUT_PATH, output = OUTPUT_PATH): string[] {
   return [

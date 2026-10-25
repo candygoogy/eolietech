@@ -88,6 +88,30 @@ test("/heic-to-jpg/ converts a HEIC photo to JPG on the device", async ({ page, 
   w.assertPrivate();
 });
 
+test("/heic-to-png/ starts on PNG and converts a HEIC photo to PNG", async ({ page, baseURL }) => {
+  const w = watch(page, baseURL!);
+  await convertOne(page, "/heic-to-png/", "sample.heic", "png");
+  w.assertPrivate();
+});
+
+test("a file pasted anywhere on the page goes to the tool", async ({ page, baseURL, browserName }) => {
+  // Firefox empties the clipboardData of a paste event made by script (a real Ctrl+V keeps its files).
+  test.skip(browserName === "firefox", "script-made paste events carry no files in Firefox");
+  const w = watch(page, baseURL!);
+  await page.goto("/compress-image/");
+  await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
+  await page.evaluate(async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 8;
+    const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
+    const data = new DataTransfer();
+    data.items.add(new File([blob], "pasted.png", { type: "image/png" }));
+    document.body.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true }));
+  });
+  await expect(page.locator('.tool-item[data-state="done"]')).toHaveCount(1, { timeout: 60_000 });
+  w.assertPrivate();
+});
+
 test("/compress-image/ compresses a batch and downloads it as a zip", async ({ page, baseURL }) => {
   const w = watch(page, baseURL!);
   await page.goto("/compress-image/");

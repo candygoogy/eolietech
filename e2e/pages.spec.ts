@@ -38,6 +38,19 @@ for (const path of ["/tools/", "/it/strumenti/"]) {
   });
 }
 
+test("a tool page links only its own tool's stylesheet, added when the tool mounts", async ({ page }) => {
+  const sheets = () => page.locator('link[rel="stylesheet"]').evaluateAll((links) => links.map((l) => l.getAttribute("href")!));
+  await page.goto("/crop-image/");
+  await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
+  const crop = await sheets();
+  expect(crop.filter((href) => /\/_astro\/crop\.[^/]+\.css$/.test(href))).toHaveLength(1);
+  expect(crop.filter((href) => !/\/_astro\/(Base|crop)\.[^/]+\.css$/.test(href))).toEqual([]);
+
+  await page.goto("/merge-pdf/");
+  await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
+  expect((await sheets()).filter((href) => !/\/_astro\/Base\.[^/]+\.css$/.test(href))).toEqual([]);
+});
+
 test("a tool page links its presets, and a preset page links back and marks itself current", async ({ page }) => {
   await page.goto("/resize-image/");
   const row = page.getByRole("navigation", { name: en["tools.presets"] });

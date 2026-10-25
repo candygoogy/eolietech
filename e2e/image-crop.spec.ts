@@ -223,3 +223,14 @@ test("Italian page crops too", async ({ page, baseURL }) => {
   await expect(page.getByRole("button", { name: "Scarica sample-ritagliata.webp" })).toBeVisible();
   w.assertPrivate();
 });
+
+test("/crop-image-9-16/ opens with the ratio rotated to 9:16", async ({ page, baseURL }) => {
+  const w = watch(page, baseURL!);
+  await openTool(page, "/crop-image-9-16/");
+  await choose(page, fixture("sample.jpg"));
+  await expect(page.locator(".crop-aspect__option", { has: page.locator("input:checked") })).toHaveText("9:16");
+  const [, , tw, th] = await fields(page);
+  expect(th).toBe(48);
+  expect(Math.abs(tw - 27)).toBeLessThanOrEqual(1);
+  w.assertPrivate();
+});
