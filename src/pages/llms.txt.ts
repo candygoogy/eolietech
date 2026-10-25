@@ -1,0 +1,6 @@
+import type { APIRoute } from "astro";
+import { llmsTxt } from "../lib/llms-txt";
+
+/** Built to dist/llms.txt; the text comes from src/lib/llms-txt.ts. */
+export const GET: APIRoute = ({ site }) =>
+  new Response(llmsTxt(site!), { headers: { "Content-Type": "text/plain; charset=utf-8" } });
