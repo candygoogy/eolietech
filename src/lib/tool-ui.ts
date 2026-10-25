@@ -108,7 +108,11 @@ export interface DropzoneOptions {
   hint?: string;
 }
 
-/** A keyboard-accessible drop zone: click/Enter opens the picker, drag-and-drop and paste also work. */
+/**
+ * A keyboard-accessible drop zone: click/Enter opens the picker and drag-and-drop works on the zone.
+ * Pasting files (Ctrl+V / Cmd+V) works anywhere on the page, unless the focus is in a text field
+ * or the zone is hidden, inert or no longer in the document.
+ */
 export function createDropzone(opts: DropzoneOptions): HTMLLabelElement {
   const { ctx } = opts;
   const zone = document.createElement("label");
@@ -150,9 +154,30 @@ export function createDropzone(opts: DropzoneOptions): HTMLLabelElement {
     delete zone.dataset.active;
     take(e.dataTransfer?.files);
   });
-  zone.addEventListener("paste", (e) => take(e.clipboardData?.files));
+  const onPaste = (e: ClipboardEvent) => {
+    if (!zone.isConnected) {
+      document.removeEventListener("paste", onPaste);
+      return;
+    }
+    // A hidden or inert zone (tool busy, or swapped out) takes nothing, same as a drop would.
+    if (zone.closest("[hidden],[inert]") || isEditable(e.target)) return;
+    const files = e.clipboardData?.files;
+    if (!files || files.length === 0) return;
+    e.preventDefault();
+    take(files);
+  };
+  document.addEventListener("paste", onPaste);
 
   return zone;
+}
+
+const NON_TEXT_INPUTS = new Set(["file", "checkbox", "radio", "range", "button", "submit", "reset", "image", "color"]);
+
+/** True when a paste on this target should go to the field itself (text inputs, textareas, selects, contenteditable). */
+function isEditable(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target instanceof HTMLInputElement) return !NON_TEXT_INPUTS.has(target.type);
+  return target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target.isContentEditable;
 }
 
 /** Save a Blob with a filename (object URL, revoked after the click). */

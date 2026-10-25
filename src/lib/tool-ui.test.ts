@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ENTER_MS, filterFiles, formatBytes, markEnter, matchesAccept, renameExtension } from "./tool-ui";
+import { createDropzone, ENTER_MS, filterFiles, formatBytes, markEnter, matchesAccept, renameExtension } from "./tool-ui";
 
 const file = (name: string, type: string, size = 10) => new File([new Uint8Array(size)], name, { type });
 const ctx = {
@@ -50,5 +50,60 @@ describe("tool-ui", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  describe("createDropzone paste", () => {
+    const paste = (target: EventTarget, files: File[]) => {
+      const e = new Event("paste", { bubbles: true, cancelable: true });
+      Object.defineProperty(e, "clipboardData", { value: { files } });
+      target.dispatchEvent(e);
+      return e;
+    };
+    const mount = () => {
+      const onFiles = vi.fn();
+      const zone = createDropzone({ accept: "image/*", multiple: false, ctx, onFiles });
+      document.body.append(zone);
+      return { zone, onFiles };
+    };
+
+    it("takes a file pasted anywhere on the page", () => {
+      const { zone, onFiles } = mount();
+      try {
+        const e = paste(document.body, [file("shot.png", "image/png"), file("b.png", "image/png")]);
+        expect(e.defaultPrevented).toBe(true);
+        expect(onFiles).toHaveBeenCalledTimes(1);
+        expect(onFiles.mock.calls[0][0].ok.map((f: File) => f.name)).toEqual(["shot.png"]);
+      } finally {
+        zone.remove();
+      }
+    });
+
+    it("leaves a paste into a text field alone", () => {
+      const { zone, onFiles } = mount();
+      const field = document.createElement("input");
+      field.type = "text";
+      document.body.append(field);
+      try {
+        const e = paste(field, [file("shot.png", "image/png")]);
+        expect(e.defaultPrevented).toBe(false);
+        expect(onFiles).not.toHaveBeenCalled();
+      } finally {
+        zone.remove();
+        field.remove();
+      }
+    });
+
+    it("ignores pastes once the zone is hidden or removed", () => {
+      const { zone, onFiles } = mount();
+      zone.hidden = true;
+      paste(document.body, [file("shot.png", "image/png")]);
+      zone.hidden = false;
+      zone.remove();
+      paste(document.body, [file("shot.png", "image/png")]);
+      document.body.append(zone);
+      paste(document.body, [file("shot.png", "image/png")]);
+      zone.remove();
+      expect(onFiles).not.toHaveBeenCalled();
+    });
   });
 });
