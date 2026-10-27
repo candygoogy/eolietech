@@ -12,7 +12,7 @@ faq:
   - q: "La conversione da HEIC a PNG è senza perdita?"
     a: "La conversione sì. Il PNG contiene esattamente i pixel decodificati dall'HEIC, e se lo salvi di nuovo in un editor non si rovina. Non può però recuperare i dettagli che la compressione HEIC ha già eliminato al momento dello scatto, anche se con le impostazioni dell'iPhone quella perdita è difficilissima da vedere."
   - q: "Posso rendere i PNG più leggeri?"
-    a: "Solo di poco. Ogni file passa già da oxipng, un ottimizzatore senza perdita, e il PNG non ha un'impostazione di qualità perché non scarta mai dettagli: per questo il cursore è disattivato. Per un file molto più leggero serve un formato con perdita, cioè il JPG, che si apre ovunque, oppure il WebP, se il sito su cui carichi le foto lo accetta. Con [Convertire PNG in WebP](/it/png-in-webp/) puoi trasformare i PNG in WebP."
+    a: "Solo di poco. Ogni file passa già da oxipng, un ottimizzatore senza perdita, e il PNG non ha un'impostazione di qualità perché non scarta mai dettagli: per questo il cursore è disattivato. Per un file molto più leggero serve un formato con perdita, cioè il JPG, che si apre ovunque, oppure il WebP, se il sito su cui carichi le foto lo accetta. Per trasformare i PNG in WebP c'è il convertitore da PNG a WebP di questo sito."
   - q: "Per le foto dell'iPhone è meglio il PNG o il JPG?"
     a: "Per la maggior parte delle foto, il JPG. Si apre ovunque e con qualità 85 a schermo sembra identico all'originale, con un peso molto inferiore a quello di un PNG. Scegli il PNG se devi ritoccare l'immagine, se contiene testo o linee sottili, o se un programma ti chiede proprio un PNG."
   - q: "Il PNG conserva la data dello scatto e la posizione?"

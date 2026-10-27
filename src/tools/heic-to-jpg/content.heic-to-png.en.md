@@ -12,7 +12,7 @@ faq:
   - q: "Is converting HEIC to PNG lossless?"
     a: "The conversion is. The PNG holds exactly the pixels decoded from the HEIC, and saving it again in an editor will not degrade it. It cannot bring back detail that the HEIC compression removed when the photo was taken, but with the iPhone's settings that loss is very hard to see."
   - q: "Can I make the PNG files smaller?"
-    a: "Only a little. Every file already goes through oxipng, a lossless optimizer, and PNG has no quality setting because it never discards detail, which is why the slider is disabled. For a much smaller file you need a lossy format: JPG for the widest compatibility, or WebP if the place you upload to accepts it. [PNG to WebP](/png-to-webp/) can turn the PNGs into WebP."
+    a: "Only a little. Every file already goes through oxipng, a lossless optimizer, and PNG has no quality setting because it never discards detail, which is why the slider is disabled. For a much smaller file you need a lossy format: JPG for the widest compatibility, or WebP if the place you upload to accepts it. The PNG to WebP converter on this site can turn the PNGs into WebP."
   - q: "Should I choose PNG or JPG for my iPhone photos?"
     a: "For most photos, JPG. It opens everywhere and at quality 85 looks the same as the original on screen, at a fraction of the size of a PNG. Choose PNG when you plan to edit the image, when it shows text or fine lines, or when an app asks for PNG specifically."
   - q: "Does the PNG keep the date taken and the location?"

@@ -87,6 +87,17 @@ describe("tool registry", () => {
     }
   });
 
+  it("keeps Markdown links out of FAQ answers (they are printed as plain text)", () => {
+    for (const tool of tools) {
+      for (const file of fs.readdirSync(path.join(toolsDir, tool.id)).filter((f) => /^content\..*\.md$/.test(f))) {
+        const fm = fs.readFileSync(path.join(toolsDir, tool.id, file), "utf8").split(/^---\s*$/m)[1] ?? "";
+        for (const line of fm.split(/\r?\n/).filter((l) => /^\s+(- )?(q|a):/.test(l))) {
+          expect(line, `${tool.id}/${file}`).not.toMatch(/\]\(/);
+        }
+      }
+    }
+  });
+
   it("defines counted ui strings as .one/.other pairs, never as a bare key (tPlural)", () => {
     // Keys read with tPlural; a bare key here would print "1 pages".
     const counted = [
