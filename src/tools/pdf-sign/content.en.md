@@ -20,7 +20,7 @@ faq:
   - q: "The PDF already has a digital signature. Can I add mine?"
     a: "You can, but saving changes the file, so the earlier digital signature will no longer verify. If a document carries digital signatures, the next person to sign it usually needs one too."
   - q: "Can I sign a password-protected PDF?"
-    a: "No. Open it with its password in your PDF reader, save an unprotected copy and sign that."
+    a: "No. If you know the password, remove it with Unlock PDF on this site and sign the unlocked copy."
 ui:
   sign.drop.replace: "Choose another PDF"
   sign.reading: "Opening {name}…"
@@ -107,4 +107,4 @@ The PDF is read and saved inside your browser, and your signature only exists in
 
 - To open a document someone signed with a firma digitale, use [Open P7M files](/open-p7m-file/).
 - To put the signed pages together with other documents, use [Merge PDF](/merge-pdf/).
-- Password-protected PDFs can't be opened here; save an unprotected copy first.
+- Password-protected PDFs can't be opened here; remove a password you know with [Unlock PDF](/unlock-pdf/) first.

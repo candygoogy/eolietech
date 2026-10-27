@@ -18,7 +18,7 @@ faq:
   - q: "Why was a page saved smaller than the resolution I chose?"
     a: "Very large pages, such as posters or technical drawings, would need hundreds of megapixels at 300 dpi and could crash the browser tab. Each image is capped at about 16.7 megapixels, which still covers A4 and Letter at 300 dpi. When a page is scaled down, the tool tells you which one."
   - q: "Can I convert a password-protected PDF?"
-    a: "No. Open the file with its password in your PDF reader, save an unprotected copy, and convert that."
+    a: "No. If you know the password, remove it with Unlock PDF on this site and convert the unlocked copy."
 ui:
   p2i.format.label: "Format"
   p2i.format.jpg: "JPG (smaller files)"
@@ -78,4 +78,4 @@ The pages are drawn by PDF.js, the open-source renderer Firefox uses for its own
 
 - To keep part of a PDF as a PDF rather than as images, use [Split PDF](/split-pdf/).
 - To go the other way and turn photos or scans into one PDF, use [JPG to PDF](/jpg-to-pdf/).
-- Password-protected PDFs cannot be opened here; save an unprotected copy first.
+- Password-protected PDFs cannot be opened here; remove a password you know with [Unlock PDF](/unlock-pdf/) first.

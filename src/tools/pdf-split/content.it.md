@@ -16,7 +16,7 @@ faq:
   - q: "Perché una parte pesa quasi quanto il file originale?"
     a: "Spesso le pagine condividono risorse come font e immagini. Ogni parte conserva tutto quello che serve alle sue pagine, quindi anche una sola pagina che usa un font incorporato o un'immagine pesante può dare un file di dimensioni notevoli."
   - q: "Posso dividere un PDF protetto da password?"
-    a: "No. I PDF cifrati non si possono dividere qui. Apri il file con la sua password nel tuo lettore PDF, salva una copia non protetta e dividi quella."
+    a: "No. I PDF cifrati non si possono dividere qui. Se conosci la password, toglila con Sbloccare PDF su questo sito e dividi la copia sbloccata."
   - q: "Posso mettere le pagine in un ordine diverso?"
     a: "Gli intervalli vengono estratti nell'ordine in cui li scrivi, quindi “5, 1-3” comincia dalla pagina 5. Per trascinare le pagine, ruotarle o eliminarle, usa Organizzare PDF."
 ui:

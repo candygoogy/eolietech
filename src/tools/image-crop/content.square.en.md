@@ -31,7 +31,7 @@ The square starts as large as the photo allows. Drag it over your face, then pul
 
 ## Product photos and square posts
 
-A set of product photos looks tidier when every one is the same shape, and a square keeps the product centred in a grid. Crop each photo with a little space around the item so it doesn't touch the edges. For a square post, 1080 × 1080 px is a safe size: crop the square you want, then bring it down to 1080 px with [Resize images](/resize-image/).
+A set of product photos looks tidier when every one is the same shape, and a square keeps the product centred in a grid. Crop each photo with a little space around the item so it doesn't touch the edges. If a square crop would cut off part of the product, [Make an image square](/make-image-square/) keeps the whole photo and fills the rest of the square with white or another background. For a square post, 1080 × 1080 px is a safe size: crop the square you want, then bring it down to 1080 px with [Resize images](/resize-image/).
 
 You can switch to another ratio at any time with the buttons above the image. For every shape and option, use [Crop an image](/crop-image/).
 

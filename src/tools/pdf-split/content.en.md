@@ -16,7 +16,7 @@ faq:
   - q: "Why is a part almost as large as the original file?"
     a: "Pages often share resources such as fonts and images. A part keeps everything its pages need, so a single page that uses a large embedded font or image can still be a sizeable file."
   - q: "Can I split a password-protected PDF?"
-    a: "No. Encrypted PDFs cannot be split here. Open the file with its password in your PDF reader, save an unprotected copy, and split that."
+    a: "No. Encrypted PDFs cannot be split here. If you know the password, remove it with Unlock PDF on this site and split the unlocked copy."
   - q: "Can I put pages in a different order?"
     a: "Ranges are extracted in the order you type them, so “5, 1-3” starts with page 5. For dragging pages around, rotating or deleting them, use Organize PDF pages."
 ui:

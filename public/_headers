@@ -201,3 +201,23 @@
   Cross-Origin-Embedder-Policy: credentialless
 /it/estrarre-testo-da-screenshot/
   Cross-Origin-Embedder-Policy: credentialless
+/make-image-square/
+  Cross-Origin-Embedder-Policy: credentialless
+/fit-image-to-16-9/
+  Cross-Origin-Embedder-Policy: credentialless
+/fit-image-to-9-16/
+  Cross-Origin-Embedder-Policy: credentialless
+/protect-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/unlock-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/foto-quadrata-senza-tagliare/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/adattare-immagine-16-9/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/adattare-immagine-9-16/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/proteggere-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/sbloccare-pdf/
+  Cross-Origin-Embedder-Policy: credentialless

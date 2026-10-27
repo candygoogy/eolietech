@@ -20,7 +20,7 @@ faq:
   - q: "Il mio PDF viene caricato da qualche parte?"
     a: "No. Le pagine vengono disegnate e lette da PDF.js, il motore PDF open source di Firefox, dentro questa pagina, e il nuovo PDF viene montato nella memoria del tuo browser. Non arriva niente a un server, ed è proprio il motivo per oscurare qui e non su un sito che ti chiede prima di caricare il file."
   - q: "Posso oscurare un PDF protetto da password?"
-    a: "No. Aprilo con la password nel tuo lettore PDF, salva una copia non protetta e oscura quella."
+    a: "No. Se conosci la password, toglila con Sbloccare PDF su questo sito e oscura la copia sbloccata."
 ui:
   redact.drop.label: "Scegli un PDF o trascinalo qui"
   redact.drop.replace: "Scegli un altro PDF"

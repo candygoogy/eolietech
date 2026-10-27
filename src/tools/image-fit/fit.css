@@ -1,0 +1,106 @@
+/*
+ * Image fitter only: the Shape and Background choices are radio groups shown as segmented controls
+ * (the same look as the cropper's ratio picker in crop.css), side by side where there is room. The
+ * rest of the tool uses the shared classes in tool.css.
+ */
+
+.fit-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-5);
+}
+
+.fit-choice {
+  display: block;
+}
+
+.fit-choice legend {
+  float: left;
+  width: 100%;
+  padding-bottom: 0.375rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.fit-choice__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  clear: both;
+}
+
+.fit-choice__options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-full);
+  background: var(--tool-well, var(--color-sunken));
+}
+
+.fit-choice__option {
+  display: inline-grid;
+  place-items: center;
+  min-width: 3.25rem;
+  min-height: calc(var(--target-min) - 6px);
+  padding: 0 0.875rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-color),
+    color var(--duration-fast) var(--ease-color);
+}
+
+/* The chosen option is set in ink: unmistakable in both themes, and not the action colour. */
+.fit-choice__option:has(input:checked) {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.fit-choice__option:has(input:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fit-choice__option:not(:has(input:checked)):hover {
+    background: var(--tool-well-hover, var(--color-fill-hover));
+    color: var(--color-text);
+  }
+}
+
+/* The colour picker sits after the choices, shown while Colour is picked. */
+.fit-color {
+  width: 3.5rem;
+  min-height: var(--target-min);
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+/* Phones: even rows instead of a ragged wrap (backgrounds two by two, the four shapes in one row). */
+@media (max-width: 36rem) {
+  .fit-choice {
+    width: 100%;
+  }
+
+  .fit-choice__options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    border-radius: var(--radius-lg);
+  }
+
+  .fit-choice__option {
+    min-width: 0;
+    padding-inline: var(--space-2);
+  }
+
+  /* The four shapes always fit one row. */
+  .fit-choice:first-child .fit-choice__options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

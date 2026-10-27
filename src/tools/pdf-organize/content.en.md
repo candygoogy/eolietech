@@ -18,7 +18,7 @@ faq:
   - q: "Why do some thumbnails look slightly different from my PDF reader?"
     a: "Thumbnails are small previews. Unusual fonts or colour profiles may render a little differently at that size, but the saved PDF keeps the original page content exactly as it was."
   - q: "Can I open password-protected PDFs?"
-    a: "No. Encrypted PDFs cannot be edited here. Save an unprotected copy in a reader that knows the password, then open that copy."
+    a: "No. Encrypted PDFs cannot be edited here. If you know the password, remove it with Unlock PDF on this site, then open the unlocked copy."
 ui:
   organize.listLabel: "Pages, in their new order"
   organize.hint: "Drag pages to reorder them, or use the buttons under each page."

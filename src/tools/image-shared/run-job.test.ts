@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { JobSettings } from "./protocol";
 
 // The WASM codecs are replaced by stand-ins that only track sizes.
 const img = (width: number, height: number) => ({ width, height, data: new Uint8ClampedArray(0) }) as unknown as ImageData;
@@ -39,5 +40,18 @@ describe("runJob", () => {
     expect(fit).toHaveBeenCalledWith(expect.anything(), 32, undefined);
     expect(resizeTo).not.toHaveBeenCalled();
     expect(compress.res).toMatchObject({ ok: true, width: 32, height: 24, notEnlarged: false });
+  });
+
+  it("runs a tool's own transform instead of the resize step, with the settings as posted", async () => {
+    const transform = vi.fn(async (_i: ImageData, s: JobSettings) => {
+      const size = (s as JobSettings & { fit: { size: number } }).fit.size;
+      return img(size, size);
+    });
+    const settings = { output: "png" as const, quality: 80, resize: { mode: "width" as const, width: 10, enlarge: true }, fit: { size: 100 } };
+    const { res } = await runJob({ id: 4, buffer: PNG(), settings }, ["png"], undefined, transform);
+    expect(transform).toHaveBeenCalledWith(expect.anything(), settings);
+    expect(resizeTo).not.toHaveBeenCalled();
+    expect(fit).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ ok: true, format: "png", width: 100, height: 100, sourceWidth: 64, sourceHeight: 48 });
   });
 });

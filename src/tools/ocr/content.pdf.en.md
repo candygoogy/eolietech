@@ -20,7 +20,7 @@ faq:
   - q: "Is anything lost in the searchable copy?"
     a: "Every page is kept as it is. Document-wide extras are not carried over: bookmarks, fillable form fields and attached files. If you need those, keep the original next to the searchable copy."
   - q: "Can it handle a password-protected PDF?"
-    a: "No. Open it with its password in your PDF reader, save a copy without one and use that."
+    a: "No. If you know the password, remove it with Unlock PDF on this site and use the unlocked copy."
 ---
 
 ## A searchable copy of your scan

@@ -18,7 +18,7 @@ faq:
   - q: "Perché la prima compressione ci mette di più?"
     a: "Il motore di compressione pesa circa 15 MB. Il browser lo scarica la prima volta che premi Comprimi e lo tiene nella cache, così le visite successive partono più in fretta. Non viene scaricato finché non chiedi di comprimere un file."
   - q: "Posso comprimere PDF protetti da password?"
-    a: "No, se il file chiede una password per essere aperto. Prima salva una copia non protetta con il tuo lettore PDF, poi comprimi quella."
+    a: "No, se il file chiede una password per essere aperto. Se la conosci, toglila prima con Sbloccare PDF su questo sito, poi comprimi la copia sbloccata."
 ui:
   compress.preset.legend: "Qualità"
   compress.preset.screen: "File più leggero"

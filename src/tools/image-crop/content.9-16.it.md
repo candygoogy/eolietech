@@ -29,7 +29,7 @@ Tutti questi formati riempiono lo schermo del telefono tenuto in verticale, in u
 
 ## Ritagliare una foto in 9:16
 
-Il 9:16 è più stretto di quasi tutte le foto scattate con una fotocamera o un telefono, quindi il ritaglio toglie soprattutto i lati. Da una foto verticale del telefono (3:4), un ritaglio 9:16 a tutta altezza perde un quarto della larghezza, di solito solo sfondo. Da una foto orizzontale ne tiene meno della metà, quindi sposta il riquadro di lato finché la persona o l'oggetto che ti interessa non ci sta dentro.
+Il 9:16 è più stretto di quasi tutte le foto scattate con una fotocamera o un telefono, quindi il ritaglio toglie soprattutto i lati. Da una foto verticale del telefono (3:4), un ritaglio 9:16 a tutta altezza perde un quarto della larghezza, di solito solo sfondo. Da una foto orizzontale ne tiene meno della metà, quindi sposta il riquadro di lato finché la persona o l'oggetto che ti interessa non ci sta dentro. Per pubblicare tutta la foto orizzontale, [Adatta un'immagine al 9:16](/it/adattare-immagine-9-16/) la mette in un riquadro 9:16 con uno sfondo sfocato o a tinta unita.
 
 Finché le proporzioni sono girate, anche gli altri pulsanti lo sono e mostrano 5:4, 4:3 e 2:3. Premi **Ruota proporzioni** per ritrovare il 16:9 e i soliti 4:5, 3:4 e 3:2. Se ti serve un ritaglio orizzontale fin dall'inizio, [Ritaglia in 16:9](/it/ritagliare-immagine-16-9/) si apre nel verso opposto.
 

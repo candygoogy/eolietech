@@ -62,7 +62,7 @@ ui:
 
 ## Which ratio to pick
 
-- 1:1 suits profile pictures, avatars, product photos and square posts. [Crop to a square](/crop-image-square/) opens with it already set.
+- 1:1 suits profile pictures, avatars, product photos and square posts. [Crop to a square](/crop-image-square/) opens with it already set. To keep the whole photo in a square, with a background around it, use [Make an image square](/make-image-square/).
 - 4:5 is a common portrait shape for social feeds, taller than a square but much shorter than a phone screen.
 - 3:4 is the shape of an upright phone photo, and the tallest portrait an Instagram feed post keeps without cropping.
 - 3:2 is the shape of most DSLR and mirrorless photos, and of a classic 10 × 15 cm print.

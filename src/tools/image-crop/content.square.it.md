@@ -31,7 +31,7 @@ Il quadrato parte grande quanto la foto consente. Trascinalo sul viso, poi tira 
 
 ## Foto di prodotti e post quadrati
 
-Una serie di foto di prodotti è più ordinata quando hanno tutte la stessa forma, e in una griglia il quadrato tiene il prodotto al centro. Ritaglia ogni foto lasciando un po' di spazio attorno all'oggetto, così non tocca i bordi. Per un post quadrato, 1080 × 1080 px è una misura sicura: ritaglia il quadrato che vuoi, poi riducilo a 1080 px con [Ridimensiona le immagini](/it/ridimensionare-immagini/).
+Una serie di foto di prodotti è più ordinata quando hanno tutte la stessa forma, e in una griglia il quadrato tiene il prodotto al centro. Ritaglia ogni foto lasciando un po' di spazio attorno all'oggetto, così non tocca i bordi. Se un ritaglio quadrato taglierebbe una parte del prodotto, [Foto quadrata senza tagliare](/it/foto-quadrata-senza-tagliare/) tiene la foto intera e riempie il resto del quadrato di bianco o con un altro sfondo. Per un post quadrato, 1080 × 1080 px è una misura sicura: ritaglia il quadrato che vuoi, poi riducilo a 1080 px con [Ridimensiona le immagini](/it/ridimensionare-immagini/).
 
 Puoi passare ad altre proporzioni in qualsiasi momento con i pulsanti sopra l'immagine. Per tutte le forme e le opzioni, usa [Ritaglia un'immagine](/it/ritagliare-immagini/).
 

@@ -102,8 +102,32 @@ export const tools: ToolDef[] = [
         preset: { aspect: "4:5" },
       },
     ],
-    related: ["image-resize", "image-compress"],
+    related: ["image-fit", "image-resize", "image-compress"],
     updated: "2026-10-25",
+  },
+  {
+    id: "image-fit",
+    slug: { en: "make-image-square", it: "foto-quadrata-senza-tagliare" },
+    category: "image",
+    runtime: "client",
+    status: "live",
+    wave: 1,
+    locales: ["en", "it"],
+    limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
+    variants: [
+      {
+        id: "16-9",
+        slug: { en: "fit-image-to-16-9", it: "adattare-immagine-16-9" },
+        preset: { aspect: "16:9" },
+      },
+      {
+        id: "9-16",
+        slug: { en: "fit-image-to-9-16", it: "adattare-immagine-9-16" },
+        preset: { aspect: "9:16" },
+      },
+    ],
+    related: ["image-crop", "image-resize", "image-compress"],
+    updated: "2026-10-27",
   },
   {
     id: "exif-remover",
@@ -176,7 +200,7 @@ export const tools: ToolDef[] = [
         preset: { quality: "screen" },
       },
     ],
-    related: ["pdf-merge", "pdf-split", "image-compress"],
+    related: ["pdf-merge", "pdf-split", "pdf-password", "image-compress"],
     updated: "2026-10-25",
   },
   {
@@ -216,6 +240,25 @@ export const tools: ToolDef[] = [
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 1 } },
     related: ["pdf-sign", "exif-remover", "pdf-compress"],
     updated: "2026-10-19",
+  },
+  {
+    id: "pdf-password",
+    slug: { en: "protect-pdf", it: "proteggere-pdf" },
+    category: "pdf",
+    runtime: "client",
+    status: "live",
+    wave: 1,
+    locales: ["en", "it"],
+    limits: { free: { maxBytes: 200 * MiB, maxFiles: 10 } },
+    variants: [
+      {
+        id: "unlock",
+        slug: { en: "unlock-pdf", it: "sbloccare-pdf" },
+        preset: { mode: "unlock" },
+      },
+    ],
+    related: ["pdf-redact", "pdf-compress", "pdf-sign"],
+    updated: "2026-10-27",
   },
   {
     id: "pdf-sign",

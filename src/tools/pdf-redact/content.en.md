@@ -20,7 +20,7 @@ faq:
   - q: "Is my PDF uploaded?"
     a: "No. PDF.js, the open-source PDF engine Firefox uses, draws and reads the pages inside this page, and the new PDF is assembled in your browser's memory. Nothing is sent to a server, which is the whole reason to redact here and not on a website that asks you to upload the file first."
   - q: "Can I redact a password-protected PDF?"
-    a: "No. Open it with its password in your PDF reader, save an unprotected copy, and redact that."
+    a: "No. If you know the password, remove it with Unlock PDF on this site and redact the unlocked copy."
 ui:
   redact.drop.label: "Choose a PDF or drop it here"
   redact.drop.replace: "Choose another PDF"

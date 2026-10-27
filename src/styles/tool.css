@@ -171,6 +171,11 @@
   --tool-shell-rest: 0rem;
 }
 
+[data-tool-id="image-fit"] {
+  --tool-shell: 55.7344rem;
+  --tool-shell-rest: 25.1406rem;
+}
+
 [data-tool-id="exif-remover"] {
   --tool-shell: 28.9785rem;
   --tool-shell-rest: 14.4941rem;
@@ -186,6 +191,7 @@
 [data-tool-id="fattura-viewer"],
 [data-tool-id="pdf-redact"],
 [data-tool-id="pdf-sign"],
+[data-tool-id="pdf-password"],
 [data-tool-id="ocr"] {
   --tool-shell: 13.0313rem;
   --tool-shell-rest: 0rem;
@@ -205,6 +211,7 @@
       [data-tool-id="fattura-viewer"],
       [data-tool-id="pdf-redact"],
       [data-tool-id="pdf-sign"],
+      [data-tool-id="pdf-password"],
       [data-tool-id="ocr"]
     )
     > .tool

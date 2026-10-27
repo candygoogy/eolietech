@@ -18,7 +18,7 @@ faq:
   - q: "Why did my PDF not get any smaller?"
     a: "The file is probably already compressed, or its size does not come from images. The tool tells you when the result is not smaller and offers the original instead of a worse copy. Compressing it again will not help, so split it into parts or send a link from cloud storage instead."
   - q: "Can I compress a password-protected PDF?"
-    a: "Not if the file needs a password to open: the tool will tell you it is protected. Save an unprotected copy in your PDF reader first and compress that copy. The compressed copy has no password, so think about who can read the email before you send it."
+    a: "Not if the file needs a password to open: the tool will tell you it is protected. If you know the password, remove it first with Unlock PDF on this site and compress the unlocked copy. The compressed copy has no password, so think about who can read the email before you send it."
   - q: "Is my PDF uploaded?"
     a: "No. Ghostscript, compiled to WebAssembly, compresses the file in this browser tab. The only download is the engine itself, from this website. Your PDF leaves your device only when you attach it to your email."
 ui:

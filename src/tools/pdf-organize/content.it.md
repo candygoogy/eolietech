@@ -18,7 +18,7 @@ faq:
   - q: "Perché alcune miniature sono un po' diverse da come le vedo nel mio lettore PDF?"
     a: "Le miniature sono piccole anteprime. Font insoliti o profili colore particolari possono apparire leggermente diversi a quella dimensione, ma il PDF salvato conserva il contenuto originale delle pagine esattamente com'era."
   - q: "Posso aprire PDF protetti da password?"
-    a: "No. I PDF cifrati non si possono modificare qui. Salva una copia non protetta con un lettore che conosce la password, poi apri quella copia."
+    a: "No. I PDF cifrati non si possono modificare qui. Se conosci la password, toglila con Sbloccare PDF su questo sito, poi apri la copia sbloccata."
 ui:
   organize.listLabel: "Pagine, nel nuovo ordine"
   organize.hint: "Trascina le pagine per riordinarle, oppure usa i pulsanti sotto ogni pagina."

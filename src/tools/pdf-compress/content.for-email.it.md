@@ -18,7 +18,7 @@ faq:
   - q: "Perché il mio PDF non è diventato più leggero?"
     a: "Probabilmente il file è già compresso, oppure il suo peso non dipende dalle immagini. Lo strumento ti avvisa quando il risultato non è più leggero e ti propone l'originale invece di una copia peggiore. Comprimerlo di nuovo non serve: conviene dividerlo in parti o mandare un link da un servizio cloud."
   - q: "Posso comprimere un PDF protetto da password?"
-    a: "No, se il file chiede una password per essere aperto: lo strumento ti dirà che è protetto. Prima salva una copia non protetta con il tuo lettore PDF, poi comprimi quella. La copia compressa non ha password, quindi pensa a chi potrà leggere l'email prima di inviarla."
+    a: "No, se il file chiede una password per essere aperto: lo strumento ti dirà che è protetto. Se la conosci, toglila prima con Sbloccare PDF su questo sito, poi comprimi la copia sbloccata. La copia compressa non ha password, quindi pensa a chi potrà leggere l'email prima di inviarla."
   - q: "Il mio PDF viene caricato?"
     a: "No. Ghostscript, compilato in WebAssembly, comprime il file in questa scheda del browser. L'unico download è il motore stesso, da questo sito. Il PDF lascia il tuo dispositivo solo quando lo alleghi tu all'email."
 ui:

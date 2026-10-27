@@ -1,14 +1,21 @@
 /** Worker-side job runner shared by the image workers: sniff -> decode -> (resize) -> encode. */
 import { decode, encode, fit, resizeTo } from "./codecs";
 import { resolveOutput, sniffFormat, targetSize, type InputFormat } from "./formats";
-import type { JobErrorCode, JobRequest, JobResponse } from "./protocol";
+import type { JobErrorCode, JobRequest, JobResponse, JobSettings } from "./protocol";
 
 export type HeicDecoder = (buffer: ArrayBuffer) => Promise<ImageData>;
+
+/**
+ * A tool's own pixel step (image-fit), run on the decoded image in place of the resize or fit step.
+ * It gets the job settings as posted, so a tool can carry its own fields on them.
+ */
+export type Transform = (img: ImageData, settings: JobSettings) => Promise<ImageData>;
 
 export async function runJob(
   req: JobRequest,
   allowed: readonly InputFormat[],
   decodeHeic?: HeicDecoder,
+  transform?: Transform,
 ): Promise<{ res: JobResponse; transfer: Transferable[] }> {
   const { id, buffer, settings } = req;
   try {
@@ -27,7 +34,9 @@ export async function runJob(
     const sourceWidth = img.width;
     const sourceHeight = img.height;
     let notEnlarged = false;
-    if (settings.resize) {
+    if (transform) {
+      img = await transform(img, settings);
+    } else if (settings.resize) {
       const target = targetSize(img.width, img.height, settings.resize);
       notEnlarged = target.notEnlarged;
       img = await resizeTo(img, target.width, target.height);
@@ -65,13 +74,13 @@ function classify(err: unknown, fallback: JobErrorCode): JobErrorCode {
 }
 
 /** Wire a worker scope to runJob. */
-export function serve(allowed: readonly InputFormat[], decodeHeic?: HeicDecoder): void {
+export function serve(allowed: readonly InputFormat[], decodeHeic?: HeicDecoder, transform?: Transform): void {
   const scope = self as unknown as {
     onmessage: ((e: MessageEvent<JobRequest>) => void) | null;
     postMessage: (msg: JobResponse, transfer: Transferable[]) => void;
   };
   scope.onmessage = async (e: MessageEvent<JobRequest>) => {
-    const { res, transfer } = await runJob(e.data, allowed, decodeHeic);
+    const { res, transfer } = await runJob(e.data, allowed, decodeHeic, transform);
     scope.postMessage(res, transfer);
   };
 }

@@ -62,7 +62,7 @@ ui:
 
 ## Quali proporzioni scegliere
 
-- 1:1 va bene per foto profilo, avatar, foto di prodotti e post quadrati. [Ritaglia in quadrato](/it/ritagliare-immagine-quadrata/) si apre con queste proporzioni già impostate.
+- 1:1 va bene per foto profilo, avatar, foto di prodotti e post quadrati. [Ritaglia in quadrato](/it/ritagliare-immagine-quadrata/) si apre con queste proporzioni già impostate. Se vuoi la foto intera in un quadrato, con uno sfondo intorno, usa [Foto quadrata senza tagliare](/it/foto-quadrata-senza-tagliare/).
 - 4:5 è un formato verticale comune nei feed dei social, più alto di un quadrato ma molto più basso dello schermo di un telefono.
 - 3:4 è il formato di una foto scattata col telefono in verticale, ed è il più alto che un post nel feed di Instagram tiene senza ritagliare.
 - 3:2 è il formato delle foto di quasi tutte le reflex e le mirrorless, e della classica stampa 10 × 15 cm.

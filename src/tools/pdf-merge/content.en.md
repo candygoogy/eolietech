@@ -12,7 +12,7 @@ faq:
   - q: "Are my files uploaded anywhere?"
     a: "No. The merge runs in your browser with the open-source pdf-lib library. Your PDFs are read from your disk into the page's memory and the result is saved back to your disk. You can disconnect from the internet after the page has loaded and the tool still works."
   - q: "Can I merge password-protected PDFs?"
-    a: "No. Encrypted PDFs cannot be combined here. Open the file in a reader that knows the password, save an unprotected copy, and add that copy instead."
+    a: "No. Encrypted PDFs cannot be combined here. If you know the password, remove it with Unlock PDF on this site, which also lifts editing restrictions, and add the unlocked copy instead."
   - q: "Do links, bookmarks and form fields survive?"
     a: "Page content, including text, images and vector graphics, is copied exactly. Document-level extras such as the bookmark outline, and form fields that span several files, may not carry over, so check the result if you rely on them."
   - q: "Is there a limit on the number or size of files?"

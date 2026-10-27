@@ -18,7 +18,7 @@ faq:
   - q: "Why does the first compression take longer?"
     a: "The compression engine is about 15 MB. Your browser downloads it the first time you press Compress and keeps it in its cache, so later visits start faster. It is not downloaded until you ask to compress a file."
   - q: "Can I compress password-protected PDFs?"
-    a: "Not if the file needs a password to open. Save an unprotected copy in your PDF reader first, then compress that copy."
+    a: "Not if the file needs a password to open. If you know the password, remove it first with Unlock PDF on this site, then compress the unlocked copy."
 ui:
   compress.preset.legend: "Quality"
   compress.preset.screen: "Smallest file"

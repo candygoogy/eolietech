@@ -20,7 +20,7 @@ faq:
   - q: "Il PDF ha già una firma digitale. Posso aggiungere la mia?"
     a: "Puoi, ma salvando il file lo modifichi, quindi la firma digitale che c'era non risulterà più valida alla verifica. Se un documento porta firme digitali, di solito chi firma dopo deve usarne una anche lui."
   - q: "Posso firmare un PDF protetto da password?"
-    a: "No. Aprilo con la sua password nel tuo lettore PDF, salva una copia non protetta e firma quella."
+    a: "No. Se conosci la password, toglila con Sbloccare PDF su questo sito e firma la copia sbloccata."
 ui:
   sign.drop.replace: "Scegli un altro PDF"
   sign.reading: "Apro {name}…"
@@ -107,4 +107,4 @@ Il PDF viene letto e salvato dentro il tuo browser, e la tua firma esiste solo n
 
 - Per aprire un documento firmato con firma digitale, usa [Aprire file P7M](/it/aprire-file-p7m/).
 - Per unire le pagine firmate ad altri documenti, usa [Unire PDF](/it/unire-pdf/).
-- I PDF protetti da password non si aprono qui; salva prima una copia non protetta.
+- I PDF protetti da password non si aprono qui; se conosci la password, toglila prima con [Sbloccare PDF](/it/sbloccare-pdf/).

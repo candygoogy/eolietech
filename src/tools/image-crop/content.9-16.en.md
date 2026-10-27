@@ -29,7 +29,7 @@ All of these fill a phone screen held upright, in a 9:16 frame of 1080 × 1920 p
 
 ## Cropping a photo to 9:16
 
-9:16 is narrower than almost any camera photo, so the crop mostly removes the sides. From an upright phone photo (3:4), a full-height 9:16 crop drops a quarter of the width, which is usually just background. From a landscape photo it keeps less than half the width, so drag the box sideways until the person or the object you care about sits inside it.
+9:16 is narrower than almost any camera photo, so the crop mostly removes the sides. From an upright phone photo (3:4), a full-height 9:16 crop drops a quarter of the width, which is usually just background. From a landscape photo it keeps less than half the width, so drag the box sideways until the person or the object you care about sits inside it. To post the whole landscape photo, [Fit an image to 9:16](/fit-image-to-9-16/) puts it in a 9:16 frame with a blurred or plain background.
 
 While the ratio is turned, the other buttons are turned too and read 5:4, 4:3 and 2:3. Press **Rotate ratio** to bring back 16:9 and the usual 4:5, 3:4 and 3:2. For a wide crop from the start, [Crop to 16:9](/crop-image-16-9/) opens the other way round.
 

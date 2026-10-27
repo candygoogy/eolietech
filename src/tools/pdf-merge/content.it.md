@@ -12,7 +12,7 @@ faq:
   - q: "I miei file vengono caricati da qualche parte?"
     a: "No. L'unione avviene nel tuo browser con la libreria open source pdf-lib. I tuoi PDF vengono letti dal disco nella memoria della pagina e il risultato viene salvato di nuovo sul disco. Dopo la prima apertura della pagina puoi anche scollegarti da internet: lo strumento funziona lo stesso."
   - q: "Posso unire PDF protetti da password?"
-    a: "No. I PDF cifrati non si possono unire qui. Apri il file in un lettore che conosce la password, salva una copia non protetta e aggiungi quella."
+    a: "No. I PDF cifrati non si possono unire qui. Se conosci la password, toglila con Sbloccare PDF su questo sito, che rimuove anche le restrizioni sulle modifiche, e aggiungi la copia sbloccata."
   - q: "Link, segnalibri e campi dei moduli restano?"
     a: "Il contenuto delle pagine, cioè testo, immagini e grafica vettoriale, viene copiato esattamente. Gli elementi che riguardano l'intero documento, come l'indice dei segnalibri, e i campi dei moduli distribuiti su più file potrebbero non essere riportati, quindi controlla il risultato se ti servono."
   - q: "C'è un limite al numero o alla dimensione dei file?"
