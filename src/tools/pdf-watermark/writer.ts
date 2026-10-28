@@ -21,21 +21,8 @@ import {
   type PDFPage,
   type PDFRef,
 } from "pdf-lib";
-import {
-  imageDraw,
-  imageRect,
-  planText,
-  textDraws,
-  toRotation,
-  viewSize,
-  visibleBox,
-  type AngleChoice,
-  type Box,
-  type Layout,
-  type Position,
-  type Rotation,
-  type Size,
-} from "./geometry";
+import { toRotation, viewSize, visibleBox, type Box, type Rotation, type Size } from "../pdf-shared/page-box";
+import { imageDraw, imageRect, planText, textDraws, type AngleChoice, type Layout, type Position } from "./geometry";
 
 export { loadPdf } from "../pdf-shared/pdf-ops";
 

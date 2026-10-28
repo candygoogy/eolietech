@@ -10,19 +10,8 @@ import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { baseName, button, errorMessage, errorRegion, h, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
 import { PdfToolError } from "../pdf-shared/pdf-errors";
-import {
-  CORNERS,
-  isArrowKey,
-  moveRect,
-  nudge,
-  placeAt,
-  refit,
-  resizeFromCorner,
-  toMm,
-  type Corner,
-  type Size,
-  type ViewRect,
-} from "./geometry";
+import type { Size, ViewRect } from "../pdf-shared/page-box";
+import { CORNERS, isArrowKey, moveRect, nudge, placeAt, refit, resizeFromCorner, toMm, type Corner } from "./geometry";
 import { extractSignature, strengthToThreshold, suggestThreshold, thresholdToStrength, trimToInk, type Rgba } from "./ink";
 // Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
 export { default as styles } from "./sign.css?url";

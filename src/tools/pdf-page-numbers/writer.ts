@@ -5,17 +5,8 @@
  * numbers land in plain page space). The client imports this module lazily, with pdf-lib.
  */
 import { degrees, rgb, StandardFontEmbedder, StandardFonts, type PDFDocument } from "pdf-lib";
-import {
-  formatLabel,
-  numbering,
-  placeLabel,
-  toRotation,
-  viewSize,
-  visibleBox,
-  type LabelFormat,
-  type Position,
-  type Size,
-} from "./layout";
+import { toRotation, viewSize, visibleBox, type Size } from "../pdf-shared/page-box";
+import { formatLabel, numbering, placeLabel, type LabelFormat, type Position } from "./layout";
 
 export { loadPdf } from "../pdf-shared/pdf-ops";
 

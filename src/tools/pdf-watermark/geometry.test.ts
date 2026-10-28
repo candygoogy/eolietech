@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  userToView,
+  viewSize,
+  viewToUser,
+  visibleBox,
+  type Box,
+  type Point,
+  type Rotation,
+  type Size,
+  type ViewRect,
+} from "../pdf-shared/page-box";
+import {
   CAP_HEIGHT,
   CORNER_MARGIN,
   MAX_TILES,
@@ -13,17 +24,7 @@ import {
   textDraws,
   textOrigin,
   tileCenters,
-  toRotation,
   userAngle,
-  userToView,
-  viewSize,
-  viewToUser,
-  visibleBox,
-  type Box,
-  type Point,
-  type Rotation,
-  type Size,
-  type ViewRect,
 } from "./geometry";
 
 /** A page whose visible box is offset from the origin (CropBox inside a larger MediaBox). */
@@ -44,38 +45,6 @@ function screenAngleOf(userDeg: number, rotation: Rotation): number {
 }
 
 describe("page boxes", () => {
-  it("uses the CropBox clipped to the MediaBox and swaps sides for quarter turns", () => {
-    expect(box).toEqual(crop);
-    expect(visibleBox(media, { x: -10, y: 850, width: 100, height: 100 })).toEqual({ x: 0, y: 850, width: 90, height: 50 });
-    // A CropBox entirely off the media falls back to the MediaBox; reversed corners are normalised.
-    expect(visibleBox(media, { x: 800, y: 0, width: 10, height: 10 })).toEqual(media);
-    expect(visibleBox({ x: 700, y: 900, width: -700, height: -900 }, crop)).toEqual(crop);
-    expect(viewSize(box, 0)).toEqual({ width: 600, height: 800 });
-    expect(viewSize(box, 270)).toEqual({ width: 800, height: 600 });
-    expect(toRotation(-90)).toBe(270);
-    expect(toRotation(450)).toBe(90);
-  });
-
-  it("round-trips view <-> user space for every rotation", () => {
-    for (const r of ROTATIONS) {
-      for (const [vx, vy] of [
-        [0, 0],
-        [123, 45],
-        [viewSize(box, r).width, viewSize(box, r).height],
-      ] as const) {
-        const u = viewToUser(vx, vy, box, r);
-        const back = userToView(u.x, u.y, box, r);
-        close(back.x, vx);
-        close(back.y, vy);
-      }
-    }
-    // The displayed top-left corner is the box's top-left (0), bottom-left (90), bottom-right (180), top-right (270).
-    expect(viewToUser(0, 0, box, 0)).toEqual({ x: 50, y: 830 });
-    expect(viewToUser(0, 0, box, 90)).toEqual({ x: 50, y: 30 });
-    expect(viewToUser(0, 0, box, 180)).toEqual({ x: 650, y: 30 });
-    expect(viewToUser(0, 0, box, 270)).toEqual({ x: 650, y: 830 });
-  });
-
   it("turns a screen angle into the user-space angle that reads the same on a rotated page", () => {
     for (const r of ROTATIONS) {
       for (const a of [0, 30, 45, 90, -60, 180]) {

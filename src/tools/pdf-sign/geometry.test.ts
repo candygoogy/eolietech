@@ -1,20 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  drawParams,
-  drawnCorners,
-  fitInside,
-  nudge,
-  placeAt,
-  resizeFromCorner,
-  toRotation,
-  userToView,
-  viewSize,
-  viewToUser,
-  visibleBox,
-  type Box,
-  type Rotation,
-  type ViewRect,
-} from "./geometry";
+import { userToView, viewToUser, visibleBox, type Box, type Rotation, type ViewRect } from "../pdf-shared/page-box";
+import { drawParams, drawnCorners, fitInside, nudge, placeAt, resizeFromCorner } from "./geometry";
 
 /** A Letter-ish page whose visible box is offset from the origin (CropBox inside a larger MediaBox). */
 const media: Box = { x: 0, y: 0, width: 700, height: 900 };
@@ -32,42 +18,6 @@ function landed(rect: ViewRect, rotation: Rotation): ViewRect {
 }
 
 describe("view <-> PDF user space", () => {
-  it("uses the CropBox clipped to the MediaBox and swaps sides for quarter turns", () => {
-    expect(box).toEqual(crop);
-    expect(visibleBox(media, { x: -10, y: 850, width: 100, height: 100 })).toEqual({ x: 0, y: 850, width: 90, height: 50 });
-    expect(viewSize(box, 0)).toEqual({ width: 600, height: 800 });
-    expect(viewSize(box, 90)).toEqual({ width: 800, height: 600 });
-    expect(toRotation(-90)).toBe(270);
-    expect(toRotation(450)).toBe(90);
-  });
-
-  it("maps the displayed top-left corner to the right user-space corner for each rotation", () => {
-    // Top-left of the screen is: the box's top-left (0), bottom-left (90), bottom-right (180), top-right (270).
-    expect(viewToUser(0, 0, box, 0)).toEqual({ x: 50, y: 830 });
-    expect(viewToUser(0, 0, box, 90)).toEqual({ x: 50, y: 30 });
-    expect(viewToUser(0, 0, box, 180)).toEqual({ x: 650, y: 30 });
-    expect(viewToUser(0, 0, box, 270)).toEqual({ x: 650, y: 830 });
-  });
-
-  it.each([0, 90, 180, 270] as Rotation[])("round-trips points at rotation %i", (r) => {
-    const { width, height } = viewSize(box, r);
-    for (const [vx, vy] of [
-      [0, 0],
-      [width, height],
-      [123.5, 45.25],
-      [width / 3, height - 7],
-    ]) {
-      const u = viewToUser(vx!, vy!, box, r);
-      expect(u.x).toBeGreaterThanOrEqual(box.x);
-      expect(u.x).toBeLessThanOrEqual(box.x + box.width);
-      expect(u.y).toBeGreaterThanOrEqual(box.y);
-      expect(u.y).toBeLessThanOrEqual(box.y + box.height);
-      const v = userToView(u.x, u.y, box, r);
-      expect(v.x).toBeCloseTo(vx!, 9);
-      expect(v.y).toBeCloseTo(vy!, 9);
-    }
-  });
-
   it.each([0, 90, 180, 270] as Rotation[])("draws an image exactly on the placed rectangle at rotation %i", (r) => {
     const rect = { x: 100, y: 420, w: 150, h: 50 };
     const p = drawParams(rect, box, r);

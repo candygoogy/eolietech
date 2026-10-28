@@ -11,6 +11,7 @@ import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { baseName, button, errorMessage, errorRegion, h, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
 import { PdfToolError } from "../pdf-shared/pdf-errors";
+import type { Size } from "../pdf-shared/page-box";
 import {
   DEFAULT_FORMAT,
   DEFAULT_MARGIN_MM,
@@ -32,7 +33,6 @@ import {
   SIZES,
   type LabelFormat,
   type Position,
-  type Size,
   type SizeName,
 } from "./layout";
 import type { NumberSettings } from "./writer";

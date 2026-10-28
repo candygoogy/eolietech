@@ -5,7 +5,8 @@
  * The client imports this module lazily, so pdf-lib loads only when a file is opened.
  */
 import { degrees, type PDFDocument, type PDFImage } from "pdf-lib";
-import { drawParams, toRotation, viewSize, visibleBox, type Size, type ViewRect } from "./geometry";
+import { toRotation, viewSize, visibleBox, type Size, type ViewRect } from "../pdf-shared/page-box";
+import { drawParams } from "./geometry";
 
 export { loadPdf } from "../pdf-shared/pdf-ops";
 

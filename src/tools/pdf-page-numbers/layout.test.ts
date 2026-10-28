@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { userToView, viewSize, viewToUser, visibleBox, type Box, type Rotation } from "../pdf-shared/page-box";
 import {
   alongBaseline,
   ASCENT,
@@ -10,14 +11,7 @@ import {
   parseWhole,
   placeLabel,
   POSITIONS,
-  toRotation,
-  userToView,
-  viewSize,
-  viewToUser,
-  visibleBox,
-  type Box,
   type Position,
-  type Rotation,
 } from "./layout";
 
 const ROTATIONS: Rotation[] = [0, 90, 180, 270];
@@ -105,32 +99,6 @@ describe("labelOrigin (in the view)", () => {
     const o = labelOrigin({ width: 100, height: 60 }, "bottom-right", 80, 50, 10);
     expect(o.x).toBe(0);
     expect(o.y).toBeCloseTo(ASCENT * 10, 6);
-  });
-});
-
-describe("geometry helpers", () => {
-  it("normalises angles", () => {
-    expect([0, 90, 180, 270, 360, -90, 450].map(toRotation)).toEqual([0, 90, 180, 270, 0, 270, 90]);
-  });
-
-  it("clips the CropBox to the MediaBox", () => {
-    expect(visibleBox(MEDIA, CROP)).toEqual(CROP);
-    expect(visibleBox(MEDIA, { x: -50, y: 700, width: 200, height: 200 })).toEqual({ x: 0, y: 700, width: 150, height: 100 });
-    // A CropBox outside the media falls back to the media.
-    expect(visibleBox(MEDIA, { x: 900, y: 900, width: 10, height: 10 })).toEqual(MEDIA);
-  });
-
-  it.each(ROTATIONS)("viewToUser and userToView are inverses at %i°", (r) => {
-    for (const [vx, vy] of [
-      [0, 0],
-      [12, 34],
-      [123.5, 77.25],
-    ] as const) {
-      const u = viewToUser(vx, vy, CROP, r);
-      const back = userToView(u.x, u.y, CROP, r);
-      expect(back.x).toBeCloseTo(vx, 9);
-      expect(back.y).toBeCloseTo(vy, 9);
-    }
   });
 });
 
