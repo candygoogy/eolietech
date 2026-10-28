@@ -119,14 +119,19 @@ describe("tool registry", () => {
   });
 
   it("gives every tool and variant page, in every locale, cross-origin isolation in public/_headers", () => {
+    // One site-wide rule (Cloudflare allows 100 _headers rules; per-page rules ran out), with opt-outs
+    // only for the waitlist pages, whose Turnstile iframe COEP would block.
+    const rules = headers.split(/\r?\n(?=\S)/).filter((block) => block.startsWith("/"));
+    expect(rules.length, "_headers rules (Cloudflare limit: 100)").toBeLessThanOrEqual(100);
+    const siteWide = rules.find((block) => block.startsWith("/*\n") || block.startsWith("/*\r\n"));
+    expect(siteWide).toMatch(/^\s+Cross-Origin-Embedder-Policy: credentialless$/m);
+    const coepRules = rules.filter((block) => /^\s+Cross-Origin-Embedder-Policy:/m.test(block));
+    expect(coepRules, "COEP set by more than one rule is joined with a comma, which browsers reject").toHaveLength(1);
+    const optedOut = rules.filter((block) => /^\s+! Cross-Origin-Embedder-Policy$/m.test(block)).map((block) => block.split(/\r?\n/)[0]);
+    expect(optedOut.sort()).toEqual(["/it/prezzi/", "/pricing/"]);
     for (const tool of tools) {
       for (const locale of tool.locales) {
-        for (const { slug } of toolPages(tool, locale)) {
-          const p = localePath(locale, slug);
-          expect(headers, `${p} missing in public/_headers`).toMatch(
-            new RegExp(String.raw`^${p}\r?\n\s+Cross-Origin-Embedder-Policy: credentialless`, "m"),
-          );
-        }
+        for (const { slug } of toolPages(tool, locale)) expect(optedOut).not.toContain(localePath(locale, slug));
       }
     }
   });

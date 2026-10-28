@@ -27,3 +27,16 @@ test("pages load with no CSP violations or console errors", async ({ page }) => 
   // favicon may 404 until the design step adds one
   expect(errors.filter((e) => !/favicon/i.test(e))).toEqual([]);
 });
+
+test("cross-origin isolation: one COEP value on tool pages and workers, none on the waitlist page", async ({ page, request }) => {
+  const tool = await request.get("/merge-pdf/");
+  expect(tool.headers()["cross-origin-embedder-policy"]).toBe("credentialless");
+  await page.goto("/merge-pdf/");
+  expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
+  const asset = await page.evaluate(() => document.querySelector<HTMLScriptElement>("script[type=module][src]")?.src);
+  expect(asset).toBeTruthy();
+  expect((await request.get(asset!)).headers()["cross-origin-embedder-policy"]).toBe("credentialless");
+  for (const path of ["/pricing/", "/it/prezzi/"]) {
+    expect((await request.get(path)).headers()["cross-origin-embedder-policy"], path).toBeUndefined();
+  }
+});
