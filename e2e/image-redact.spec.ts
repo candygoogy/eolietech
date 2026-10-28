@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, test, type Page } from "@playwright/test";
+import { test as base, expect, type Page } from "@playwright/test";
 
 /**
  * Redact an image (/redact-image/ and its blur and pixelate pages): open an image, add boxes with
@@ -13,6 +13,28 @@ const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), "fixtur
 const fixture = (name: string) => path.join(FIXTURES, name);
 const W = 64;
 const H = 48;
+
+/**
+ * A Firefox that was just launched next to other workers is slow for its first seconds (measured:
+ * first page load 4 to 13 s against 0.3 s once warm, the page's own main thread idle meanwhile),
+ * long enough to miss a 5 s wait for the tool to mount or for a 700 ms announcement. Each worker's
+ * browser (and the new one Playwright starts after a failure) opens an image here once, waiting on
+ * the tool's own ready signals, so the tests' waits measure the tool.
+ */
+const WARM_MS = 60_000;
+const test = base.extend<object, { warm: void }>({
+  warm: [
+    async ({ browser }, use, workerInfo) => {
+      const page = await browser.newPage({ baseURL: workerInfo.project.use.baseURL });
+      await page.goto("/redact-image/", { timeout: WARM_MS });
+      await page.locator('[data-tool-root][data-mounted] .tool-drop input[type="file"]').setInputFiles(fixture("sample.png"), { timeout: WARM_MS });
+      await expect(page.locator(".redact-editor")).toBeVisible({ timeout: WARM_MS });
+      await page.close();
+      await use();
+    },
+    { scope: "worker", auto: true, timeout: 2 * WARM_MS },
+  ],
+});
 
 function watch(page: Page, baseURL: string) {
   const origin = new URL(baseURL).origin;

@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { test as base, expect, type Locator, type Page } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
 
 /**
@@ -10,6 +10,28 @@ import { PDFDocument } from "pdf-lib";
  * a phone number, page 2 mentions the surname once).
  */
 const fixture = fileURLToPath(new URL("./fixtures/pdf/redact/personal-data.pdf", import.meta.url));
+
+/**
+ * A Firefox that was just launched next to other workers is slow for its first seconds: measured
+ * in a parallel run, its first page load took 4 to 13 s and its first PDF open up to 7 s more,
+ * against 0.3 s and 1 s on the same browsers once warm, with the page's own main thread idle the
+ * whole time. Each worker's browser (and the new one Playwright starts after a failure) opens a PDF
+ * here once, waiting on the tool's own ready signals, so the tests' waits measure the tool.
+ */
+const WARM_MS = 60_000;
+const test = base.extend<object, { warm: void }>({
+  warm: [
+    async ({ browser }, use, workerInfo) => {
+      const page = await browser.newPage({ baseURL: workerInfo.project.use.baseURL });
+      await page.goto("/redact-pdf/", { timeout: WARM_MS });
+      await page.locator("[data-tool-root][data-mounted='true'] input[type=file]").setInputFiles(fixture, { timeout: WARM_MS });
+      await expect(page.locator('.redact-frame[data-page="1"] canvas')).toBeVisible({ timeout: WARM_MS });
+      await page.close();
+      await use();
+    },
+    { scope: "worker", auto: true, timeout: 2 * WARM_MS },
+  ],
+});
 
 function watchNetwork(page: Page, baseURL: string) {
   const origin = new URL(baseURL).origin;
