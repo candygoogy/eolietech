@@ -221,3 +221,43 @@
   Cross-Origin-Embedder-Policy: credentialless
 /it/sbloccare-pdf/
   Cross-Origin-Embedder-Policy: credentialless
+/compress-image-to-kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/compress-image-to-20kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/compress-image-to-50kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/compress-image-to-100kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/compress-image-to-200kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/redact-image/
+  Cross-Origin-Embedder-Policy: credentialless
+/blur-faces-in-photo/
+  Cross-Origin-Embedder-Policy: credentialless
+/pixelate-image/
+  Cross-Origin-Embedder-Policy: credentialless
+/add-page-numbers-to-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/add-watermark-to-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-foto-in-kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-foto-a-20kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-foto-a-50kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-foto-a-100kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/comprimere-foto-a-200kb/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/oscurare-immagine/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/sfocare-volti-foto/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/pixelare-immagine/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/numerare-pagine-pdf/
+  Cross-Origin-Embedder-Policy: credentialless
+/it/filigrana-pdf/
+  Cross-Origin-Embedder-Policy: credentialless

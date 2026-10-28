@@ -33,10 +33,12 @@ The registry is `src/tools/registry.ts`. Every tool below has `status: "live"`.
 | Tool | URL | Main libraries |
 |---|---|---|
 | Compress images | `/compress-image/` | jSquash codecs (`@jsquash/jpeg` MozJPEG, `@jsquash/png`, `@jsquash/oxipng`, `@jsquash/webp`, `@jsquash/avif`, `@jsquash/resize`) |
+| Compress to a size in KB | `/compress-image-to-kb/` | jSquash MozJPEG and WebP encoders, searching quality (then scale) until the file fits under the target |
 | HEIC to JPG | `/heic-to-jpg/` | `heic-to` (libheif, its CSP build), then jSquash MozJPEG or OxiPNG to encode |
 | Resize images | `/resize-image/` | jSquash codecs and `@jsquash/resize` (Lanczos3), shared with Compress images |
 | Crop image | `/crop-image/` | jSquash codecs to decode and encode; the crop is a plain pixel copy in a Web Worker |
 | Make an image square | `/make-image-square/` | jSquash codecs and `@jsquash/resize`; the photo is placed on a white, black, coloured or blurred frame in a Web Worker |
+| Redact an image | `/redact-image/` | jSquash codecs; black boxes, blur and pixelation are applied to the full-resolution pixels in a Web Worker |
 | Remove EXIF data | `/remove-exif/` | None: JPEG, PNG and WebP metadata is removed by rewriting the file's own segments, so the image data is never re-encoded |
 | Merge PDF | `/merge-pdf/` | `pdf-lib` |
 | Split PDF | `/split-pdf/` | `pdf-lib` |
@@ -46,6 +48,8 @@ The registry is `src/tools/registry.ts`. Every tool below has `status: "live"`.
 | PDF to JPG | `/pdf-to-jpg/` | `pdfjs-dist` to render pages, jSquash MozJPEG or OxiPNG to encode, `client-zip` |
 | Redact PDF | `/redact-pdf/` | `pdfjs-dist` to render and search pages; redacted pages are rebuilt as images with `pdf-lib`, so the text under the boxes is gone, not covered |
 | PDF password | `/protect-pdf/`, `/unlock-pdf/` | qpdf 12 compiled to WebAssembly (`@neslinesli93/qpdf-wasm`, ISC; qpdf is Apache-2.0): AES-256 encryption and decryption without rewriting the pages |
+| Add page numbers | `/add-page-numbers-to-pdf/` | `pdf-lib` (standard Helvetica font) on the original file; `pdfjs-dist` for the preview |
+| Add a watermark | `/add-watermark-to-pdf/` | `pdf-lib` (text in standard fonts, or an embedded PNG/JPG logo, with opacity) on the original file; `pdfjs-dist` for the preview |
 | Sign PDF | `/sign-pdf/` | `pdf-lib` to place the signature image; `pdfjs-dist` for page previews |
 | Image to text (OCR) | `/image-to-text/` | Tesseract compiled to WebAssembly (`tesseract.js`, `tesseract.js-core`, Apache-2.0) with English and Italian `tessdata_fast` models, served from this site |
 | Open P7M files | `/open-p7m-file/` | None: the CMS (PKCS#7) container is read with a small DER parser and the signature is checked with the browser's Web Crypto API |

@@ -1,0 +1,320 @@
+/*
+ * Add a watermark to a PDF only. Settings on the left, the preview page beside them on wide screens
+ * (below them on narrow ones). The preview page is white paper in both themes, because it is paper.
+ * The page ratio and the swatch colours are set from client.ts (element.style), never as inline attributes.
+ */
+
+/* Once a PDF is open, the drop well shrinks to a "choose another" strip (as in Sign PDF). */
+.tool--pdf-watermark[data-loaded] > .tool-drop {
+  min-height: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.tool--pdf-watermark[data-loaded] > .tool-drop::before {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0;
+}
+
+.tool--pdf-watermark[data-loaded] .tool-drop__label {
+  font-size: var(--text-lg);
+}
+
+@media (max-width: 36rem) {
+  .tool--pdf-watermark[data-loaded] .tool-drop__hint {
+    display: none;
+  }
+}
+
+.wm-editor {
+  display: grid;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .wm-editor {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+  }
+
+  .wm-preview {
+    position: sticky;
+    top: var(--space-5);
+  }
+}
+
+[data-settled] .wm-editor {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  [data-settled] .wm-editor {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
+}
+
+.wm-settings,
+.wm-panel {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* ---------- text field ---------- */
+.wm-field {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.wm-field > label,
+.wm-inline > label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.wm-field input {
+  width: min(100%, 32rem);
+  min-height: var(--target-min);
+}
+
+.wm-field .tool-note {
+  margin: 0;
+}
+
+/* ---------- segmented controls (radios), as in Sign PDF ---------- */
+.wm-seg {
+  display: block;
+  min-width: 0;
+}
+
+.wm-seg legend,
+.wm-colors legend {
+  float: left;
+  width: 100%;
+  padding-bottom: 0.375rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.wm-seg__options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  clear: both;
+  border-radius: var(--radius-full);
+  background: var(--tool-well, var(--color-sunken));
+}
+
+.wm-seg__option {
+  display: inline-grid;
+  place-items: center;
+  min-height: calc(var(--target-min) - 6px);
+  padding: 0 1rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-color),
+    color var(--duration-fast) var(--ease-color);
+}
+
+.wm-seg__option:has(input:checked) {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.wm-seg__option:has(input:focus-visible),
+.wm-colors__option:has(input:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 24rem) {
+  .wm-seg__option {
+    padding: 0 0.75rem;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wm-seg__option:not(:has(input:checked)):hover {
+    background: var(--tool-well-hover, var(--color-fill-hover));
+    color: var(--color-text);
+  }
+}
+
+/* Angle choice with its degrees field beside it. */
+.wm-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3) var(--space-4);
+}
+
+.wm-inline {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.wm-inline input {
+  width: 7rem;
+  min-height: var(--target-min);
+}
+
+/* ---------- colour ---------- */
+.wm-colors {
+  display: block;
+  min-width: 0;
+}
+
+.wm-colors__options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  clear: both;
+  margin-right: var(--space-2);
+}
+
+.wm-colors__option,
+.wm-colors__custom {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 0.875rem 0 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--tool-well, var(--color-sunken));
+  font-weight: 700;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-color),
+    color var(--duration-fast) var(--ease-color);
+}
+
+.wm-colors__option:has(input:checked) {
+  box-shadow: inset 0 0 0 2px var(--color-text);
+  color: var(--color-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wm-colors__option:not(:has(input:checked)):hover,
+  .wm-colors__custom:hover {
+    background: var(--tool-well-hover, var(--color-fill-hover));
+    color: var(--color-text);
+  }
+}
+
+.wm-colors__dot {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--wm-dot, #7a7a7a);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+}
+
+.wm-colors__custom {
+  margin-top: var(--space-2);
+}
+
+/* Beats the field styles of global.css and tool.css: the picker is drawn as a round swatch. */
+.tool .wm-colors__picker[type="color"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  cursor: pointer;
+}
+
+.wm-colors__picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.wm-colors__picker::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.wm-colors__picker::-moz-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.wm-colors__custom:has(input:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- image ---------- */
+.wm-pick {
+  cursor: pointer;
+}
+
+.tool-actions:has(> input:focus-visible) > .wm-pick {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.wm-logo-name {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* ---------- pages ---------- */
+.wm-pages input[type="text"] {
+  min-height: var(--target-min);
+}
+
+/* ---------- preview ---------- */
+.wm-preview {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+}
+
+.wm-preview__stage {
+  --wm-max-h: min(70vh, 40rem);
+  display: grid;
+  justify-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--tool-well, var(--color-sunken));
+}
+
+@media (max-width: 36rem) {
+  .wm-preview__stage {
+    padding: var(--space-2);
+  }
+}
+
+.wm-preview__frame {
+  position: relative;
+  width: min(100%, calc(var(--wm-max-h) * var(--wm-r, 0.7727)));
+  aspect-ratio: var(--wm-ratio, 612 / 792);
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
+.wm-preview__page,
+.wm-preview__mark {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wm-preview__caption {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}

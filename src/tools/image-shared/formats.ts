@@ -202,6 +202,18 @@ export function flattenAlpha(data: Uint8ClampedArray | Uint8Array, bg: [number, 
   return changed;
 }
 
+/**
+ * File size in decimal units (1 KB = 1000 bytes), one decimal, rounded down so a size never reads
+ * above its true value: 19,999 bytes -> "19.9 KB", never "20.0 KB". For tools whose limits are in
+ * decimal KB (image-target-size); the others show sizes with formatBytes (1024) from src/lib/tool-ui.
+ */
+export function formatDecimalBytes(bytes: number, locale: string): string {
+  if (bytes < 1000) return `${bytes} B`;
+  const [value, unit] = bytes < 1_000_000 ? [Math.floor(bytes / 100) / 10, "KB"] : [Math.floor(bytes / 100_000) / 10, "MB"];
+  const number = new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
+  return `${number} ${unit}`;
+}
+
 /** Percentage saved (positive) or added (negative), rounded. */
 export const percentSaved = (before: number, after: number): number =>
   before > 0 ? Math.round(((before - after) / before) * 100) : 0;

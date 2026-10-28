@@ -11,10 +11,12 @@ import { expect, test, type Page } from "@playwright/test";
 
 const TOOLS = {
   "image-compress": "compress-image",
+  "image-target-size": "compress-image-to-kb",
   "heic-to-jpg": "heic-to-jpg",
   "image-resize": "resize-image",
   "image-crop": "crop-image",
   "image-fit": "make-image-square",
+  "image-redact": "redact-image",
   "exif-remover": "remove-exif",
   "pdf-merge": "merge-pdf",
   "pdf-split": "split-pdf",
@@ -27,6 +29,8 @@ const TOOLS = {
   "pdf-redact": "redact-pdf",
   "pdf-sign": "sign-pdf",
   "pdf-password": "protect-pdf",
+  "pdf-page-numbers": "add-page-numbers-to-pdf",
+  "pdf-watermark": "add-watermark-to-pdf",
   "ocr": "image-to-text",
   "background-remover": "remove-background",
   "audio-transcribe": "transcribe-audio",

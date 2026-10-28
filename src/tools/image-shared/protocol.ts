@@ -19,8 +19,11 @@ export interface JobRequest {
   settings: JobSettings;
 }
 
-/** Error codes; the UI maps them to translated strings. */
-export type JobErrorCode = "decode" | "unsupported" | "memory" | "generic";
+/**
+ * Error codes; the UI maps them to translated strings (img.error.<code>, "generic" -> tool.error.generic).
+ * "noFit": image-target-size could not get the file under the target size, even made small.
+ */
+export type JobErrorCode = "decode" | "unsupported" | "memory" | "noFit" | "generic";
 
 export type JobResponse =
   | {
@@ -38,5 +41,12 @@ export type JobResponse =
       notEnlarged?: boolean;
       /** True when transparent pixels were flattened onto white for JPEG. */
       flattened: boolean;
+      /** Quality the output was encoded with, when a tool chose it per file (image-target-size). */
+      quality?: number;
+      /**
+       * The buffer is the original file's own encoded image, not re-encoded (image-target-size: already
+       * under the target; its metadata is stripped losslessly). The UI keeps the original file name.
+       */
+      unchanged?: boolean;
     }
   | { id: number; ok: false; error: JobErrorCode; detail?: string };

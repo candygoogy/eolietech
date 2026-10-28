@@ -1,0 +1,393 @@
+/*
+ * Redact an image only. The photo sits in a well like the cropper's; the effect is painted into
+ * the preview itself (client.ts), so the boxes over it are only outlines: white with a dark edge so
+ * they read on any photo, and the box you are working on gets the image tools' sulphur marks, its
+ * handles and a remove button (as in Redact PDF). Positions and the image's ratio are set from
+ * client.ts at runtime (element.style), never as inline style attributes.
+ */
+
+/* Once an image is open, the drop well shrinks to a "choose another" strip (as in the cropper). */
+.tool--image-redact[data-loaded] > .tool-drop {
+  min-height: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.tool--image-redact[data-loaded] > .tool-drop::before {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0;
+}
+
+.tool--image-redact[data-loaded] .tool-drop__label {
+  font-size: var(--text-lg);
+}
+
+@media (max-width: 36rem) {
+  .tool--image-redact[data-loaded] .tool-drop__hint {
+    display: none;
+  }
+}
+
+.redact-editor {
+  display: grid;
+  gap: var(--space-4);
+}
+
+[data-settled] .redact-editor {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  [data-settled] .redact-editor {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
+}
+
+/* ---------- effect and strength ---------- */
+.redact-controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3) var(--space-5);
+}
+
+.redact-controls > .redact-safe {
+  grid-column: 1 / -1;
+  max-width: var(--measure, 65ch);
+}
+
+@media (max-width: 40rem) {
+  .redact-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.redact-effect {
+  display: block;
+}
+
+.redact-effect legend {
+  float: left;
+  width: 100%;
+  padding-bottom: 0.375rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+/* A segmented control built from radios, as the cropper's ratios. */
+.redact-effect__options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  clear: both;
+  border-radius: var(--radius-full);
+  background: var(--tool-well, var(--color-sunken));
+}
+
+.redact-effect__option {
+  display: inline-grid;
+  place-items: center;
+  min-height: calc(var(--target-min) - 6px);
+  padding: 0 0.875rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-color),
+    color var(--duration-fast) var(--ease-color);
+}
+
+/* The chosen effect is set in ink: unmistakable in both themes, and not the action colour. */
+.redact-effect__option:has(input:checked) {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.redact-effect__option:has(input:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .redact-effect__option:not(:has(input:checked)):hover {
+    background: var(--tool-well-hover, var(--color-fill-hover));
+    color: var(--color-text);
+  }
+}
+
+/* Phones: three even segments across the width. */
+@media (max-width: 36rem) {
+  .redact-effect__options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    border-radius: var(--radius-lg);
+  }
+
+  .redact-effect__option {
+    padding-inline: var(--space-2);
+  }
+}
+
+div.redact-strength {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.375rem;
+}
+
+div.redact-strength > .tool-note {
+  margin: 0;
+}
+
+/* ---------- toolbar ---------- */
+.redact-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.redact-count {
+  margin-inline-start: auto;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+/* ---------- stage ---------- */
+.redact-stage {
+  /* Tall enough to work on, short enough to leave the page scrollable around it on a phone. */
+  --redact-max-h: min(65vh, 36rem);
+  display: grid;
+  justify-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--tool-well, var(--color-sunken));
+}
+
+@media (max-width: 36rem) {
+  .redact-stage {
+    padding: var(--space-3);
+  }
+}
+
+.redact-frame {
+  position: relative;
+  width: min(100%, calc(var(--redact-max-h) * var(--redact-r, 1)));
+  aspect-ratio: var(--redact-ratio, 1);
+  cursor: crosshair;
+  /* Drags over the photo draw and move boxes, as in the cropper; the page scrolls around the well. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.redact-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Checkerboard so transparent pixels read as transparent (as .tool-item__thumb). */
+  background: repeating-conic-gradient(var(--color-sunken) 0 25%, var(--color-surface) 0 50%) 0 0 / 16px 16px;
+}
+
+/* The keyboard hint explains the stage above it. */
+.redact-editor > .redact-hint {
+  margin-top: calc(var(--space-2) - var(--space-4));
+}
+
+/* ---------- boxes ---------- */
+.redact-box {
+  --redact-hit: 0.75rem;
+  --redact-mark: #f6cf2c; /* --sulphur-400: the same in both themes, it sits on a photo */
+  position: absolute;
+  z-index: 1;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.85),
+    0 0 0 1px rgb(0 0 0 / 0.6);
+  cursor: move;
+  touch-action: none;
+}
+
+@media (pointer: coarse) {
+  .redact-box {
+    --redact-hit: 1.25rem;
+  }
+}
+
+.redact-box[data-selected] {
+  z-index: 2;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.85),
+    0 0 0 2px var(--redact-mark),
+    0 0 0 3px rgb(0 0 0 / 0.6);
+}
+
+.redact-box:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Handles sit outside the box, so even a box one line of text high can be moved from inside. */
+.redact-handle {
+  position: absolute;
+  display: none;
+}
+
+.redact-box[data-selected] .redact-handle {
+  display: block;
+}
+
+.redact-handle[data-handle="n"],
+.redact-handle[data-handle="s"] {
+  left: 0;
+  right: 0;
+  height: var(--redact-hit);
+  cursor: ns-resize;
+}
+
+.redact-handle[data-handle="e"],
+.redact-handle[data-handle="w"] {
+  top: 0;
+  bottom: 0;
+  width: var(--redact-hit);
+  cursor: ew-resize;
+}
+
+.redact-handle[data-handle="n"] {
+  bottom: 100%;
+}
+
+.redact-handle[data-handle="s"] {
+  top: 100%;
+}
+
+.redact-handle[data-handle="w"] {
+  right: 100%;
+}
+
+.redact-handle[data-handle="e"] {
+  left: 100%;
+}
+
+.redact-handle[data-handle="nw"],
+.redact-handle[data-handle="ne"],
+.redact-handle[data-handle="se"],
+.redact-handle[data-handle="sw"] {
+  width: var(--redact-hit);
+  height: var(--redact-hit);
+}
+
+.redact-handle[data-handle="nw"] {
+  right: 100%;
+  bottom: 100%;
+  cursor: nwse-resize;
+}
+
+.redact-handle[data-handle="ne"] {
+  left: 100%;
+  bottom: 100%;
+  cursor: nesw-resize;
+}
+
+.redact-handle[data-handle="se"] {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
+
+.redact-handle[data-handle="sw"] {
+  right: 100%;
+  top: 100%;
+  cursor: nesw-resize;
+}
+
+/* Corner marks: small sulphur squares with a dark edge, readable on any photo and on a black box. */
+.redact-handle[data-handle$="w"]:not([data-handle="w"])::after,
+.redact-handle[data-handle$="e"]:not([data-handle="e"])::after {
+  content: "";
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--redact-mark);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.7);
+}
+
+.redact-handle[data-handle="nw"]::after {
+  right: -0.25rem;
+  bottom: -0.25rem;
+}
+
+.redact-handle[data-handle="ne"]::after {
+  left: -0.25rem;
+  bottom: -0.25rem;
+}
+
+.redact-handle[data-handle="se"]::after {
+  left: -0.25rem;
+  top: -0.25rem;
+}
+
+.redact-handle[data-handle="sw"]::after {
+  right: -0.25rem;
+  top: -0.25rem;
+}
+
+/* Remove: a small round ink button off the top-right corner, shown for the box you are working on. */
+.redact-box__remove {
+  position: absolute;
+  z-index: 3;
+  bottom: calc(100% + var(--redact-hit));
+  left: calc(100% + var(--redact-hit) - 1.5rem);
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: #1a1a1a;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.7);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  .redact-box__remove {
+    width: 2rem;
+    height: 2rem;
+    left: calc(100% + var(--redact-hit) - 2rem);
+  }
+}
+
+.redact-box[data-selected] .redact-box__remove,
+.redact-box__remove:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.redact-box__remove:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* While drawing or dragging, the remove button would only get in the way. */
+.redact-box[data-dragging] .redact-box__remove {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- output: room for "Same as the original WebP" ---------- */
+div.redact-output {
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+}

@@ -133,6 +133,11 @@
   --tool-shell-rest: 17.0625rem;
 }
 
+[data-tool-id="image-target-size"] {
+  --tool-shell: 33.9531rem;
+  --tool-shell-rest: 10.4844rem;
+}
+
 [data-tool-id="heic-to-jpg"] {
   --tool-shell: 29.5938rem;
   --tool-shell-rest: 9.0313rem;
@@ -192,6 +197,9 @@
 [data-tool-id="pdf-redact"],
 [data-tool-id="pdf-sign"],
 [data-tool-id="pdf-password"],
+[data-tool-id="pdf-page-numbers"],
+[data-tool-id="image-redact"],
+[data-tool-id="pdf-watermark"],
 [data-tool-id="ocr"] {
   --tool-shell: 13.0313rem;
   --tool-shell-rest: 0rem;
@@ -212,6 +220,9 @@
       [data-tool-id="pdf-redact"],
       [data-tool-id="pdf-sign"],
       [data-tool-id="pdf-password"],
+      [data-tool-id="pdf-page-numbers"],
+      [data-tool-id="image-redact"],
+      [data-tool-id="pdf-watermark"],
       [data-tool-id="ocr"]
     )
     > .tool

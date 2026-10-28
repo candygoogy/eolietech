@@ -6,7 +6,7 @@
 import { createDropzone, downloadBlob, downloadZip, formatBytes, markEnter, type FileIntake } from "../../lib/tool-ui";
 import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
-import { MIME, outputName, percentSaved, uniqueNames, type InputFormat, type RasterFormat } from "./formats";
+import { MIME, formatDecimalBytes, outputName, percentSaved, uniqueNames, type InputFormat, type RasterFormat } from "./formats";
 import { WorkerPool, defaultPoolSize } from "./pool";
 import type { JobErrorCode, JobSettings } from "./protocol";
 
@@ -26,6 +26,10 @@ interface Result {
   flattened: boolean;
   /** Same format as the input and not smaller: we recommend keeping the original. */
   preferOriginal: boolean;
+  /** Quality the worker chose for this file (image-target-size). */
+  quality?: number;
+  /** The worker handed back the original image without re-encoding it (image-target-size: already under the target). */
+  unchanged: boolean;
 }
 
 interface Item {
@@ -55,6 +59,13 @@ export interface BatchOptions {
    * pixel size did not change. Off for every other tool, whose rows stay as they were.
    */
   resize?: boolean;
+  /**
+   * Target-size rows (image-target-size): file size first, then the pixel size ("old -> new" when the
+   * image was made smaller, img.status.resized) and the quality used (img.status.quality). A file kept
+   * as it was says so (img.status.unchanged) and gets a plain Download. Sizes are shown in decimal
+   * units (1 KB = 1000 bytes, formatDecimalBytes), the same units as the target.
+   */
+  target?: boolean;
 }
 
 export interface Batch {
@@ -70,6 +81,8 @@ export const domId = (prefix: string): string => `${prefix}-${++uid}`;
 export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
   const { ctx } = opts;
   const t = ctx.t;
+  /** Sizes in the units the tool's limits use: decimal KB for target sizes, else the site's 1024 units. */
+  const size = (bytes: number): string => (opts.target ? formatDecimalBytes(bytes, ctx.locale) : formatBytes(bytes));
   const poolSize = defaultPoolSize();
   const pool = new WorkerPool(opts.createWorker, poolSize);
   let active = 0;
@@ -207,11 +220,12 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
       const sourceHeight = res.sourceHeight ?? res.height;
       // A resized image is the point of the resizer, even when its file is not smaller.
       const resized = sourceWidth !== res.width || sourceHeight !== res.height;
-      const preferOriginal = res.format === res.input && blob.size >= item.file.size && !(opts.resize && resized);
+      const preferOriginal =
+        !res.unchanged && res.format === res.input && blob.size >= item.file.size && !(opts.resize && resized);
       finish(item, jobGen, {
         result: {
           blob,
-          name: outputName(item.file.name, res.input, res.format),
+          name: res.unchanged ? item.file.name : outputName(item.file.name, res.input, res.format),
           input: res.input,
           format: res.format,
           width: res.width,
@@ -221,6 +235,8 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
           notEnlarged: !!res.notEnlarged,
           flattened: res.flattened,
           preferOriginal,
+          quality: res.quality,
+          unchanged: !!res.unchanged,
         },
       });
     } else {
@@ -283,7 +299,7 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
 
     if (item.state === "pending" || item.state === "working") {
       meta.textContent = t(item.state === "pending" ? "img.status.pending" : "img.status.working", {
-        size: formatBytes(file.size),
+        size: size(file.size),
       });
     } else if (item.state === "error") {
       const key = item.error === "generic" || !item.error ? "tool.error.generic" : `img.error.${item.error}`;
@@ -291,8 +307,8 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
     } else if (result) {
       const pct = percentSaved(file.size, result.blob.size);
       const sizes = {
-        before: formatBytes(file.size),
-        after: formatBytes(result.blob.size),
+        before: size(file.size),
+        after: size(result.blob.size),
         percent: Math.abs(pct),
         width: result.width,
         height: result.height,
@@ -300,9 +316,15 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
         fromHeight: result.sourceHeight,
       };
       const weight = t(pct > 0 ? "img.status.smaller" : pct < 0 ? "img.status.larger" : "img.status.same", sizes);
+      const resized = result.width !== result.sourceWidth || result.height !== result.sourceHeight;
       const lines = opts.resize
         ? [t("img.status.resized", sizes), weight]
-        : [weight, t("img.status.dimensions", sizes)];
+        : opts.target
+          ? result.unchanged
+            ? [t("img.status.unchanged", sizes), t("img.status.dimensions", sizes)]
+            : [weight, t(resized ? "img.status.resized" : "img.status.dimensions", sizes)]
+          : [weight, t("img.status.dimensions", sizes)];
+      if (opts.target && result.quality !== undefined) lines.push(t("img.status.quality", { quality: result.quality }));
       if (opts.resize && result.notEnlarged) lines.push(t("img.status.notEnlarged"));
       if (result.preferOriginal) lines.push(t("img.status.keepOriginal"));
       if (result.flattened) lines.push(t("img.status.flattened"));
@@ -377,7 +399,7 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
       .filter((i) => i.state === "done" && i.result)
       .reduce((s, i) => s + (i.result!.preferOriginal ? i.file.size : i.result!.blob.size), 0);
     const parts = [tPlural(ctx, "img.summary.done", total, { done, total })];
-    if (done > 0) parts.push(t("img.summary.sizes", { before: formatBytes(before), after: formatBytes(after) }));
+    if (done > 0) parts.push(t("img.summary.sizes", { before: size(before), after: size(after) }));
     if (failed > 0) parts.push(tPlural(ctx, "img.summary.failed", failed, { failed }));
     status.textContent = parts.join(" ");
   }
