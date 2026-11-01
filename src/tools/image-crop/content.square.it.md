@@ -9,6 +9,8 @@ howTo:
   - "Per una misura precisa, scrivila in Larghezza: l'altezza si adegua. In Salva come tieni il formato originale, oppure scegline un altro."
   - "Premi Ritaglia, controlla le misure in pixel e scarica il tuo quadrato."
 faq:
+  - q: "Posso rendere quadrata una foto senza tagliarla?"
+    a: "Sì, con Foto quadrata senza tagliare su questo sito. Tiene la foto intera, con tutti i bordi, e riempie i lati vuoti del quadrato con il bianco, il nero, un colore a scelta o una copia sfocata della foto."
   - q: "Come faccio una buona foto profilo?"
     a: "Molte app mostrano la foto profilo come un cerchio ritagliato al centro del quadrato, quindi gli angoli spariscono. Tieni il viso al centro, lascia un po' di spazio sopra la testa e fai un ritaglio un po' più largo di quanto ti verrebbe d'istinto."
   - q: "Quanto deve essere grande il quadrato?"
@@ -22,6 +24,8 @@ faq:
 ui:
   crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre quadrato; non viene caricato niente."
 ---
+
+Vuoi la foto intera nel quadrato, senza tagliare niente? [Foto quadrata senza tagliare](/it/foto-quadrata-senza-tagliare/) la mette dentro un quadrato e riempie i lati vuoti con il bianco, il nero, un colore o una copia sfocata della foto.
 
 ## Foto profilo e avatar
 

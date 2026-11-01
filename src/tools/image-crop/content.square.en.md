@@ -9,6 +9,8 @@ howTo:
   - "For an exact size, type it in Width and the height follows. Keep the original format under Save as, or pick another one."
   - "Press Crop image, check the size in pixels, then download your square."
 faq:
+  - q: "Can I make a photo square without cropping it?"
+    a: "Yes, with Make an image square on this site. It keeps the whole photo, with every edge, and fills the empty sides of the square with white, black, a colour you choose or a blurred copy of the photo."
   - q: "How do I make a good profile picture?"
     a: "Many apps show profile pictures as a circle cut from the middle of the square, so the corners disappear. Keep the face in the centre, leave a little room above the head, and crop a bit looser than feels natural."
   - q: "What size should the square be?"
@@ -22,6 +24,8 @@ faq:
 ui:
   crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens square; nothing is uploaded."
 ---
+
+Want the whole photo in the square, with nothing cut off? [Make an image square](/make-image-square/) fits it inside a square and fills the empty sides with white, black, a colour or a blurred copy of the photo.
 
 ## Profile pictures and avatars
 

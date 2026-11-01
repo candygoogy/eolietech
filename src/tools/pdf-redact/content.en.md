@@ -2,13 +2,15 @@
 title: "Redact PDF: black out text for good, in your browser | Eolietech"
 description: "Black out names, addresses, IBANs and phone numbers in a PDF. The text under each box is removed from the file, not just covered. Runs in your browser, nothing is uploaded."
 h1: "Redact PDF"
-intro: "Hide a name, an account number or a whole paragraph before you send a PDF to someone. Draw black boxes or search for what has to go, check them, and save a copy where that text is gone from the file, not just painted over. The PDF never leaves your device."
+intro: "Black out a name, an account number or a whole paragraph before you send a PDF to someone. Draw black boxes or search for what has to go, check them, and save a copy where that text is gone from the file, not just painted over. The PDF never leaves your device."
 howTo:
   - "Choose a PDF or drop it on the box above. Its pages appear below, one under the other."
   - "Drag across a page to draw a black box over what you want to hide. To find words for you, type them in the search field, or press one of the buttons for email addresses, phone numbers, IBANs or Italian codici fiscali."
   - "Check every box. Drag a box to move it, drag its edges to resize it, and press the small × to remove it."
   - "Press Redact and save, then download the new PDF. Your original file is left as it was."
 faq:
+  - q: "How do I black out text in a PDF?"
+    a: "Open the PDF here, then drag a box over the text, or type a word in the search field to black out every place it appears. Press Redact and save. In the new PDF the blacked-out text is removed from the file, so it cannot be copied or searched, and nothing is uploaded on the way."
   - q: "Is the text under the boxes really gone?"
     a: "Yes. Every page with a box is redrawn as a picture with the boxes painted solid black, and the new PDF holds only that picture for the page. The original text, fonts and drawings of that page are not copied into the new file, so there is nothing left underneath to select, copy or search."
   - q: "Why does my redacted page look slightly less sharp?"

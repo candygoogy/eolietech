@@ -65,3 +65,16 @@ test("a tool page links its presets, and a preset page links back and marks itse
   await expect(current).toHaveText(en["tools.image-resize.variant.for-email"]);
   await expect(variantRow.locator('a[href$="/resize-image-for-email/"]')).toHaveCount(0);
 });
+
+test("the square crop pages point to the no-crop square tool, and Redact PDF answers how to black out text", async ({ page, request }) => {
+  for (const [path, target] of [
+    ["/crop-image-square/", "/make-image-square/"],
+    ["/it/ritagliare-immagine-quadrata/", "/it/foto-quadrata-senza-tagliare/"],
+  ]) {
+    await page.goto(path);
+    await expect(page.locator(`main a[href="${target}"]`).first()).toBeVisible();
+    expect((await request.get(target)).status(), target).toBe(200);
+  }
+  await page.goto("/redact-pdf/");
+  await expect(page.getByText("How do I black out text in a PDF?")).toBeVisible();
+});
