@@ -1,11 +1,35 @@
 # Eolietech
 
-Free, privacy-first tools for images, PDFs and audio. Everything runs in your browser, so your
-files never leave your device, and you can verify that. No ads, no accounts.
+**Free tools for images, PDFs and audio that run in your browser. Your files never leave your
+device, and you can check that yourself.**
+
+[eolietech.com](https://eolietech.com) · [all tools](https://eolietech.com/tools/) ·
+[how to verify](https://eolietech.com/security/) · in English and [Italian](https://eolietech.com/it/)
+
+[![The Eolietech home page: "Your files never leave your device." A postcard of Stromboli stamped "not sent" and a PDF clipped beside it.](.github/readme/home.png)](https://eolietech.com)
+
+- **Images:** compress (also to an exact size in KB), convert between HEIC, JPG, PNG, WebP and AVIF,
+  resize, crop, make a photo square without cropping, black out, blur or pixelate parts of it, strip
+  EXIF data and GPS location, remove the background.
+- **PDFs:** merge, split, reorder, compress, redact, sign, add page numbers or a watermark, add or remove
+  a password, turn images into a PDF and pages into images, read text from scans (OCR).
+- **Documents:** open signed `.p7m` files and read Italian e-invoices (FatturaPA).
+- **Audio:** transcribe a recording with Whisper, running on your device.
+
+No account, no ads, no daily limits, no watermarks. Once a tool has loaded, it keeps working offline.
+
+### Check it in 30 seconds
+
+1. `curl -sI https://eolietech.com/ | grep -i content-security-policy` shows `connect-src 'self'`:
+   the browser itself stops the page from talking to any other server.
+2. Open a tool, open your browser's Network panel and process a file. Nothing is uploaded.
+3. Go offline after the first file. The next one still works.
+
+If Eolietech saved you a trip to an upload site, a star on this repo helps other people find it.
 
 Copyright (C) 2026 Francesco Basile.
 
-## The privacy claim, and how to check it
+## How the privacy claim works
 
 When you open a file in a tool, the page reads it and processes it with code running on your
 device, often compiled to WebAssembly. The result is built in the browser and saved to your
