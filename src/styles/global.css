@@ -336,6 +336,15 @@ hr {
   margin-inline-start: auto;
 }
 
+/* The GitHub link joins the page links where the row has room for it. On narrow phones the Italian
+ * labels already fill the row and a fifth item would wrap onto a line of its own; the footer and
+ * the line under every tool still link the repository there. */
+@media (max-width: 29.99rem) {
+  .site-nav__source {
+    display: none;
+  }
+}
+
 /* Both language codes; the current one carries the sea line, like the current section link. */
 .site-lang {
   display: inline-flex;

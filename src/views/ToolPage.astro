@@ -10,6 +10,7 @@ import Base from "../layouts/Base.astro";
 import JsonLd from "../components/JsonLd.astro";
 import { getDictionary, localePath, t } from "../i18n";
 import { pagePath } from "../i18n/routes";
+import { siteConfig } from "../site.config";
 import { breadcrumbs, graph, webApplication } from "../lib/structured-data";
 import { variantLinks } from "../lib/tool-variants";
 import { getTool, publishedTools } from "../tools/registry";
@@ -152,6 +153,10 @@ const structuredData = graph([
       <p class="tool-page__private">
         <span>{t(locale, "toolPage.private")}</span>
         <a href={pagePath(locale, "security")}>{t(locale, "toolPage.verify")}</a>
+      </p>
+      <p class="tool-page__private tool-page__source">
+        <span>{t(locale, "toolPage.openSource")}</span>
+        <a href={siteConfig.sourceUrl}>{t(locale, "toolPage.star")}</a>
       </p>
     </div>
 

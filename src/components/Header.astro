@@ -46,6 +46,9 @@ const languages = LOCALES.map((l) => ({
             </li>
           ))
         }
+        <li class="site-nav__source">
+          <a href={siteConfig.sourceUrl}>{t(locale, "nav.source")}</a>
+        </li>
       </ul>
     </nav>
     <p class="site-lang" role="group" aria-label={t(locale, "nav.language")}>

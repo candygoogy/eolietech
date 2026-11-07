@@ -107,6 +107,11 @@
   min-height: var(--target-min);
 }
 
+/* Second line, right under the first: the repository link. */
+.tool-page__source {
+  margin-top: 0;
+}
+
 /* ---------- loading shell ----------
  * Server-rendered inside [data-tool-root] until the tool's client chunk mounts. It has the tool's
  * shape (the drop well) and reserves the mounted tool's measured height, so mounting shifts nothing

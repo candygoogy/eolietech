@@ -13,6 +13,7 @@
   "nav.pricing": "Pricing",
   "nav.about": "About",
   "nav.security": "Security",
+  "nav.source": "GitHub",
 
   "home.title": "Eolietech: private tools that run in your browser",
   "home.h1": "Your files never leave your device.",
@@ -232,6 +233,8 @@
   "toolPage.allTools": "All tools",
   "toolPage.private": "Files are processed on this device and never uploaded.",
   "toolPage.verify": "How to check",
+  "toolPage.openSource": "Free and open source.",
+  "toolPage.star": "Star it on GitHub",
 
   "pricing.title": "Pricing | Eolietech",
   "pricing.description": "Every Eolietech tool that runs in your browser is free, with no account and no ads. Pro, with server and AI features and an API, comes later.",
