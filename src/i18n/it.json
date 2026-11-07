@@ -94,6 +94,7 @@
   "home.tools.lede": "Raggruppati in base a ciò su cui lavorano. Ognuno funziona nella scheda in cui lo apri.",
   "home.tools.stamp": "gratis, senza account",
   "home.tools.all": "Vedi tutti gli strumenti",
+  "home.shortcuts.label": "Scorciatoie",
   "home.formats.h2": "Cosa aprono gli strumenti.",
   "home.formats.lede": "Un francobollo per ogni tipo di file, archiviato sotto gli strumenti che lo accettano. Valore facciale €0, perché nessuno viene spedito.",
   "home.formats.by": "Aperto da",

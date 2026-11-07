@@ -1137,6 +1137,21 @@ a.tool-index__row:focus-visible::after {
   font-size: var(--text-sm);
 }
 
+/* Home: the shortcuts row under the tool list (Home.astro). The preset-row tabs from tool pages,
+ * set on the tool list's own grid from 48rem, so the label sits in the category column and the
+ * tabs line up with the tool names. */
+.tool-variants.home-shortcuts {
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .tool-variants.home-shortcuts {
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2.6fr);
+    gap: var(--space-3) var(--space-5);
+    margin-top: var(--space-7);
+  }
+}
+
 @media (min-width: 48rem) {
   .tool-index__group {
     grid-template-columns: minmax(12rem, 1fr) minmax(0, 2.6fr);

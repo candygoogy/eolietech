@@ -97,6 +97,7 @@
   "home.tools.lede": "Grouped by what they work on. Each one runs in the tab you open it in.",
   "home.tools.stamp": "free, no account",
   "home.tools.all": "See all tools",
+  "home.shortcuts.label": "Shortcuts",
   "home.formats.h2": "What the tools open.",
   "home.formats.lede": "One stamp for each kind of file, filed under the tools that take it. Face value €0, because none of them gets posted.",
   "home.formats.by": "Opened by",
