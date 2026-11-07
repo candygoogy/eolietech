@@ -1,6 +1,6 @@
 ---
-title: "Aprire file P7M: estrai il documento e controlla la firma | Eolietech"
-description: "Apri i file firmati .p7m nel browser: salva il PDF o l'XML che contengono, guarda chi li ha firmati e quando, e controlla la firma. Non viene caricato niente."
+title: "Aprire file P7M gratis e senza programmi | Eolietech"
+description: "Apri gratis i file .p7m senza installare programmi: salva il PDF o l'XML che contengono, vedi chi li ha firmati e controlla la firma. Non viene caricato niente."
 h1: "Aprire file P7M"
 intro: "Un file .p7m è un documento chiuso dentro una firma digitale, e quasi nessun computer sa aprirlo da solo. Trascinalo qui: riavrai il PDF, l'XML o il file originale, vedrai chi l'ha firmato e quando, e saprai se è cambiato da allora. Tutto avviene nel tuo browser."
 howTo:
@@ -9,6 +9,10 @@ howTo:
   - "Guarda la riga sotto ogni firmatario. In verde vuol dire che il documento non è cambiato dalla firma e che la firma corrisponde al certificato."
   - "Scarica il documento contenuto, oppure apri il PDF in una nuova scheda. Se hai più file, Scarica tutto ti dà un unico .zip."
 faq:
+  - q: "Come si apre un file .p7m senza programmi?"
+    a: "Trascinalo nel riquadro qui sopra. La pagina toglie la busta della firma e ti restituisce il file che c'era dentro, di solito un PDF o un XML, che apri con i programmi che hai già. Non installi niente, non ti registri ed è gratis."
+  - q: "Ho ricevuto una fattura .xml.p7m. Come la leggo?"
+    a: "Qui ottieni il file XML, che però è scritto per i programmi e non per le persone. Per leggerla come una fattura ordinata, o salvarla in PDF, trascina lo stesso file .p7m nel visualizzatore di fatture elettroniche di Eolietech: toglie la busta da solo."
   - q: "I miei file vengono caricati?"
     a: "No. Questa pagina apre la busta e controlla la firma dentro la scheda del browser, con le funzioni crittografiche del browser stesso. Non passa niente dalla rete, e puoi verificarlo negli strumenti per sviluppatori mentre la usi."
   - q: "Se la riga è verde, la firma ha valore legale?"

@@ -1,6 +1,6 @@
 ---
-title: "Fattura elettronica in PDF: da XML o .p7m a PDF | Eolietech"
-description: "Trasforma la fattura elettronica XML, anche firmata .xml.p7m, in un PDF leggibile da stampare o archiviare. Funziona nel browser, senza caricare la fattura."
+title: "Fattura elettronica in PDF gratis, da XML o .p7m | Eolietech"
+description: "Trasforma gratis la fattura elettronica XML o .xml.p7m in un PDF da stampare o archiviare. Senza programmi: tutto nel browser, la fattura non viene caricata."
 h1: "Fattura elettronica in PDF"
 intro: "Hai il file .xml o .xml.p7m di una fattura e ti serve un PDF da stampare, inoltrare o mettere in una cartella? Trascinalo qui: il PDF si crea nel browser, con tutte le righe e il riepilogo IVA. La fattura non lascia il tuo dispositivo."
 howTo:
@@ -8,6 +8,8 @@ howTo:
   - "Controlla nella riga fornitore, numero, data e totale. Se vuoi leggerla prima, premi Visualizza."
   - "Premi Scarica PDF. Con più fatture, Scarica tutti i PDF le raccoglie in un unico .zip."
 faq:
+  - q: "Come si converte una fattura elettronica XML in PDF?"
+    a: "Trascina il file .xml o .xml.p7m nel riquadro qui sopra e premi Scarica PDF. Con più fatture, Scarica tutti i PDF le raccoglie in un unico .zip. È gratis e non devi installare programmi."
   - q: "Il PDF sostituisce la fattura XML?"
     a: "No. Il PDF è una copia leggibile e lo dice in fondo a ogni pagina. Per il fisco vale il file XML passato dal Sistema di Interscambio, quindi conserva anche quello."
   - q: "Come si chiama il PDF?"

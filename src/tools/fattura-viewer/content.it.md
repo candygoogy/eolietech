@@ -1,6 +1,6 @@
 ---
-title: "Visualizzare la fattura elettronica XML o .p7m | Eolietech"
-description: "Apri le fatture elettroniche XML, anche firmate .xml.p7m, e leggile come una pagina chiara, oppure salvale in PDF. Tutto nel browser: la fattura non viene caricata."
+title: "Visualizzare la fattura elettronica XML o .p7m, gratis | Eolietech"
+description: "Apri gratis le fatture elettroniche XML e .xml.p7m e leggile come una pagina chiara, o salvale in PDF. Senza programmi: la fattura non viene caricata."
 h1: "Visualizzare fatture elettroniche"
 intro: "Il file .xml di una fattura elettronica non si legge a occhio. Trascinalo qui, anche se è firmato .p7m, e vedrai fornitore, righe, IVA e pagamento come su una fattura di carta. Se ti serve, scarica un PDF. Il file resta sul tuo dispositivo."
 howTo:
@@ -9,6 +9,10 @@ howTo:
   - "Premi Visualizza per leggerla per intero: le due parti, le righe, il riepilogo IVA, il pagamento e gli eventuali allegati."
   - "Premi Scarica PDF per salvarne una copia leggibile, oppure Scarica tutti i PDF per averle in un unico .zip."
 faq:
+  - q: "Come si apre il file XML di una fattura elettronica?"
+    a: "Un file .xml aperto così com'è mostra solo codici e tag. Trascinalo nel riquadro qui sopra, anche se è un .xml.p7m firmato, e premi Visualizza: la fattura compare come una pagina ordinata, con le due parti, le righe, il riepilogo IVA e il pagamento. Non serve installare niente."
+  - q: "Come si stampa una fattura elettronica?"
+    a: "Aprila qui e premi Scarica PDF: ottieni una copia leggibile che stampi come qualsiasi altro PDF. Ricorda che è una copia di cortesia: la fattura che vale ai fini fiscali resta il file XML."
   - q: "La fattura viene caricata su un server?"
     a: "No. Il file viene letto dal browser, dentro questa scheda, e anche il PDF nasce qui. Una fattura contiene codici fiscali, indirizzi e IBAN: non passano dalla rete, e puoi verificarlo negli strumenti per sviluppatori del browser mentre usi la pagina."
   - q: "Il PDF ha valore fiscale?"

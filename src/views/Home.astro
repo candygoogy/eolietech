@@ -87,12 +87,21 @@ const shortcutIds: [toolId: string, variantId: string][] = [
   ["pdf-password", "unlock"],
   ["image-compress", "avif-to-jpg"],
   ["image-compress", "webp-to-png"],
-  ["p7m-opener", "p7m-to-pdf"],
   ["fattura-viewer", "to-pdf"],
+  ["p7m-opener", "p7m-to-pdf"],
 ];
+// In Italian the e-invoice and .p7m pages lead: a job every Italian inbox has, that the big tool sites skip.
+const italianFirst = ["fattura-viewer", "p7m-opener"];
+const shortcutOrder =
+  locale === "it"
+    ? [
+        ...shortcutIds.filter(([id]) => italianFirst.includes(id)),
+        ...shortcutIds.filter(([id]) => !italianFirst.includes(id)),
+      ]
+    : shortcutIds;
 const shortcuts = (
   await Promise.all(
-    shortcutIds.map(async ([toolId, variantId]) => {
+    shortcutOrder.map(async ([toolId, variantId]) => {
       const slug = getTool(toolId)?.variants?.find((v) => v.id === variantId)?.slug[locale];
       const entry = await getEntry("tools", contentEntryId(toolId, locale, variantId));
       return published.has(toolId) && slug && entry ? { href: localePath(locale, slug), label: entry.data.h1 } : null;

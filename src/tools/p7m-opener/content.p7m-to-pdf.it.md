@@ -1,6 +1,6 @@
 ---
-title: "Da P7M a PDF: estrai il PDF da un file firmato | Eolietech"
-description: "Trasforma un .pdf.p7m nel PDF che puoi aprire, stampare e inoltrare. La firma viene controllata strada facendo e non esce niente dal tuo browser."
+title: "Da P7M a PDF gratis: estrai il PDF da un file firmato | Eolietech"
+description: "Trasforma gratis un .pdf.p7m nel PDF da aprire, stampare e inoltrare, senza programmi. La firma viene controllata e non esce niente dal tuo browser."
 h1: "Da P7M a PDF"
 intro: "Ti è arrivato un contratto.pdf.p7m che non si apre? Il PDF è lì dentro, intatto. Trascina qui il file per salvarlo come un normale PDF, e intanto guarda chi l'ha firmato. Non viene caricato niente."
 howTo:
@@ -8,6 +8,8 @@ howTo:
   - "Controlla chi ha firmato ciascun file e se la riga sotto il firmatario è verde: vuol dire che il PDF non è cambiato dalla firma."
   - "Premi Scarica il PDF per salvarlo, oppure Apri per guardarlo prima in una nuova scheda. Se hai più file, Scarica tutto ti dà un unico .zip."
 faq:
+  - q: "Come si trasforma un file .p7m in PDF?"
+    a: "Trascina il file .pdf.p7m nel riquadro qui sopra e premi Scarica il PDF. In pochi secondi hai il PDF che era dentro la busta, senza programmi da installare, senza registrarti e senza caricare il file da nessuna parte."
   - q: "Il PDF viene convertito o ricostruito?"
     a: "No. Un .pdf.p7m contiene già il PDF esattamente com'era al momento della firma. Questa pagina lo tira fuori dalla busta senza cambiare un byte, quindi si vede e si stampa identico alla copia di chi l'ha firmato."
   - q: "Il PDF che scarico è ancora firmato?"
