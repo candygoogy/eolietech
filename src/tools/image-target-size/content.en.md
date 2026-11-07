@@ -1,6 +1,6 @@
 ---
-title: "Compress an image to a size in KB | Eolietech"
-description: "Get a photo under the size an upload form allows: 20, 50, 100 KB or any other. JPG or WebP, up to 50 at a time, compressed in your browser, never uploaded."
+title: "Compress an image to a size in KB (20, 50, 100 KB), free | Eolietech"
+description: "Free: get a photo under the size an upload form allows, 20, 50, 100 KB or any other. JPG or WebP, up to 50 at a time, compressed in your browser, never uploaded."
 h1: "Compress an image to a size in KB"
 intro: "Upload forms often turn a photo away because it is a few KB too heavy. Type the limit the form gives, add your photos, and each one comes back under it at the best quality that fits. Everything runs on your device, so your photos are never uploaded."
 howTo:

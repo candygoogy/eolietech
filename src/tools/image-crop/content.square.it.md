@@ -1,6 +1,6 @@
 ---
-title: "Ritagliare un'immagine quadrata | Eolietech"
-description: "Ritaglia una foto in quadrato per la foto profilo, un avatar, la foto di un prodotto o un post quadrato. JPG, PNG, WebP e AVIF, nel browser, senza caricarla."
+title: "Ritagliare un'immagine quadrata, gratis e senza caricarla | Eolietech"
+description: "Gratis: ritaglia una foto in quadrato per la foto profilo, un avatar, la foto di un prodotto o un post quadrato. JPG, PNG, WebP e AVIF, nel browser, senza caricarla."
 h1: "Ritaglia in quadrato"
 intro: "Il riquadro si apre già quadrato e grande quanto la foto consente, quindi di solito basta spostarlo sul viso o sul prodotto e salvare. Il ritaglio avviene nel browser e la foto resta sul tuo dispositivo."
 howTo:

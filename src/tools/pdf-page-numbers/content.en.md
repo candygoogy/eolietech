@@ -1,6 +1,6 @@
 ---
-title: "Add page numbers to a PDF in your browser | Eolietech"
-description: "Number the pages of a PDF as 1, 1 / 12 or Page 1 of 12, at the top or bottom, and skip the cover if you need to. The PDF is never uploaded."
+title: "Add page numbers to a PDF, free and without uploading | Eolietech"
+description: "Free: number the pages of a PDF as 1, 1 / 12 or Page 1 of 12, at the top or bottom, and skip the cover if you need to. Runs in your browser; the PDF is never uploaded."
 h1: "Add page numbers to a PDF"
 intro: "Add page numbers to a PDF for a thesis, a report or a court filing. Choose the corner, the format (a plain number or Page 1 of 12) and the page where counting starts, then check the preview and save a numbered copy. The file stays on your device."
 howTo:

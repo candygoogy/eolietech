@@ -1,6 +1,6 @@
 ---
-title: "Rendere quadrata una foto senza tagliarla | Eolietech"
-description: "Rendi quadrata una foto senza tagliare niente: l'immagine intera su sfondo bianco, nero, colorato o sfocato. Anche per Instagram, fino a 50 foto, senza caricarle."
+title: "Foto quadrata senza tagliare, gratis e senza caricarla | Eolietech"
+description: "Gratis: rendi quadrata una foto senza tagliare niente, con l'immagine intera su sfondo bianco, nero, colorato o sfocato. Anche per Instagram, fino a 50 foto, senza caricarle."
 h1: "Foto quadrata senza tagliare"
 intro: "Metti la foto intera in un quadrato e riempi lo spazio che avanza con il bianco, il nero, un colore a scelta o una copia sfocata della foto stessa. Non si perde nessun bordo, quindi anche una foto molto alta o molto larga resta com'è. Ci sono anche il 4:5, il 16:9 e il 9:16, puoi lavorare fino a 50 foto alla volta e non escono mai dal tuo dispositivo."
 howTo:

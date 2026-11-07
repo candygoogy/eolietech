@@ -1,6 +1,6 @@
 ---
-title: "Image to text (OCR): copy the text out of photos and screenshots | Eolietech"
-description: "Get the text out of screenshots, photos of documents and scanned pages, in English or Italian. Tesseract runs in your browser, so your images are never uploaded."
+title: "Image to text (OCR): get the text from a photo, free | Eolietech"
+description: "Free: get the text out of screenshots, photos of documents and scanned pages, in English or Italian. Tesseract runs in your browser, so your images are never uploaded."
 h1: "Image to text"
 intro: "Drop a screenshot, a photo of a letter or a scanned page and get the words back as text you can copy, edit and search. The reading happens on your device, so the image never leaves it."
 howTo:
