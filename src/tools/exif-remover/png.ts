@@ -1,9 +1,10 @@
 /**
- * PNG: walk the chunks, report the metadata, and rewrite the file without it. Image chunks (IHDR,
- * PLTE, IDAT, IEND...) and colour chunks (iCCP, sRGB, gAMA, cHRM, pHYs...) are copied byte for byte.
+ * PNG: walk the chunks, report the metadata, and rewrite the file without it. "Everything" keeps an
+ * allow-list of the chunks needed to show the image (IHDR, PLTE, IDAT, IEND, colour, animation) and
+ * drops every other chunk, private ones included. Kept chunks are copied byte for byte.
  */
-import { TiffError, ascii, concat, orientationOnlyExif, readExif, removeGpsInPlace, startsWith, tiffStart, type ExifInfo } from "./tiff";
-import { blankXmpGps, latin1, xmpGps } from "./xmp";
+import { TiffError, ascii, concat, orientationOnlyExif, readExif, removeGpsInPlace, startsWith, tiffStart, type Coords, type ExifInfo } from "./tiff";
+import { blankXmpGps, isLocationName, latin1, xmpGps } from "./xmp";
 import type { Block, Cleaned, Mode, Report } from "./types";
 
 export class PngError extends Error {
@@ -26,8 +27,13 @@ export interface Chunk {
   end: number;
 }
 
-/** Chunks dropped in "all" mode. */
-const METADATA = new Set(["eXIf", "tEXt", "zTXt", "iTXt", "tIME"]);
+/**
+ * Chunks kept in "all" mode: image, transparency, colour (ICC kept, as in JPEG), HDR and animation.
+ * pHYs (pixel density) stays too, like the density in a JPEG's JFIF header: it only sets the print size.
+ */
+const KEEP_ALL = new Set([
+  "IHDR", "PLTE", "IDAT", "IEND", "tRNS", "gAMA", "cHRM", "sRGB", "iCCP", "sBIT", "cICP", "mDCV", "cLLI", "acTL", "fcTL", "fdAT", "pHYs",
+]);
 const TEXT = new Set(["tEXt", "zTXt", "iTXt"]);
 
 export function walkPng(b: Uint8Array): { chunks: Chunk[]; end: number } {
@@ -58,10 +64,17 @@ function keyword(b: Uint8Array, c: Chunk): string {
   return latin1(nul >= 0 ? d.subarray(0, nul) : d);
 }
 
-/** iTXt layout: keyword\0 flag method lang\0 translated\0 text. Returns the text offset (in chunk data) and whether it is compressed. */
-function itxtText(d: Uint8Array): { at: number; compressed: boolean } | null {
+/**
+ * Where a text chunk's text starts (in chunk data) and whether it is compressed. tEXt: keyword\0 text;
+ * zTXt: keyword\0 method, compressed text; iTXt: keyword\0 flag method lang\0 translated\0 text.
+ */
+function textAt(b: Uint8Array, c: Chunk): { at: number; compressed: boolean } | null {
+  const d = data(b, c);
   const k = d.indexOf(0);
-  if (k < 0 || k + 3 > d.length) return null;
+  if (k < 0) return null;
+  if (c.type === "tEXt") return { at: k + 1, compressed: false };
+  if (c.type === "zTXt") return { at: k + 2, compressed: true };
+  if (k + 3 > d.length) return null;
   const compressed = d[k + 1] === 1;
   const lang = d.indexOf(0, k + 3);
   if (lang < 0) return null;
@@ -69,7 +82,36 @@ function itxtText(d: Uint8Array): { at: number; compressed: boolean } | null {
   return tr < 0 ? null : { at: tr + 1, compressed };
 }
 
-const isXmp = (b: Uint8Array, c: Chunk) => c.type === "iTXt" && keyword(b, c) === "XML:com.adobe.xmp";
+const isXmp = (b: Uint8Array, c: Chunk) => TEXT.has(c.type) && keyword(b, c) === "XML:com.adobe.xmp";
+/** A text note keyed like a location (ImageMagick writes "exif:GPSLatitude" and friends as tEXt). */
+const isLocationText = (b: Uint8Array, c: Chunk) => TEXT.has(c.type) && !isXmp(b, c) && isLocationName(keyword(b, c));
+
+/** "38/1, 28/1, 4068/100" (degrees, minutes, seconds as rationals) or a plain decimal, signed by its ref (N, S, E, W). */
+function parseTextCoordinate(value: string, ref: string, max: number): number | null {
+  if (value.length > 80) return null;
+  const r = /^\s*(\d+)\s*\/\s*(\d+)\s*,\s*(\d+)\s*\/\s*(\d+)\s*,\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(value);
+  const dec = /^\s*([+-]?\d{1,3}(?:\.\d+)?)\s*$/.exec(value);
+  let v: number;
+  if (r) {
+    const [d, m, s] = [1, 3, 5].map((i) => Number(r[i]) / Number(r[i + 1])) as [number, number, number];
+    v = d + m / 60 + s / 3600;
+  } else if (dec) v = Number(dec[1]);
+  else return null;
+  if (/^\s*[SW]/i.test(ref)) v = -Math.abs(v);
+  return Number.isFinite(v) && Math.abs(v) <= max ? v : null;
+}
+
+/** Location from text notes: coordinates, "unreadable" when a latitude or longitude note does not parse, or null. */
+function textGps(notes: Map<string, string>): Coords | "unreadable" | null {
+  const find = (word: RegExp) => [...notes].find(([k]) => word.test(k) && !/ref$/i.test(k));
+  const ref = (key: string) => notes.get(`${key}Ref`) ?? "";
+  const latNote = find(/latitude/i);
+  const lonNote = find(/longt?itude/i);
+  if (!latNote && !lonNote) return null;
+  const lat = latNote ? parseTextCoordinate(latNote[1], ref(latNote[0]), 90) : null;
+  const lon = lonNote ? parseTextCoordinate(lonNote[1], ref(lonNote[0]), 180) : null;
+  return lat !== null && lon !== null ? { lat, lon } : "unreadable";
+}
 /** ImageMagick and exiftool store raw EXIF/XMP as hex in compressed text ("Raw profile type exif"). */
 const isRawProfile = (b: Uint8Array, c: Chunk) => TEXT.has(c.type) && /^Raw profile type /i.test(keyword(b, c));
 
@@ -79,6 +121,7 @@ export function inspectPng(b: Uint8Array): Report {
   let exif: ExifInfo | null = null;
   let exifUnreadable = false;
   let xmp: Report["gps"] = null;
+  const notes = new Map<string, string>();
   for (const c of chunks) {
     if (c.type === "eXIf") {
       if (exif || exifUnreadable) continue;
@@ -91,17 +134,22 @@ export function inspectPng(b: Uint8Array): Report {
       }
     } else if (isXmp(b, c)) {
       blocks.add("xmp");
-      const d = data(b, c);
-      const t = itxtText(d);
-      if (t && !t.compressed) xmp ??= xmpGps(d.subarray(t.at));
+      const t = textAt(b, c);
+      if (t && !t.compressed) xmp ??= xmpGps(data(b, c).subarray(t.at));
     } else if (TEXT.has(c.type)) {
       blocks.add("text");
+      if (isLocationText(b, c)) {
+        const t = textAt(b, c);
+        notes.set(keyword(b, c), t && !t.compressed ? latin1(data(b, c).subarray(t.at, t.at + 81)) : "");
+      }
     } else if (c.type === "tIME") {
       blocks.add("time");
+    } else if (!KEEP_ALL.has(c.type)) {
+      blocks.add("app");
     }
   }
   if (exif?.thumbnail) blocks.add("thumbnail");
-  return { format: "png", exif, exifUnreadable, gps: exif?.gps ?? xmp ?? null, blocks: [...blocks] };
+  return { format: "png", exif, exifUnreadable, gps: exif?.gps ?? xmp ?? textGps(notes), blocks: [...blocks] };
 }
 
 export function cleanPng(b: Uint8Array, mode: Mode): Cleaned {
@@ -109,12 +157,13 @@ export function cleanPng(b: Uint8Array, mode: Mode): Cleaned {
   const parts: Uint8Array[] = [b.subarray(0, 8)];
   let keptOrientation: number | null = null;
   let droppedUnreadable = false;
+  let droppedXmp = false;
   let exifSeen = false;
 
   for (const c of chunks) {
     const whole = b.subarray(c.start, c.end);
     if (mode === "all") {
-      if (!METADATA.has(c.type)) {
+      if (KEEP_ALL.has(c.type)) {
         parts.push(whole);
       } else if (c.type === "eXIf" && !exifSeen) {
         exifSeen = true;
@@ -143,21 +192,25 @@ export function cleanPng(b: Uint8Array, mode: Mode): Cleaned {
         droppedUnreadable = true;
       }
     } else if (isXmp(b, c)) {
-      const d = data(b, c).slice();
-      const t = itxtText(d);
+      const t = textAt(b, c);
       // Compressed XMP cannot be checked without inflating it, so it goes rather than risk a location.
-      if (!t || t.compressed) continue;
-      parts.push(blankXmpGps(d.subarray(t.at)) ? chunk("iTXt", d) : whole);
-    } else if (isRawProfile(b, c)) {
-      // Hex-encoded EXIF or XMP copies: may hold the location, cannot be edited in place.
+      if (!t || t.compressed) {
+        droppedXmp = true;
+        continue;
+      }
+      const d = data(b, c).slice();
+      const edit = blankXmpGps(d.subarray(t.at));
+      if (edit === "unsafe") droppedXmp = true;
+      else parts.push(edit === "blanked" ? chunk(c.type, d) : whole);
+    } else if (isRawProfile(b, c) || isLocationText(b, c)) {
+      // Hex-encoded EXIF or XMP copies, and notes keyed like a location: may hold it, cannot be edited in place.
       continue;
     } else {
       parts.push(whole);
     }
   }
-  // Bytes after IEND are not part of the image; "all" leaves them out, "gps" keeps the file as it was.
-  if (mode === "gps" && end < b.length) parts.push(b.subarray(end));
-  return { bytes: concat(parts), keptOrientation, droppedUnreadable };
+  // Bytes after IEND are not part of the image and cannot be checked for a location: both modes leave them out.
+  return { bytes: concat(parts), keptOrientation, droppedUnreadable, droppedXmp, droppedTrailer: mode === "gps" && b.length - end > 16 };
 }
 
 /** Build a chunk with its length and CRC. */

@@ -1,7 +1,7 @@
 /**
- * WebP (RIFF): walk the chunks, report the metadata, and rewrite the file without it. The image
- * chunks (VP8, VP8L, ALPH, ANIM, ANMF) and ICCP are copied byte for byte; the VP8X flags and the
- * RIFF size are updated to match.
+ * WebP (RIFF): walk the chunks, report the metadata, and rewrite the file without it. "Everything"
+ * keeps an allow-list: the image chunks (VP8, VP8L, ALPH, ANIM, ANMF) and ICCP are copied byte for
+ * byte, every other chunk goes; the VP8X flags and the RIFF size are updated to match.
  */
 import { TiffError, ascii, concat, orientationOnlyExif, readExif, removeGpsInPlace, startsWith, tiffStart, type ExifInfo } from "./tiff";
 import { blankXmpGps, xmpGps } from "./xmp";
@@ -26,6 +26,11 @@ export interface RiffChunk {
 /** VP8X flag bits. */
 export const FLAG_EXIF = 0x08;
 export const FLAG_XMP = 0x04;
+/** VP8X flags that describe the image: ICC, alpha, animation. The rest are metadata or reserved. */
+const IMAGE_FLAGS = 0x20 | 0x10 | 0x02;
+
+/** Chunks kept in "all" mode (EXIF is rewritten with the rotation flag only). ICC stays, as in JPEG. */
+const KEEP_ALL = new Set(["VP8 ", "VP8L", "VP8X", "ALPH", "ANIM", "ANMF", "ICCP"]);
 
 export function walkWebp(b: Uint8Array): RiffChunk[] {
   if (!(startsWith(b, ascii("RIFF")) && startsWith(b, ascii("WEBP"), 8))) throw new WebpError("not a WebP");
@@ -68,6 +73,8 @@ export function inspectWebp(b: Uint8Array): Report {
     } else if (c.fourcc === "XMP ") {
       blocks.add("xmp");
       xmp ??= xmpGps(data(b, c));
+    } else if (c.fourcc !== "EXIF" && !KEEP_ALL.has(c.fourcc)) {
+      blocks.add("app");
     }
   }
   if (exif?.thumbnail) blocks.add("thumbnail");
@@ -79,6 +86,7 @@ export function cleanWebp(b: Uint8Array, mode: Mode): Cleaned {
   const parts: Uint8Array[] = [];
   let keptOrientation: number | null = null;
   let droppedUnreadable = false;
+  let droppedXmp = false;
   let hasExif = false;
   let hasXmp = false;
   let exifSeen = false;
@@ -109,9 +117,14 @@ export function cleanWebp(b: Uint8Array, mode: Mode): Cleaned {
     } else if (c.fourcc === "XMP ") {
       if (mode === "all") continue;
       const d = data(b, c).slice();
-      parts.push(blankXmpGps(d) ? riffChunk("XMP ", d) : whole);
+      const edit = blankXmpGps(d);
+      if (edit === "unsafe") {
+        droppedXmp = true;
+        continue;
+      }
+      parts.push(edit === "blanked" ? riffChunk("XMP ", d) : whole);
       hasXmp = true;
-    } else {
+    } else if (mode === "gps" || KEEP_ALL.has(c.fourcc)) {
       parts.push(whole);
     }
   }
@@ -123,11 +136,18 @@ export function cleanWebp(b: Uint8Array, mode: Mode): Cleaned {
     let flags = body[8]!;
     if (!hasExif) flags &= ~FLAG_EXIF;
     if (!hasXmp) flags &= ~FLAG_XMP;
+    if (mode === "all") {
+      // Only the image flags (and EXIF, when the rotation flag was kept); the reserved bytes are zeroed.
+      flags &= IMAGE_FLAGS | (hasExif ? FLAG_EXIF : 0);
+      body.fill(0, 9, Math.min(12, 8 + first.size));
+    }
     body[8] = flags;
   }
   const out = concat([b.subarray(0, 12), body]);
   new DataView(out.buffer).setUint32(4, out.length - 8, true);
-  return { bytes: out, keptOrientation, droppedUnreadable };
+  // Bytes after the RIFF data are never copied (walkWebp stops there).
+  const riffEnd = new DataView(b.buffer, b.byteOffset, b.byteLength).getUint32(4, true) + 8;
+  return { bytes: out, keptOrientation, droppedUnreadable, droppedXmp, droppedTrailer: mode === "gps" && b.length - riffEnd > 16 };
 }
 
 /** Build a RIFF chunk (little-endian size, padded to an even length). */

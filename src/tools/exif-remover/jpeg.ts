@@ -4,7 +4,7 @@
  * decoded or re-encoded.
  */
 import { EXIF_HEADER, TiffError, ascii, concat, orientationOnlyExif, readExif, removeGpsInPlace, startsWith, type ExifInfo } from "./tiff";
-import { blankXmpGps, xmpGps } from "./xmp";
+import { blankXmpGps, latin1, xmpGps } from "./xmp";
 import type { Block, Cleaned, Mode, Report } from "./types";
 
 export class JpegError extends Error {
@@ -52,6 +52,8 @@ const XMP_EXT_SIG = ascii("http://ns.adobe.com/xmp/extension/\0");
 const ICC_SIG = ascii("ICC_PROFILE\0");
 const MPF_SIG = ascii("MPF\0");
 const JFIF_SIG = ascii("JFIF\0");
+/** JFIF extension APP0: a thumbnail (JPEG, palette or RGB) and nothing else. */
+const JFXX_SIG = ascii("JFXX\0");
 const ADOBE_SIG = ascii("Adobe");
 const EXIF_SIG = ascii("Exif\0");
 
@@ -167,8 +169,11 @@ export function inspectJpeg(b: Uint8Array): Report {
       case "mpf":
         blocks.add("extra");
         break;
+      case "jfif":
+        if (jfifThumbnail(b, s)) blocks.add("thumbnail");
+        break;
       case "app":
-        blocks.add("app");
+        blocks.add(s.marker === 0xe0 && startsWith(b, JFXX_SIG, s.data) ? "thumbnail" : "app");
         break;
     }
   }
@@ -209,13 +214,25 @@ function mpfImageStarts(b: Uint8Array, primary: JpegLayout): number[] {
   return starts;
 }
 
-const KEEP_ALL_MODE = new Set<SegmentKind>(["soi", "eoi", "scan", "core", "jfif", "icc", "adobe"]);
+const KEEP_ALL_MODE = new Set<SegmentKind>(["soi", "eoi", "scan", "core", "icc", "adobe"]);
+
+/** JFIF APP0 payload: "JFIF\0", version (2), units (1), densities (4), thumbnail width and height (1 + 1), then RGB pixels. */
+const JFIF_HEAD = 12;
+
+/** The JFIF segment carries a thumbnail (or trailing bytes after its header). */
+function jfifThumbnail(b: Uint8Array, s: Segment): boolean {
+  const len = s.end - s.data;
+  return len > JFIF_HEAD + 2 || (len === JFIF_HEAD + 2 && (b[s.data + JFIF_HEAD] !== 0 || b[s.data + JFIF_HEAD + 1] !== 0));
+}
 
 export function cleanJpeg(b: Uint8Array, mode: Mode): Cleaned {
   return mode === "all" ? cleanAll(b) : cleanGps(b);
 }
 
-/** Keep JFIF, ICC, Adobe and the image itself; everything else goes, including data after EOI. */
+/**
+ * Keep JFIF (without its thumbnail), ICC, Adobe and the image itself; everything else goes,
+ * including JFXX thumbnails and data after EOI.
+ */
 function cleanAll(b: Uint8Array): Cleaned {
   const { segments } = walkJpeg(b);
   const parts: Uint8Array[] = [];
@@ -224,6 +241,10 @@ function cleanAll(b: Uint8Array): Cleaned {
   for (const s of segments) {
     if (KEEP_ALL_MODE.has(s.kind)) {
       parts.push(b.subarray(s.start, s.end));
+    } else if (s.kind === "jfif") {
+      if (!jfifThumbnail(b, s) || s.end - s.data < JFIF_HEAD + 2) parts.push(b.subarray(s.start, s.end));
+      // Same header, thumbnail size 0 x 0 and no pixels.
+      else parts.push(concat([new Uint8Array([0xff, 0xe0, 0, JFIF_HEAD + 4]), b.subarray(s.data, s.data + JFIF_HEAD), new Uint8Array(2)]));
     } else if (s.kind === "exif" && !exifSeen) {
       exifSeen = true;
       // Keep only the rotation flag, where the old EXIF was, so the photo stays upright.
@@ -238,34 +259,41 @@ function cleanAll(b: Uint8Array): Cleaned {
       }
     }
   }
-  return { bytes: concat(parts), keptOrientation, droppedUnreadable: false };
+  return { bytes: concat(parts), keptOrientation, droppedUnreadable: false, droppedXmp: false, droppedTrailer: false };
 }
 
+/** Extended XMP chunk: signature, GUID (32), full length (4), offset (4), then a slice of the packet. */
+const XMP_EXT_HEAD = XMP_EXT_SIG.length + 32 + 4 + 4;
+
 /**
- * Remove GPS only, in place: the GPS IFD is cut out of each EXIF block and GPS properties are blanked
- * in XMP, all without changing any length, so maker notes, multi-picture offsets and images stored
- * after EOI (HDR gain maps, depth maps) keep working. Those embedded images are cleaned the same way.
- * An EXIF block that cannot be parsed is dropped whole, since its GPS cannot be found.
+ * Remove GPS only, in place: the GPS IFD is cut out of each EXIF block and location properties are
+ * blanked in XMP, all without changing any length, so maker notes, multi-picture offsets and images
+ * stored after EOI (HDR gain maps, depth maps) keep working. Those embedded images are cleaned the
+ * same way. An EXIF block that cannot be parsed, or an XMP packet that cannot be cleaned with
+ * certainty, is dropped whole. Anything after the last image (a motion photo's video, which can
+ * carry its own location) is dropped too, with the XMP pointers to it.
  */
 function cleanGps(b: Uint8Array): Cleaned {
   const out = b.slice();
   const drop: Segment[] = [];
   const done = new Set<number>();
+  const images: JpegLayout[] = [];
+  let droppedUnreadable = false;
+  let droppedXmp = false;
   const cleanImage = (from: number): JpegLayout => {
     done.add(from);
     const layout = walkJpeg(out, from);
     for (const s of layout.segments) {
-      if (s.kind === "exif") {
-        try {
-          removeGpsInPlace(out.subarray(s.data + 6, s.end));
-        } catch (err) {
-          if (!(err instanceof TiffError)) throw err;
-          drop.push(s);
-        }
-      } else if (s.kind === "xmp" || s.kind === "xmpExt") {
-        blankXmpGps(out.subarray(s.data, s.end));
+      if (s.kind !== "exif") continue;
+      try {
+        removeGpsInPlace(out.subarray(s.data + 6, s.end));
+      } catch (err) {
+        if (!(err instanceof TiffError)) throw err;
+        drop.push(s);
+        droppedUnreadable = true;
       }
     }
+    images.push(layout);
     return layout;
   };
 
@@ -292,7 +320,38 @@ function cleanGps(b: Uint8Array): Cleaned {
     }
   }
 
-  if (drop.length === 0) return { bytes: out, keptOrientation: null, droppedUnreadable: false };
+  // Data after the last image cannot be checked for a location, so it goes (a few bytes of padding
+  // are not worth a mention).
+  const imageEnd = Math.max(...images.map((l) => l.end));
+  const trailing = imageEnd < out.length;
+  const droppedTrailer = out.length - imageEnd > 16;
+
+  for (const layout of images) {
+    const ext = new Map<string, Segment[]>();
+    for (const s of layout.segments) {
+      if (s.kind === "xmp") {
+        if (blankXmpGps(out.subarray(s.data, s.end), trailing) === "unsafe") {
+          drop.push(s);
+          droppedXmp = true;
+        }
+      } else if (s.kind === "xmpExt") {
+        const guid = s.end - s.data >= XMP_EXT_HEAD ? latin1(out.subarray(s.data + XMP_EXT_SIG.length, s.data + XMP_EXT_SIG.length + 32)) : "";
+        ext.set(guid, [...(ext.get(guid) ?? []), s]);
+      }
+    }
+    // Extended XMP is one packet split over several segments, so a property can straddle two of
+    // them: check the joined packet, and keep or drop all its segments together.
+    for (const [guid, segs] of ext) {
+      const offset = (s: Segment) => new DataView(out.buffer, out.byteOffset + s.data + XMP_EXT_HEAD - 4, 4).getUint32(0);
+      const joined = guid ? concat(segs.sort((x, y) => offset(x) - offset(y)).map((s) => out.subarray(s.data + XMP_EXT_HEAD, s.end))) : null;
+      if (!joined || blankXmpGps(joined, trailing) !== "unchanged") {
+        drop.push(...segs);
+        droppedXmp = true;
+      }
+    }
+  }
+
+  if (drop.length === 0 && !trailing) return { bytes: out, keptOrientation: null, droppedUnreadable, droppedXmp, droppedTrailer };
   const parts: Uint8Array[] = [];
   let at = 0;
   for (const s of drop.sort((x, y) => x.start - y.start)) {
@@ -300,6 +359,6 @@ function cleanGps(b: Uint8Array): Cleaned {
     parts.push(out.subarray(at, s.start));
     at = s.end;
   }
-  parts.push(out.subarray(at));
-  return { bytes: concat(parts), keptOrientation: null, droppedUnreadable: true };
+  parts.push(out.subarray(at, imageEnd));
+  return { bytes: concat(parts), keptOrientation: null, droppedUnreadable, droppedXmp, droppedTrailer };
 }

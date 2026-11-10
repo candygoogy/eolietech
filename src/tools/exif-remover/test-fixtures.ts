@@ -232,6 +232,27 @@ export function pngWithMetadata(base: Uint8Array, meta: FixtureMeta = DEFAULT_ME
   return cat([base.subarray(0, ihdrEnd), ...chunks, base.subarray(ihdrEnd)]);
 }
 
+/** `base` (a PNG) with extra chunks inserted before IEND. */
+export function pngWithChunks(base: Uint8Array, chunks: [type: string, body: string][]): Uint8Array {
+  const iend = base.length - 12;
+  return cat([base.subarray(0, iend), ...chunks.map(([type, body]) => pngChunk(type, enc(body))), base.subarray(iend)]);
+}
+
+/** `base` (a JPEG) with an XMP APP1 segment holding `xmp`, inserted after its APP0. */
+export function jpegWithXmp(base: Uint8Array, xmp: string): Uint8Array {
+  let at = 2;
+  if (base[2] === 0xff && base[3] === 0xe0) at = 4 + ((base[4]! << 8) | base[5]!);
+  return cat([base.subarray(0, at), segment(0xe1, [...enc("http://ns.adobe.com/xap/1.0/\0"), ...enc(xmp)]), base.subarray(at)]);
+}
+
+/** `base` (a JPEG) with its APP0 replaced by a JFIF header carrying a w x h RGB thumbnail, plus a JFXX thumbnail segment. */
+export function jpegWithJfifThumbnail(base: Uint8Array, w: number, h: number): Uint8Array {
+  const at = base[2] === 0xff && base[3] === 0xe0 ? 4 + ((base[4]! << 8) | base[5]!) : 2;
+  const jfif = segment(0xe0, [...enc("JFIF\0"), 1, 2, 1, 0, 72, 0, 72, w, h, ...new Array(w * h * 3).fill(0x5a)]);
+  const jfxx = segment(0xe0, [...enc("JFXX\0"), 0x13, 2, 2, ...new Array(2 * 2 * 3).fill(0x5b)]);
+  return cat([base.subarray(0, 2), jfif, jfxx, base.subarray(at)]);
+}
+
 function riff(fourcc: string, body: number[] | Uint8Array): Uint8Array {
   const out = new Uint8Array(8 + body.length + (body.length & 1));
   out.set(enc(fourcc));
@@ -250,6 +271,13 @@ export function webpWithMetadata(base: Uint8Array, meta: FixtureMeta = DEFAULT_M
   parts.push(base.subarray(vp8xEnd), riff("EXIF", exifTiff(meta)));
   if (meta.xmp) parts.push(riff("XMP ", enc(xmpPacket(meta))));
   const out = cat(parts);
+  new DataView(out.buffer).setUint32(4, out.length - 8, true);
+  return out;
+}
+
+/** `base` (a WebP) with extra RIFF chunks appended, RIFF size fixed. */
+export function webpWithChunks(base: Uint8Array, chunks: [fourcc: string, body: string][]): Uint8Array {
+  const out = cat([base, ...chunks.map(([fourcc, body]) => riff(fourcc, enc(body)))]);
   new DataView(out.buffer).setUint32(4, out.length - 8, true);
   return out;
 }

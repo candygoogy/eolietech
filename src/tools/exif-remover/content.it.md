@@ -62,6 +62,8 @@ ui:
   exif.status.noLocation: "Nessuna posizione da rimuovere: {before} → {after}"
   exif.status.keptOrientation: "Indicazione di rotazione tenuta, così si apre dritta"
   exif.status.droppedUnreadable: "Il suo blocco EXIF non si poteva leggere, quindi è stato rimosso tutto per sicurezza"
+  exif.status.droppedXmp: "I suoi dati XMP non si potevano controllare del tutto, quindi sono stati rimossi tutti per sicurezza"
+  exif.status.droppedTrailer: "Sono stati rimossi anche i dati salvati dopo l'immagine, come il video di una foto in movimento"
   exif.error.decode: "non è stato possibile leggere questo file. Potrebbe essere danneggiato o non essere davvero un JPG, PNG o WebP."
   exif.error.unsupported: "questo formato non è supportato qui. Lo strumento pulisce JPG, PNG e WebP."
   exif.error.heic: "le foto HEIC non sono supportate qui. Convertendole in JPG perdono tutti i metadati:"
@@ -102,7 +104,7 @@ Secondo quanto riportato da più fonti, i grandi social come Facebook, Instagram
 
 **Tutto** rimuove posizione, fotocamera, date, programmi, dati XMP e IPTC, commenti, la piccola anteprima che alcune fotocamere nascondono nel file e le eventuali immagini extra salvate con la foto, come la mappa di luminosità HDR che aggiungono alcuni telefoni recenti. Senza quella mappa, su uno schermo HDR la foto può sembrare un po' meno brillante; altrove resta identica.
 
-**Solo la posizione** rimuove le coordinate GPS, sia dai dati EXIF sia dagli XMP, e tiene tutto il resto, così l'app delle foto continua a ordinarle per data e a sapere con quale fotocamera sono state scattate. Un nome di luogo scritto da te o da un'app in una didascalia resta; scegli Tutto per togliere anche quello. Se ti serve solo questo, [Rimuovere la posizione dalle foto](/it/rimuovere-posizione-dalle-foto/) parte già con questa opzione.
+**Solo la posizione** rimuove le coordinate GPS, sia dai dati EXIF sia dagli XMP, e tiene tutto il resto, così l'app delle foto continua a ordinarle per data e a sapere con quale fotocamera sono state scattate. Un nome di luogo scritto da te o da un'app in una didascalia resta; scegli Tutto per togliere anche quello. Una foto in movimento perde il suo breve video, che è salvato dopo l'immagine e può contenere anche lui la posizione. Se ti serve solo questo, [Rimuovere la posizione dalle foto](/it/rimuovere-posizione-dalle-foto/) parte già con questa opzione.
 
 ## L'indicazione di rotazione
 

@@ -10,8 +10,8 @@ import { button, errorRegion, h, statusRegion } from "../ai-shared/dom";
 import { domId } from "../image-shared/batch-ui";
 import { MIME, acceptFor, uniqueNames } from "../image-shared/formats";
 import type { ToolCtx } from "../types";
-import { analyze, cameraName, hasMetadata, parseExifDate, roundCoord, type Analysis } from "./metadata";
-import type { Mode, Report } from "./types";
+import { analyze, cameraName, hasMetadata, parseExifDate, roundCoord, type AnalyzeError } from "./metadata";
+import type { Cleaned, Mode, Report } from "./types";
 // Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
 export { default as styles } from "./exif.css?url";
 
@@ -20,13 +20,16 @@ const ACCEPT = `${acceptFor(["jpg", "png", "webp", "heic", "avif"])},image/gif,.
 
 type State = "reading" | "ready" | "error";
 
+/** What the row needs from an analysis. The cleaned bytes are not kept: the Blob is the one copy. */
+type Result = { ok: true; report: Report; cleaned: Omit<Cleaned, "bytes"> } | { ok: false; error: AnalyzeError };
+
 interface Item {
   file: File;
   state: State;
   /** The user pressed Remove: the row offers its clean copy. */
   cleaned: boolean;
-  analysis?: Analysis;
-  /** Clean copy for the current mode. */
+  analysis?: Result;
+  /** Clean copy for the current mode (the only copy of its bytes). */
   blob?: Blob;
   thumbUrl?: string;
   li: HTMLLIElement;
@@ -45,7 +48,14 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   const tool = h("div", { className: "tool" });
   const errors = errorRegion();
-  const status = statusRegion();
+  const live = statusRegion();
+  // Some screen readers read a live region again when the same text is written to it: skip repeats.
+  const status = {
+    el: live.el,
+    set(msg: string) {
+      if (live.el.textContent !== msg) live.set(msg);
+    },
+  };
   const drop = createDropzone({ accept: ACCEPT, multiple: true, ctx, onFiles: add, hint: t("exif.drop.hint") });
 
   // What to remove: everything (default) or the location only (the variant page's default).
@@ -68,6 +78,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   const progress = h("progress", { className: "tool-progress", "aria-label": t("exif.progress"), hidden: true });
   const list = h("ul", { className: "tool-list", "aria-label": t("exif.list") });
   const cleanBtn = button("", { variant: "primary", onClick: cleanAll });
+  // Busy is shown with aria-disabled, not disabled: a disabled button loses focus to the page.
+  let zipping = false;
   const zipBtn = button(t("tool.downloadAll"), { onClick: () => void zipAll() });
   const resetBtn = button(t("tool.reset"), { variant: "ghost", onClick: reset });
   const actions = h("div", { className: "tool-actions", hidden: true }, cleanBtn, zipBtn, resetBtn);
@@ -88,7 +100,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       files = files.slice(0, Math.max(0, room));
       messages.push(t("tool.error.tooMany", { max: ctx.limits.maxFiles }));
     }
-    if (messages.length) errors.show(messages);
+    // One line per distinct message ("too many files" comes once per extra file, and once more here).
+    if (messages.length) errors.show([...new Set(messages)]);
     else errors.clear();
     for (const file of files) {
       const item: Item = { file, state: "reading", cleaned: false, li: h("li", { className: "tool-item" }) };
@@ -106,16 +119,23 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     const jobGen = gen;
     queue = queue.then(async () => {
       if (destroyed || jobGen !== gen || !items.includes(item)) return;
-      let analysis: Analysis;
+      let analysis: Result;
+      let blob: Blob | undefined;
       try {
-        analysis = analyze(new Uint8Array(await item.file.arrayBuffer()), mode);
+        const a = analyze(new Uint8Array(await item.file.arrayBuffer()), mode);
+        if (a.ok) {
+          // Copy the bytes into the Blob and let the array go, so each photo is held once.
+          const { bytes, ...flags } = a.cleaned;
+          blob = new Blob([bytes as Uint8Array<ArrayBuffer>], { type: MIME[a.report.format] });
+          analysis = { ok: true, report: a.report, cleaned: flags };
+        } else analysis = a;
       } catch {
         analysis = { ok: false, error: "decode" };
       }
       await new Promise((r) => setTimeout(r, 0));
       if (destroyed || jobGen !== gen || !items.includes(item)) return;
       item.analysis = analysis;
-      item.blob = analysis.ok ? new Blob([analysis.cleaned.bytes as Uint8Array<ArrayBuffer>], { type: MIME[analysis.report.format] }) : undefined;
+      item.blob = blob;
       item.state = analysis.ok ? "ready" : "error";
       renderItem(item);
       render();
@@ -151,9 +171,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   async function zipAll() {
     const done = items.filter(isDone);
-    if (done.length === 0) return;
+    if (done.length === 0 || zipping) return;
     const names = uniqueNames(done.map((i) => i.file.name));
-    zipBtn.disabled = true;
+    zipping = true;
+    zipBtn.setAttribute("aria-disabled", "true");
     try {
       await downloadZip(
         done.map((i, n) => ({ name: names[n]!, blob: i.blob! })),
@@ -162,7 +183,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     } catch {
       errors.show(t("tool.error.generic"));
     } finally {
-      zipBtn.disabled = false;
+      zipping = false;
+      zipBtn.removeAttribute("aria-disabled");
     }
   }
 
@@ -213,6 +235,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   function renderItem(item: Item) {
     const { li, file, analysis } = item;
+    // The row is rebuilt below; if focus is inside it, put it back on the same button afterwards
+    // instead of letting it fall to the page.
+    const active = document.activeElement;
+    const refocus = active instanceof HTMLElement && li.contains(active) ? (active.dataset.action ?? "remove") : null;
     li.dataset.state = item.state === "reading" ? "working" : item.state === "error" ? "error" : item.cleaned ? "done" : "pending";
     li.replaceChildren();
 
@@ -243,9 +269,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     } else if (isDone(item) && analysis?.ok) {
       const { cleaned, report } = analysis;
       const sizes = { before: formatBytes(file.size), after: formatBytes(item.blob!.size) };
-      const noLocation = mode === "gps" && report.gps === null && !report.exif?.hasGpsBlock && !cleaned.droppedUnreadable;
+      const dropped = cleaned.droppedUnreadable || cleaned.droppedXmp || cleaned.droppedTrailer;
+      const noLocation = mode === "gps" && report.gps === null && !report.exif?.hasGpsBlock && !dropped;
       const lines = [
-        !hasMetadata(report)
+        !hasMetadata(report) && !dropped
           ? t("exif.status.nothing", sizes)
           : noLocation
             ? t("exif.status.noLocation", sizes)
@@ -253,32 +280,36 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       ];
       if (cleaned.keptOrientation) lines.push(t("exif.status.keptOrientation"));
       if (cleaned.droppedUnreadable) lines.push(t("exif.status.droppedUnreadable"));
+      if (cleaned.droppedXmp) lines.push(t("exif.status.droppedXmp"));
+      if (cleaned.droppedTrailer) lines.push(t("exif.status.droppedTrailer"));
       meta.textContent = lines.join(" · ");
       const blob = item.blob!;
-      row.append(
-        button(t("tool.download"), {
-          ariaLabel: t("exif.downloadNamed", { name: file.name }),
-          onClick: () => downloadBlob(blob, file.name),
-        }),
-      );
+      const download = button(t("tool.download"), {
+        ariaLabel: t("exif.downloadNamed", { name: file.name }),
+        onClick: () => downloadBlob(blob, file.name),
+      });
+      download.dataset.action = "download";
+      row.append(download);
     }
 
-    row.append(
-      button(t("exif.removeFile"), {
-        variant: "ghost",
-        ariaLabel: t("exif.removeNamed", { name: file.name }),
-        onClick: () => {
-          const index = items.indexOf(item);
-          revoke(item);
-          items = items.filter((i) => i !== item);
-          li.remove();
-          render();
-          const next = items[Math.min(index, items.length - 1)];
-          (next?.li.querySelector<HTMLButtonElement>("button:last-of-type") ?? drop.querySelector("input"))?.focus();
-        },
-      }),
-    );
+    const remove = button(t("exif.removeFile"), {
+      variant: "ghost",
+      ariaLabel: t("exif.removeNamed", { name: file.name }),
+      onClick: () => {
+        const index = items.indexOf(item);
+        revoke(item);
+        items = items.filter((i) => i !== item);
+        li.remove();
+        render();
+        // The next row's Remove button (the one that took this row's place), else the drop zone.
+        const next = items[Math.min(index, items.length - 1)];
+        (next?.li.querySelector<HTMLButtonElement>('[data-action="remove"]') ?? drop.querySelector("input"))?.focus();
+      },
+    });
+    remove.dataset.action = "remove";
+    row.append(remove);
     li.append(row);
+    if (refocus) (li.querySelector<HTMLElement>(`[data-action="${refocus}"]`) ?? remove).focus();
   }
 
   /** Summary, progress and the global buttons. */

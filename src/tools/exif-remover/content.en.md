@@ -62,6 +62,8 @@ ui:
   exif.status.noLocation: "No location to remove: {before} → {after}"
   exif.status.keptOrientation: "Rotation flag kept, so it opens the right way up"
   exif.status.droppedUnreadable: "Its EXIF block could not be read, so all of it was removed to be safe"
+  exif.status.droppedXmp: "Its XMP data could not be checked fully, so all of it was removed to be safe"
+  exif.status.droppedTrailer: "The data stored after the picture, such as a motion photo's video, was removed too"
   exif.error.decode: "this file could not be read. It may be damaged, or not really a JPG, PNG or WebP."
   exif.error.unsupported: "this format is not supported here. The tool cleans JPG, PNG and WebP."
   exif.error.heic: "HEIC photos are not supported here. Converting them to JPG drops all their metadata:"
@@ -102,7 +104,7 @@ Large social networks such as Facebook, Instagram and X are widely reported to s
 
 **Everything** removes the location, camera, dates, software, XMP and IPTC data, comments, the small preview copy some cameras tuck inside, and any extra images stored with the photo, such as the HDR brightness map some recent phones add. Without that map, a photo can look a little flatter on an HDR screen, while it looks the same everywhere else.
 
-**Location only** removes the GPS coordinates, from the EXIF data and from XMP, and keeps everything else, so your photo app still sorts the pictures by date and knows the camera. A place name that you or an app typed into a caption stays; choose Everything to remove that too. If you only ever need this, [Remove location from a photo](/remove-location-from-photo/) starts with it selected.
+**Location only** removes the GPS coordinates, from the EXIF data and from XMP, and keeps everything else, so your photo app still sorts the pictures by date and knows the camera. A place name that you or an app typed into a caption stays; choose Everything to remove that too. A motion photo loses its short video, which is stored after the picture and can hold the location too. If you only ever need this, [Remove location from a photo](/remove-location-from-photo/) starts with it selected.
 
 ## The rotation flag
 

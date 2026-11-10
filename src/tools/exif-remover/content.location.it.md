@@ -29,7 +29,7 @@ Per un panorama dalla montagna non è un problema. Per una foto della porta di c
 
 ## Cosa toglie questa pagina e cosa tiene
 
-Toglie il blocco GPS dai dati EXIF della foto e le eventuali coordinate GPS nei dati XMP. Tutto il resto rimane: data e ora, fotocamera e impostazioni di scatto, indicazione di rotazione. L'immagine non viene aperta né salvata di nuovo; i dati compressi vengono copiati byte per byte, quindi la foto è identica e il file mantiene il suo peso.
+Toglie il blocco GPS dai dati EXIF della foto e le eventuali coordinate GPS nei dati XMP, comprese quelle che i droni e alcune app scrivono con nomi propri. Tutto il resto rimane: data e ora, fotocamera e impostazioni di scatto, indicazione di rotazione. L'immagine non viene aperta né salvata di nuovo; i dati compressi vengono copiati byte per byte, quindi la foto è identica e il file mantiene il suo peso. L'unica eccezione è la foto in movimento: il suo breve video è salvato dopo l'immagine e può contenere anche lui la posizione, quindi viene rimosso e ti resta una foto normale.
 
 Se preferisci togliere ogni dettaglio, compresi fotocamera, data e nome dell'app di fotoritocco, scegli Tutto qui sopra oppure usa lo strumento completo per [rimuovere i dati EXIF](/it/rimuovere-exif/).
 

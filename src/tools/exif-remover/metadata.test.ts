@@ -7,7 +7,18 @@ import { cleanPng, crc32, inspectPng, walkPng } from "./png";
 import { cleanWebp, inspectWebp, walkWebp, FLAG_EXIF, FLAG_XMP } from "./webp";
 import { readExif, removeGpsInPlace, orientationOnlyExif } from "./tiff";
 import { parseXmpCoordinate, xmpGps } from "./xmp";
-import { DEFAULT_META, exifTiff, jpegWithMetadata, jpegWithMpf, pngWithMetadata, webpWithMetadata } from "./test-fixtures";
+import {
+  DEFAULT_META,
+  exifTiff,
+  jpegWithJfifThumbnail,
+  jpegWithMetadata,
+  jpegWithMpf,
+  jpegWithXmp,
+  pngWithChunks,
+  pngWithMetadata,
+  webpWithChunks,
+  webpWithMetadata,
+} from "./test-fixtures";
 import type { Report } from "./types";
 
 const FIXTURES = path.resolve(__dirname, "../../../e2e/fixtures/image");
@@ -341,6 +352,150 @@ describe("analyze", () => {
         for (const mode of ["all", "gps"] as const) expect(() => analyze(g, mode)).not.toThrow();
       }
     }
+  });
+});
+
+describe("location in vendor XMP and text notes", () => {
+  // A drone photo as DJI writes it: attribute and element forms, and the vendor's misspelling.
+  const djiXmp =
+    `<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">` +
+    `<rdf:Description rdf:about="DJI Meta Data" xmlns:drone-dji="http://www.dji.com/drone-dji/1.0/" xmlns:Camera="http://pix4d.com/camera/1.0/"` +
+    ` drone-dji:GpsLatitude="+38.467812" drone-dji:GpsLongtitude="+14.955634" drone-dji:GpsLongitude="+14.955634" drone-dji:FlightYawDegree="+12.5">` +
+    `<drone-dji:GpsLatitude>38.467812</drone-dji:GpsLatitude><Camera:RigLatitude>38.467812</Camera:RigLatitude>` +
+    `</rdf:Description></rdf:RDF></x:xmpmeta>`;
+
+  it("finds and blanks GPS properties under any namespace and spelling, keeping the rest", () => {
+    const file = jpegWithXmp(JPG, djiXmp);
+    expect(inspectJpeg(file).gps).toMatchObject({ lat: expect.closeTo(38.4678, 4), lon: expect.closeTo(14.9556, 4) });
+    const { bytes, droppedXmp } = cleanJpeg(file, "gps");
+    expect(droppedXmp).toBe(false);
+    expect(bytes.length).toBe(file.length);
+    expect(has(bytes, "38.467812")).toBe(false);
+    expect(has(bytes, "14.955634")).toBe(false);
+    expect(has(bytes, 'drone-dji:FlightYawDegree="+12.5"')).toBe(true);
+    expect(inspectJpeg(bytes).gps).toBeNull();
+  });
+
+  it("drops a PNG text note keyed like a location, and reports it", () => {
+    const file = pngWithChunks(PNG, [
+      ["tEXt", "exif:GPSLatitude\x0038/1, 28/1, 264/100"],
+      ["tEXt", "exif:GPSLatitudeRef\0N"],
+      ["tEXt", "exif:GPSLongitude\x0014/1, 57/1, 13/1"],
+      ["tEXt", "exif:GPSLongitudeRef\0E"],
+      ["tEXt", "Comment\0kept"],
+    ]);
+    expectCoords(inspectPng(file).gps);
+    const { bytes } = cleanPng(file, "gps");
+    expect(has(bytes, "38/1")).toBe(false);
+    expect(has(bytes, "GPSLongitudeRef")).toBe(false);
+    expect(has(bytes, "kept")).toBe(true);
+    expect(inspectPng(bytes).gps).toBeNull();
+  });
+
+  it("drops the whole packet when a location cannot be cut out cleanly", () => {
+    // A stray closing tag left over after the first GPS element: blanking would break the XML.
+    const broken = `<x:xmpmeta><rdf:Description><exif:GPSLatitude>38,28.04N</exif:GPSLatitude></exif:GPSLatitude></rdf:Description></x:xmpmeta>`;
+    const file = jpegWithXmp(JPG, broken);
+    const { bytes, droppedXmp } = cleanJpeg(file, "gps");
+    expect(droppedXmp).toBe(true);
+    expect(walkJpeg(bytes).segments.some((s) => s.kind === "xmp")).toBe(false);
+    expect(has(bytes, "38,28.04N")).toBe(false);
+  });
+
+  it("scans a hostile 1 MB packet in linear time", () => {
+    const unclosed = "<x:GPSa>".repeat(128 * 1024);
+    const longName = `<x:a ${"a".repeat(1024 * 1024)}`;
+    for (const body of [unclosed, longName]) {
+      const file = pngWithChunks(PNG, [["iTXt", `XML:com.adobe.xmp\0\0\0\0\0${body}`]]);
+      const t0 = performance.now();
+      const res = analyze(file, "gps");
+      expect(performance.now() - t0).toBeLessThan(1000);
+      expect(res.ok && res.cleaned.droppedXmp).toBe(true);
+    }
+  });
+});
+
+describe("motion photo video after the JPEG", () => {
+  const motionXmp =
+    `<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">` +
+    `<rdf:Description rdf:about="" xmlns:GCamera="http://ns.google.com/photos/1.0/camera/" xmlns:Container="http://ns.google.com/photos/1.0/container/"` +
+    ` xmlns:xmp="http://ns.adobe.com/xap/1.0/" GCamera:MotionPhoto="1" GCamera:MotionPhotoVersion="1" GCamera:MotionPhotoPresentationTimestampUs="0" xmp:CreatorTool="Pixel">` +
+    `<Container:Directory><rdf:Seq><rdf:li rdf:parseType="Resource"><Container:Item Item:Mime="video/mp4" Item:Semantic="MotionPhoto" Item:Length="62"/></rdf:li></rdf:Seq></Container:Directory>` +
+    `</rdf:Description></rdf:RDF></x:xmpmeta>`;
+  const mp4 = new Uint8Array([0, 0, 0, 0x18, ...Buffer.from("ftypmp42"), ...new Array(12).fill(0), 0, 0, 0, 0x1e, ...Buffer.from("\xa9xyz", "latin1"), 0, 0x12, 0x15, 0xc7, ...Buffer.from("+38.4678+014.9556/")]);
+  const photo = jpegWithXmp(jpegWithMetadata(JPG, { ...DEFAULT_META, xmp: false }), motionXmp);
+  const file = new Uint8Array([...photo, ...mp4]);
+
+  it("drops the video and the XMP pointers to it in GPS mode", () => {
+    const { bytes, droppedTrailer } = cleanJpeg(file, "gps");
+    expect(droppedTrailer).toBe(true);
+    expect(bytes.length).toBe(photo.length);
+    expect(walkJpeg(bytes).end).toBe(bytes.length);
+    for (const s of ["+38.4678+014.9556/", "GCamera:MotionPhoto", "Container:Directory", "Item:Semantic"]) expect(has(bytes, s), s).toBe(false);
+    expect(has(bytes, 'xmp:CreatorTool="Pixel"')).toBe(true);
+    expect(inspectJpeg(bytes).exif).toMatchObject({ model: "Pixel 7", hasGpsBlock: false });
+  });
+
+  it("keeps the Ultra HDR directory items, losing only the motion photo one", () => {
+    const li = (semantic: string, length: number) =>
+      `<rdf:li rdf:parseType="Resource"><Container:Item Item:Mime="image/jpeg" Item:Semantic="${semantic}" Item:Length="${length}"/></rdf:li>`;
+    const hdrXmp = motionXmp.replace(/<rdf:Seq>.*<\/rdf:Seq>/, `<rdf:Seq>${li("Primary", 0)}${li("GainMap", 1234)}${li("MotionPhoto", 62)}</rdf:Seq>`);
+    const hdr = new Uint8Array([...jpegWithXmp(jpegWithMetadata(JPG, { ...DEFAULT_META, xmp: false }), hdrXmp), ...mp4]);
+    const { bytes, droppedTrailer } = cleanJpeg(hdr, "gps");
+    expect(droppedTrailer).toBe(true);
+    for (const s of ["<Container:Directory>", 'Item:Semantic="Primary"', 'Item:Semantic="GainMap" Item:Length="1234"']) expect(has(bytes, s), s).toBe(true);
+    for (const s of ['Item:Semantic="MotionPhoto"', "GCamera:MotionPhoto", "+38.4678+014.9556/"]) expect(has(bytes, s), s).toBe(false);
+    // Blanked in place: the packet keeps its length.
+    expect(bytes.length).toBe(hdr.length - mp4.length);
+  });
+
+  it("keeps the motion photo pointers when there is no video to drop", () => {
+    const { bytes, droppedTrailer } = cleanJpeg(photo, "gps");
+    expect(droppedTrailer).toBe(false);
+    expect(has(bytes, "GCamera:MotionPhoto")).toBe(true);
+  });
+});
+
+describe("everything mode keeps only what draws the image", () => {
+  it("drops C2PA and private PNG chunks and reports them", () => {
+    const file = pngWithChunks(PNG, [
+      ["caBX", "c2pa manifest: signer=Mario Rossi"],
+      ["gpSx", "lat=38.4678 lon=14.9556"],
+      ["pHYs", "\0\0\x0b\x13\0\0\x0b\x13\x01"],
+    ]);
+    const r = inspectPng(file);
+    expect(r.blocks).toContain("app");
+    expect(hasMetadata(r)).toBe(true);
+    const { bytes } = cleanPng(file, "all");
+    expect(walkPng(bytes).chunks.map((c) => c.type)).toEqual(["IHDR", "IDAT", "pHYs", "IEND"]);
+    expect(has(bytes, "Mario Rossi")).toBe(false);
+  });
+
+  it("drops unknown WebP chunks, clears the reserved VP8X bits and reports them", () => {
+    const base = webpWithMetadata(WEBP, { ...DEFAULT_META, orientation: 1 });
+    base[20] = base[20]! | 0x01 | 0xc0;
+    base[21] = 0x77;
+    const file = webpWithChunks(base, [["C2PA", "signer=Mario Rossi gps=38.4678,14.9556"]]);
+    expect(inspectWebp(file).blocks).toContain("app");
+    const { bytes } = cleanWebp(file, "all");
+    expect(has(bytes, "Mario Rossi")).toBe(false);
+    expect(walkWebp(bytes).map((c) => c.fourcc)).toEqual(["VP8X", "ALPH", "VP8 "]);
+    expect(bytes[20]).toBe(0x10);
+    expect(bytes[21]).toBe(0);
+    expect(new DataView(bytes.buffer, bytes.byteOffset).getUint32(4, true)).toBe(bytes.length - 8);
+  });
+
+  it("drops the JFIF and JFXX thumbnails, keeping the JFIF header", () => {
+    const file = jpegWithJfifThumbnail(JPG, 8, 8);
+    expect(inspectJpeg(file).blocks).toContain("thumbnail");
+    const { bytes } = cleanJpeg(file, "all");
+    expect(has(bytes, "Z".repeat(192))).toBe(false);
+    expect(has(bytes, "JFXX")).toBe(false);
+    const jfif = walkJpeg(bytes).segments[1]!;
+    expect(jfif.kind).toBe("jfif");
+    expect([...bytes.subarray(jfif.data + 5, jfif.end)]).toEqual([1, 2, 1, 0, 72, 0, 72, 0, 0]);
+    expect(hasMetadata(inspectJpeg(bytes))).toBe(false);
+    expect(Buffer.from(scanSpan(bytes)).equals(Buffer.from(scanSpan(file)))).toBe(true);
   });
 });
 

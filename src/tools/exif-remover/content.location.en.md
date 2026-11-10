@@ -29,7 +29,7 @@ That is harmless for a view from a mountain. It is not harmless for a photo of y
 
 ## What this page removes, and what it keeps
 
-It removes the GPS block from the photo's EXIF data and any GPS coordinates in its XMP data. Everything else stays: the date and time, the camera and its settings, and the rotation flag. The image itself is not opened or saved again; the compressed data is copied byte for byte, so the photo looks exactly the same and the file keeps its size.
+It removes the GPS block from the photo's EXIF data and any GPS coordinates in its XMP data, including the ones drones and some apps write under their own names. Everything else stays: the date and time, the camera and its settings, and the rotation flag. The image itself is not opened or saved again; the compressed data is copied byte for byte, so the photo looks exactly the same and the file keeps its size. The one exception is a motion photo: its short video is stored after the picture and can carry the location as well, so it is removed and you get a still photo.
 
 If you would rather remove every detail, including the camera, the date and the name of the editing app, switch to Everything above or use the full [EXIF remover](/remove-exif/).
 
