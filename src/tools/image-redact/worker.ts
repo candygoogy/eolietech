@@ -9,12 +9,12 @@
  */
 import { decode, encode } from "../image-shared/codecs";
 import { sniffFormat, type RasterFormat } from "../image-shared/formats";
-import type { JobErrorCode } from "../image-shared/protocol";
+import { classifyError, errorDetail, type ImageErrorCode } from "../image-crop/crop";
 import { applyAll, type Effect } from "./effects";
 import type { Box } from "./geometry";
 
-/** "heic": the bytes are a HEIC photo, which the page sends to the converter instead. */
-export type RedactErrorCode = JobErrorCode | "heic";
+/** "heic": the bytes are a HEIC photo, which the page sends to the converter instead. "reload": see ImageErrorCode. */
+export type RedactErrorCode = ImageErrorCode | "heic";
 
 export type RedactRequest =
   | { type: "open"; id: number; buffer: ArrayBuffer; previewMax: number }
@@ -41,6 +41,8 @@ const post = (msg: RedactResponse, transfer: Transferable[] = []) => scope.postM
 
 /** The open image: decoded once, redacted as often as the user likes. */
 let current: { id: number; img: ImageData } | null = null;
+/** The newest "open": an older one that finishes decoding later must not replace its image. */
+let latestOpen = 0;
 
 scope.addEventListener("message", (event: MessageEvent<RedactRequest>) => {
   const msg = event.data;
@@ -49,6 +51,7 @@ scope.addEventListener("message", (event: MessageEvent<RedactRequest>) => {
 });
 
 async function open(id: number, buffer: ArrayBuffer, previewMax: number) {
+  latestOpen = id;
   // Free the previous image before decoding the next one.
   current = null;
   const format = sniffFormat(new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 64)));
@@ -58,10 +61,15 @@ async function open(id: number, buffer: ArrayBuffer, previewMax: number) {
   try {
     const img = await decode(buffer, format);
     const preview = await previewOf(img, previewMax);
+    if (id !== latestOpen) {
+      // Another image was opened while this one decoded: keep that one, drop this.
+      preview.close();
+      return post({ type: "error", id, code: "generic", detail: "superseded" });
+    }
     current = { id, img };
     post({ type: "opened", id, width: img.width, height: img.height, format, preview }, [preview]);
   } catch (err) {
-    post({ type: "error", id, code: classify(err, "decode"), detail: String(err) });
+    post({ type: "error", id, code: classifyError(err, "decode"), detail: errorDetail(err) });
   }
 }
 
@@ -93,13 +101,7 @@ async function redact(msg: Extract<RedactRequest, { type: "redact" }>) {
       [encoded.buffer],
     );
   } catch (err) {
-    post({ type: "error", id, code: classify(err, "generic"), detail: String(err) });
+    const pixels = current ? current.img.width * current.img.height : 0;
+    post({ type: "error", id, code: classifyError(err, "generic", pixels), detail: errorDetail(err) });
   }
-}
-
-function classify(err: unknown, fallback: JobErrorCode): JobErrorCode {
-  const msg = String(err instanceof Error ? err.message : err).toLowerCase();
-  if (msg.includes("unsupported")) return "unsupported";
-  if (err instanceof RangeError || msg.includes("memory") || msg.includes("allocation")) return "memory";
-  return fallback;
 }

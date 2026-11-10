@@ -8,8 +8,9 @@
  */
 import { decode, encode } from "../image-shared/codecs";
 import { sniffFormat, type RasterFormat } from "../image-shared/formats";
-import type { JobErrorCode } from "../image-shared/protocol";
-import type { Rect } from "./crop";
+import { classifyError, errorDetail, type ImageErrorCode, type Rect } from "./crop";
+
+export type CropErrorCode = ImageErrorCode;
 
 export type CropRequest =
   | { type: "open"; id: number; buffer: ArrayBuffer; previewMax: number }
@@ -18,7 +19,7 @@ export type CropRequest =
 export type CropResponse =
   | { type: "opened"; id: number; width: number; height: number; format: RasterFormat; preview: ImageBitmap }
   | { type: "cropped"; id: number; buffer: ArrayBuffer; width: number; height: number; format: RasterFormat; flattened: boolean }
-  | { type: "error"; id: number; code: JobErrorCode; detail?: string };
+  | { type: "error"; id: number; code: CropErrorCode; detail?: string };
 
 const ALLOWED: readonly RasterFormat[] = ["jpg", "png", "webp", "avif"];
 
@@ -27,6 +28,8 @@ const post = (msg: CropResponse, transfer: Transferable[] = []) => scope.postMes
 
 /** The open image: decoded once, cropped as often as the user likes. */
 let current: { id: number; img: ImageData } | null = null;
+/** The newest "open": an older one that finishes decoding later must not replace its image. */
+let latestOpen = 0;
 
 scope.addEventListener("message", (event: MessageEvent<CropRequest>) => {
   const msg = event.data;
@@ -35,6 +38,7 @@ scope.addEventListener("message", (event: MessageEvent<CropRequest>) => {
 });
 
 async function open(id: number, buffer: ArrayBuffer, previewMax: number) {
+  latestOpen = id;
   // Free the previous image before decoding the next one.
   current = null;
   const format = sniffFormat(new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 64)));
@@ -43,10 +47,15 @@ async function open(id: number, buffer: ArrayBuffer, previewMax: number) {
   try {
     const img = await decode(buffer, format);
     const preview = await previewOf(img, previewMax);
+    if (id !== latestOpen) {
+      // Another image was opened while this one decoded: keep that one, drop this.
+      preview.close();
+      return post({ type: "error", id, code: "generic", detail: "superseded" });
+    }
     current = { id, img };
     post({ type: "opened", id, width: img.width, height: img.height, format, preview }, [preview]);
   } catch (err) {
-    post({ type: "error", id, code: classify(err, "decode"), detail: String(err) });
+    post({ type: "error", id, code: classifyError(err, "decode"), detail: errorDetail(err) });
   }
 }
 
@@ -82,13 +91,6 @@ async function crop(id: number, image: number, rect: Rect, format: RasterFormat,
     const encoded = await encode(new ImageData(out, w, h), format, quality);
     post({ type: "cropped", id, buffer: encoded.buffer, width: w, height: h, format, flattened: encoded.flattened }, [encoded.buffer]);
   } catch (err) {
-    post({ type: "error", id, code: classify(err, "generic"), detail: String(err) });
+    post({ type: "error", id, code: classifyError(err, "generic", rect.w * rect.h), detail: errorDetail(err) });
   }
-}
-
-function classify(err: unknown, fallback: JobErrorCode): JobErrorCode {
-  const msg = String(err instanceof Error ? err.message : err).toLowerCase();
-  if (msg.includes("unsupported")) return "unsupported";
-  if (err instanceof RangeError || msg.includes("memory") || msg.includes("allocation")) return "memory";
-  return fallback;
 }

@@ -10,7 +10,7 @@ howTo:
   - "Press Save redacted image, then Download. Under Save as, keep the original format or pick JPG, PNG or WebP."
 faq:
   - q: "How big are the blocks?"
-    a: "That depends on the box. The strength sets how many blocks fit across the box's shorter side: 32 at strength 1, 7 at the default of 7, and 4 at 10. A large face and a small one in the same photo get the same number of blocks, so both are hidden about as well."
+    a: "That depends on the box. The strength sets how many blocks fit across the box's shorter side: 32 at strength 1, 7 at the default of 7, and 4 at 10. A large face and a small one in the same photo get the same number of blocks, so both are hidden about as well. A long, thin box over a line of text, or a small one over a short word, never gets more than 3 blocks across its shorter side."
   - q: "Can I pixelate the whole image?"
     a: "Yes. Drag from one corner of the image to the opposite one, or draw a box and pull its edges out to the sides. Even the finest setting gives 32 blocks across the shorter side, so the result is a coarse mosaic, closer to a censored picture than to pixel art."
   - q: "Can pixelation be reversed?"

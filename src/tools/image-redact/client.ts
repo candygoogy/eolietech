@@ -97,9 +97,12 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       pending.delete(e.data.id);
     });
     w.addEventListener("error", (e) => {
-      // Usually out of memory: fail what is waiting; the next action starts a fresh worker.
-      console.error(e.message);
-      for (const [id, resolve] of pending) resolve({ type: "error", id, code: "memory" });
+      // A plain Event (no message) means the worker script itself could not be fetched, as after a
+      // deploy; an ErrorEvent is a crash inside it, usually out of memory. Fail what is waiting; the
+      // next action starts a fresh worker.
+      const code: RedactErrorCode = e instanceof ErrorEvent && e.message ? "memory" : "reload";
+      console.error(e instanceof ErrorEvent ? e.message : "image-redact worker failed to load");
+      for (const [id, resolve] of pending) resolve({ type: "error", id, code });
       pending.clear();
       stopWorker();
     });
@@ -310,7 +313,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         continue;
       }
       const img = g.getImageData(r.x, r.y, r.w, r.h);
-      applyEffect(img, { x: 0, y: 0, w: r.w, h: r.h }, effect, s);
+      applyEffect(img, { x: 0, y: 0, w: r.w, h: r.h }, effect, s, src.W / canvas.width);
       g.putImageData(img, r.x, r.y);
     }
   }
@@ -528,8 +531,25 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   // ---------- open, redact, reset ----------
   function errorText(code: RedactErrorCode, name: string): string {
-    if (code === "decode" || code === "unsupported" || code === "memory") return t(`redact.error.${code}`, { name });
+    if (code === "decode" || code === "unsupported" || code === "reload") return t(`redact.error.${code}`, { name });
     return t("redact.error.failed", { name });
+  }
+
+  /** Show what went wrong. Out of memory: the image is too big here, so point to the resizer. */
+  function showError(code: RedactErrorCode, name: string) {
+    if (code === "heic") return showHeic(name);
+    if (code !== "memory") return errors.show(errorText(code, name));
+    errors.el.replaceChildren(
+      h(
+        "p",
+        {},
+        t("redact.error.memory", { name }),
+        " ",
+        h("a", { href: t("redact.error.memoryHref"), text: t("redact.error.memoryLink") }),
+        t("redact.error.memoryEnd"),
+      ),
+    );
+    errors.el.hidden = false;
   }
 
   /** HEIC opens nowhere here: say so, with a link to the converter. */
@@ -587,7 +607,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     try {
       buffer = await f.arrayBuffer();
     } catch {
-      if (gen === openGen) fail(errorText("decode", f.name));
+      if (gen === openGen) fail("decode", f.name);
       return;
     }
     const id = ++seq;
@@ -606,7 +626,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         showHeic(f.name);
         return;
       }
-      fail(errorText(res.type === "error" ? res.code : "generic", f.name));
+      fail(res.type === "error" ? res.code : "generic", f.name);
       return;
     }
     file = f;
@@ -634,10 +654,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     downloadBtn.hidden = true;
   }
 
-  function fail(message: string) {
+  function fail(code: RedactErrorCode, name: string) {
     setBusy(false);
     clearImage();
-    errors.show(message);
+    showError(code, name);
     status.set("");
   }
 
@@ -662,8 +682,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         const id = ++seq;
         const buffer = await f.arrayBuffer();
         const reopened = await request({ type: "open", id, buffer, previewMax: 16 }, [buffer]);
+        if (reopened.type === "opened") reopened.preview.close();
+        // Another image was dropped meanwhile: that one owns the page now.
+        if (file !== f) return;
         if (reopened.type !== "opened") throw reopened.type === "error" ? reopened.code : "generic";
-        reopened.preview.close();
         src = { ...src, id };
         holder = worker;
       }
@@ -678,6 +700,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         quality: Number(quality.input.value) || DEFAULT_QUALITY,
       });
       if (file !== f) return;
+      if (res.type === "error" && res.detail === "no image") holder = null; // decode again on the next try
       if (res.type !== "redacted") throw res.type === "error" ? res.code : "generic";
       const blob = new Blob([res.buffer], { type: MIME[res.format] });
       result = { blob, name: redactedName(f.name, res.format === src.format, res.format, t("redact.fileSuffix")), key: startedWith };
@@ -688,8 +711,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       downloadBtn.hidden = false;
     } catch (err) {
       console.error(err);
-      errors.show(errorText(typeof err === "string" ? (err as RedactErrorCode) : "generic", f.name));
-      status.set("");
+      const code = typeof err === "string" ? (err as RedactErrorCode) : "generic";
+      if (file === f) {
+        // A codec that ran out of memory may be left unusable: start a fresh worker next time.
+        if (code === "memory") stopWorker();
+        showError(code, f.name);
+        status.set("");
+      }
     } finally {
       if (file === f) {
         setBusy(false);

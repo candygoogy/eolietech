@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_STRENGTH,
+  STRENGTH_MAX,
+  STRENGTH_MIN,
   applyAll,
   applyEffect,
   blur,
@@ -69,7 +71,30 @@ describe("strength scales with the box", () => {
     expect(cellSize(400, 200, DEFAULT_STRENGTH)).toBeGreaterThan(cellSize(100, 50, DEFAULT_STRENGTH));
     expect(blurRadius(400, 200, DEFAULT_STRENGTH)).toBeGreaterThan(blurRadius(100, 50, DEFAULT_STRENGTH));
     // The shorter side decides: a wide strip over a line of text is not blurred by its length.
-    expect(cellSize(2000, 40, 5)).toBe(cellSize(40, 40, 5));
+    expect(cellSize(2000, 40, 5)).toBe(cellSize(120, 40, 5));
+    expect(blurRadius(2000, 40, 5)).toBe(blurRadius(120, 40, 5));
+  });
+
+  it("leaves a snug box over a line of text at most 3 cells tall, at every strength", () => {
+    // A 400 x 24 box over one line of an IBAN: 3 cells across 24 px means cells of 8 px or more.
+    expect(cellSize(400, 24, DEFAULT_STRENGTH)).toBeGreaterThanOrEqual(8);
+    expect(blurRadius(400, 24, DEFAULT_STRENGTH)).toBeGreaterThanOrEqual(6);
+    for (let s = STRENGTH_MIN; s <= STRENGTH_MAX; s++) {
+      expect(24 / cellSize(400, 24, s)).toBeLessThanOrEqual(3);
+      expect(blurRadius(400, 24, s)).toBeGreaterThanOrEqual(6);
+      if (s > STRENGTH_MIN) {
+        expect(cellSize(400, 24, s)).toBeGreaterThanOrEqual(cellSize(400, 24, s - 1));
+        expect(blurRadius(400, 24, s)).toBeGreaterThanOrEqual(blurRadius(400, 24, s - 1));
+      }
+    }
+    // A snug box over a short word or a PIN gets the same floor, whatever its shape.
+    expect(cellSize(40, 24, DEFAULT_STRENGTH)).toBeGreaterThanOrEqual(8);
+    expect(blurRadius(40, 24, DEFAULT_STRENGTH)).toBeGreaterThanOrEqual(6);
+    // In a preview at a quarter size, a 160 x 96 px box is not small: the preview matches the save.
+    expect(cellSize(40, 24, DEFAULT_STRENGTH, 4) * 4).toBeLessThanOrEqual(cellSize(160, 96, DEFAULT_STRENGTH) + 4);
+    // Large face-shaped boxes and whole photos up to 2:1 keep the full range of the setting.
+    expect(cellSize(200, 200, DEFAULT_STRENGTH)).toBe(Math.ceil(200 / 7));
+    expect(cellSize(4000, 2000, STRENGTH_MIN)).toBe(Math.ceil(2000 / 32));
   });
 
   it("gets stronger with the strength setting", () => {

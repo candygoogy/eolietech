@@ -16,7 +16,7 @@ faq:
   - q: "Can I crop to an exact size, like 1080 × 1080 px?"
     a: "Yes. Pick 1:1 and type 1080 in Width: the height follows, and you get a 1080 × 1080 px piece of the original at its real pixels. If you want more of the photo inside those 1080 px, crop a bigger square first, then make it smaller with the image resizer on this site."
   - q: "Does the cropped file keep the photo's location and camera details?"
-    a: "No. The new file contains only the pixels you kept, without EXIF data such as GPS location or camera model. The orientation your phone saved is applied before you crop, so sideways shots show upright and the crop matches what you see."
+    a: "No. The new file contains only the pixels you kept, without EXIF data such as GPS location or camera model. The orientation your phone saved is applied before you crop, so sideways shots show upright and the crop matches what you see. Embedded colour profiles are not kept either, so wide-gamut photos, such as many taken on an iPhone, can look slightly less saturated."
   - q: "Can I crop HEIC photos from an iPhone?"
     a: "Not directly. This page opens JPG, PNG, WebP and AVIF. Convert the HEIC files with the HEIC to JPG converter on this site first, then crop the JPG here."
 ui:
@@ -56,7 +56,11 @@ ui:
   crop.fileSuffix: "cropped"
   crop.error.decode: "{name} could not be read. It may be damaged, animated, or not really an image of this type."
   crop.error.unsupported: "{name} is a type of image this tool cannot open. Use JPG, PNG, WebP or AVIF."
-  crop.error.memory: "There was not enough memory to work on {name}. Close other tabs, or try a smaller image."
+  crop.error.memory: "{name} is too large for this browser to edit. Make a smaller copy with"
+  crop.error.memoryLink: "Resize images"
+  crop.error.memoryHref: "/resize-image/"
+  crop.error.memoryEnd: ", then open that copy here."
+  crop.error.reload: "This page was updated. Reload to continue."
   crop.error.failed: "Something went wrong while cropping {name}. Try again, or save it in another format."
 ---
 

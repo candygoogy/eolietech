@@ -7,7 +7,6 @@ import { createDropzone, downloadBlob, formatBytes } from "../../lib/tool-ui";
 import { button, errorRegion, h, statusRegion } from "../ai-shared/dom";
 import { domId, rangeField, selectField } from "../image-shared/batch-ui";
 import { MIME, acceptFor, isLossy, isRasterFormat, type RasterFormat } from "../image-shared/formats";
-import type { JobErrorCode } from "../image-shared/protocol";
 import type { ToolCtx } from "../types";
 import {
   ASPECTS,
@@ -30,7 +29,7 @@ import {
   type Handle,
   type Rect,
 } from "./crop";
-import type { CropRequest, CropResponse } from "./worker";
+import type { CropErrorCode, CropRequest, CropResponse } from "./worker";
 // Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
 export { default as styles } from "./crop.css?url";
 
@@ -84,9 +83,12 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       pending.delete(e.data.id);
     });
     w.addEventListener("error", (e) => {
-      // Usually out of memory: fail what is waiting; the next action starts a fresh worker.
-      console.error(e.message);
-      for (const [id, resolve] of pending) resolve({ type: "error", id, code: "memory" });
+      // A plain Event (no message) means the worker script itself could not be fetched, as after a
+      // deploy; an ErrorEvent is a crash inside it, usually out of memory. Fail what is waiting; the
+      // next action starts a fresh worker.
+      const code: CropErrorCode = e instanceof ErrorEvent && e.message ? "memory" : "reload";
+      console.error(e instanceof ErrorEvent ? e.message : "image-crop worker failed to load");
+      for (const [id, resolve] of pending) resolve({ type: "error", id, code });
       pending.clear();
       stopWorker();
     });
@@ -395,9 +397,25 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   });
 
   // ---------- open, crop, reset ----------
-  function errorText(code: JobErrorCode, name: string): string {
-    if (code === "decode" || code === "unsupported" || code === "memory") return t(`crop.error.${code}`, { name });
+  function errorText(code: CropErrorCode, name: string): string {
+    if (code === "decode" || code === "unsupported" || code === "reload") return t(`crop.error.${code}`, { name });
     return t("crop.error.failed", { name });
+  }
+
+  /** Show what went wrong. Out of memory: the image is too big here, so point to the resizer. */
+  function showError(code: CropErrorCode, name: string) {
+    if (code !== "memory") return errors.show(errorText(code, name));
+    errors.el.replaceChildren(
+      h(
+        "p",
+        {},
+        t("crop.error.memory", { name }),
+        " ",
+        h("a", { href: t("crop.error.memoryHref"), text: t("crop.error.memoryLink") }),
+        t("crop.error.memoryEnd"),
+      ),
+    );
+    errors.el.hidden = false;
   }
 
   function setBusy(on: boolean) {
@@ -431,7 +449,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     try {
       buffer = await f.arrayBuffer();
     } catch {
-      if (gen === openGen) fail(errorText("decode", f.name));
+      if (gen === openGen) fail("decode", f.name);
       return;
     }
     const id = ++seq;
@@ -443,7 +461,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       return;
     }
     if (res.type !== "opened") {
-      fail(errorText(res.type === "error" ? res.code : "generic", f.name));
+      fail(res.type === "error" ? res.code : "generic", f.name);
       return;
     }
     file = f;
@@ -473,10 +491,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     downloadBtn.hidden = true;
   }
 
-  function fail(message: string) {
+  function fail(code: CropErrorCode, name: string) {
     setBusy(false);
     clearImage();
-    errors.show(message);
+    showError(code, name);
     status.set("");
   }
 
@@ -496,8 +514,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         const id = ++seq;
         const buffer = await f.arrayBuffer();
         const reopened = await request({ type: "open", id, buffer, previewMax: 16 }, [buffer]);
+        if (reopened.type === "opened") reopened.preview.close();
+        // Another image was dropped meanwhile: that one owns the page now.
+        if (file !== f) return;
         if (reopened.type !== "opened") throw reopened.type === "error" ? reopened.code : "generic";
-        reopened.preview.close();
         src = { ...src, id };
         holder = worker;
       }
@@ -510,6 +530,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         quality: Number(quality.input.value) || DEFAULT_QUALITY,
       });
       if (file !== f) return;
+      if (res.type === "error" && res.detail === "no image") holder = null; // decode again on the next try
       if (res.type !== "cropped") throw res.type === "error" ? res.code : "generic";
       const blob = new Blob([res.buffer], { type: MIME[res.format] });
       result = { blob, name: croppedName(f.name, res.format === src.format, res.format, t("crop.fileSuffix")), key: startedWith };
@@ -520,8 +541,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       downloadBtn.hidden = false;
     } catch (err) {
       console.error(err);
-      errors.show(errorText(typeof err === "string" ? (err as JobErrorCode) : "generic", f.name));
-      status.set("");
+      const code = typeof err === "string" ? (err as CropErrorCode) : "generic";
+      if (file === f) {
+        // A codec that ran out of memory may be left unusable: start a fresh worker next time.
+        if (code === "memory") stopWorker();
+        showError(code, f.name);
+        status.set("");
+      }
     } finally {
       if (file === f) {
         setBusy(false);

@@ -16,7 +16,7 @@ faq:
   - q: "Posso ritagliare a una misura precisa, per esempio 1080 × 1080 px?"
     a: "Sì. Scegli 1:1 e scrivi 1080 in Larghezza: l'altezza si adegua e ottieni un pezzo di 1080 × 1080 px dell'originale, con i suoi pixel reali. Se vuoi far stare una parte più ampia della foto in quei 1080 px, ritaglia prima un quadrato più grande e poi rimpiccioliscilo con lo strumento per ridimensionare le immagini di questo sito."
   - q: "Il file ritagliato conserva la posizione e i dati della fotocamera?"
-    a: "No. Il nuovo file contiene solo i pixel che hai tenuto, senza dati EXIF come la posizione GPS o il modello della fotocamera. L'orientamento salvato dal telefono viene applicato prima del ritaglio, quindi le foto scattate in verticale appaiono dritte e il ritaglio corrisponde a quello che vedi."
+    a: "No. Il nuovo file contiene solo i pixel che hai tenuto, senza dati EXIF come la posizione GPS o il modello della fotocamera. L'orientamento salvato dal telefono viene applicato prima del ritaglio, quindi le foto scattate in verticale appaiono dritte e il ritaglio corrisponde a quello che vedi. Nemmeno i profili colore incorporati vengono conservati, quindi le foto ad ampia gamma cromatica, come molte scattate con l'iPhone, possono apparire un po' meno sature."
   - q: "Posso ritagliare le foto HEIC dell'iPhone?"
     a: "Non direttamente: questa pagina apre JPG, PNG, WebP e AVIF. Prima converti i file HEIC con il convertitore da HEIC a JPG di questo sito, poi ritaglia qui il JPG."
 ui:
@@ -56,7 +56,11 @@ ui:
   crop.fileSuffix: "ritagliata"
   crop.error.decode: "Non è stato possibile leggere {name}. Potrebbe essere danneggiato, animato o non essere davvero un'immagine di questo tipo."
   crop.error.unsupported: "{name} è un tipo di immagine che questo strumento non apre. Usa JPG, PNG, WebP o AVIF."
-  crop.error.memory: "Non c'era abbastanza memoria per lavorare su {name}. Chiudi altre schede o prova con un'immagine più piccola."
+  crop.error.memory: "{name} è troppo grande per essere modificato in questo browser. Fanne una copia più piccola con"
+  crop.error.memoryLink: "Ridimensiona le immagini"
+  crop.error.memoryHref: "/it/ridimensionare-immagini/"
+  crop.error.memoryEnd: ", poi apri qui la copia."
+  crop.error.reload: "Questa pagina è stata aggiornata. Ricaricala per continuare."
   crop.error.failed: "Qualcosa è andato storto durante il ritaglio di {name}. Riprova, oppure salvala in un altro formato."
 ---
 

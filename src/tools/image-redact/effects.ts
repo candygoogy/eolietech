@@ -30,16 +30,55 @@ const BLUR_DIV = [48, 36, 26, 20, 15, 12, 9, 7, 5.5, 4];
 /** Three box blurs in a row come within a few per cent of a Gaussian. */
 const BLUR_PASSES = 3;
 
+/**
+ * Long, thin boxes are almost always over a line of text, where the shorter side is about the
+ * height of the letters, and 7 cells or a ninth-of-a-side blur across that leave the text readable.
+ * From TEXT_ASPECT_FROM (longer side / shorter side) a floor fades in, and from TEXT_ASPECT_FULL on
+ * such a box gets at most TEXT_CELLS cells, and a blur radius of at least 1/TEXT_BLUR_DIV, across
+ * its shorter side at the default strength. Stronger settings make it coarser still; weaker ones
+ * never make it finer. Small boxes (shorter side under SMALL_BOX px of the full image: a short
+ * word, a PIN, a date) get the full floor whatever their shape. Large face-shaped boxes and whole
+ * photos (up to 2:1) are not affected.
+ */
+const TEXT_ASPECT_FROM = 2;
+const TEXT_ASPECT_FULL = 3;
+const TEXT_CELLS = 3;
+const TEXT_BLUR_DIV = 4;
+const SMALL_BOX = 48;
+
 const level = (strength: number): number =>
   Math.min(STRENGTH_MAX, Math.max(STRENGTH_MIN, Math.round(Number.isFinite(strength) ? strength : DEFAULT_STRENGTH))) - 1;
 
+/**
+ * How much of the text floor applies: 1 for small boxes; otherwise 0 up to 2:1, rising to 1 at 3:1.
+ * `scale` is full-image pixels per box pixel, so the downscaled preview decides as the save does.
+ */
+const textShape = (w: number, h: number, scale: number): number => {
+  const short = Math.min(w, h);
+  if (!(short > 0)) return 0;
+  if (short * scale < SMALL_BOX) return 1;
+  const aspect = Math.max(w, h) / short;
+  return Math.min(1, Math.max(0, (aspect - TEXT_ASPECT_FROM) / (TEXT_ASPECT_FULL - TEXT_ASPECT_FROM)));
+};
+
+/** Above the default strength the floor follows the table, so a higher setting is always coarser. */
+const coarser = (table: readonly number[], i: number): number => Math.min(1, table[i]! / table[DEFAULT_STRENGTH - 1]!);
+
 /** Side of a pixelate cell, in pixels, for a w x h box. At least 2, or nothing would change. */
-export const cellSize = (w: number, h: number, strength: number): number =>
-  Math.max(2, Math.ceil(Math.min(w, h) / CELLS[level(strength)]!));
+export const cellSize = (w: number, h: number, strength: number, scale = 1): number => {
+  const i = level(strength);
+  const short = Math.min(w, h);
+  const floor = (short / (TEXT_CELLS * coarser(CELLS, i))) * textShape(w, h, scale);
+  return Math.max(2, Math.ceil(short / CELLS[i]!), Math.ceil(floor));
+};
 
 /** Box blur radius, in pixels, for a w x h box. At least 1. */
-export const blurRadius = (w: number, h: number, strength: number): number =>
-  Math.max(1, Math.round(Math.min(w, h) / BLUR_DIV[level(strength)]!));
+export const blurRadius = (w: number, h: number, strength: number, scale = 1): number => {
+  const i = level(strength);
+  const short = Math.min(w, h);
+  const floor = (short / (TEXT_BLUR_DIV * coarser(BLUR_DIV, i))) * textShape(w, h, scale);
+  return Math.max(1, Math.round(short / BLUR_DIV[i]!), Math.round(floor));
+};
 
 /** RGBA pixels, as ImageData has them (the worker passes ImageData, tests plain objects). */
 export interface Pixels {
@@ -48,13 +87,16 @@ export interface Pixels {
   height: number;
 }
 
-/** Apply one effect to the part of `box` inside the image, in place. */
-export function applyEffect(img: Pixels, box: Box, effect: Effect, strength: number): void {
+/**
+ * Apply one effect to the part of `box` inside the image, in place. `scale`: full-image pixels per
+ * pixel of `img` (above 1 for the downscaled preview).
+ */
+export function applyEffect(img: Pixels, box: Box, effect: Effect, strength: number, scale = 1): void {
   const r = clipBox(box, img.width, img.height);
   if (!r) return;
   if (effect === "black") fillBlack(img, r);
-  else if (effect === "pixelate") pixelate(img, r, cellSize(r.w, r.h, strength));
-  else blur(img, r, blurRadius(r.w, r.h, strength));
+  else if (effect === "pixelate") pixelate(img, r, cellSize(r.w, r.h, strength, scale));
+  else blur(img, r, blurRadius(r.w, r.h, strength, scale));
 }
 
 /** Opaque black: transparent pixels are covered too, so nothing shows through in any viewer. */

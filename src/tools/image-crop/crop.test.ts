@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   aspectFromPreset,
+  classifyError,
   clampRect,
   croppedName,
   fitAspect,
@@ -132,5 +133,25 @@ describe("croppedName", () => {
     expect(croppedName("holiday.JPEG", true, "jpg", "cropped")).toBe("holiday-cropped.JPEG");
     expect(croppedName("holiday.jpeg", false, "webp", "cropped")).toBe("holiday-cropped.webp");
     expect(croppedName("scan", true, "png", "ritagliata")).toBe("scan-ritagliata.png");
+  });
+});
+
+describe("classifyError", () => {
+  // Emscripten's ExitStatus is a plain object, not an Error: mozjpeg throws it after "Insufficient memory".
+  const exitStatus = { name: "ExitStatus", message: "Program terminated with exit(1)", status: 1 };
+
+  it("calls a codec abort on a large image a memory limit, and leaves small images to the fallback", () => {
+    expect(classifyError(exitStatus, "generic", 12000 * 9000)).toBe("memory");
+    expect(classifyError(exitStatus, "generic", 1000 * 800)).toBe("generic");
+    expect(classifyError(new RangeError("Array buffer allocation failed"), "decode")).toBe("memory");
+    expect(classifyError(new Error("AVIF decode failed"), "decode")).toBe("decode");
+  });
+
+  it("tells a file that could not be fetched (a deploy since the page loaded) from a memory error", () => {
+    expect(classifyError(new TypeError("Failed to fetch dynamically imported module: /_astro/x.js"), "generic")).toBe("reload");
+    expect(classifyError(new TypeError("Failed to fetch"), "decode")).toBe("reload");
+    const compile = Object.assign(new Error("expected magic word 00 61 73 6d"), { name: "CompileError" });
+    expect(classifyError(compile, "decode")).toBe("reload");
+    expect(classifyError(new TypeError("Cannot read properties of undefined"), "generic")).toBe("generic");
   });
 });

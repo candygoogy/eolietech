@@ -10,7 +10,7 @@ howTo:
   - "Premi Salva l'immagine oscurata, poi Scarica. In Salva come tieni il formato originale, oppure scegli JPG, PNG o WebP."
 faq:
   - q: "Quanto sono grandi i blocchi?"
-    a: "Dipende dal riquadro. L'intensità decide quanti blocchi stanno sul lato più corto del riquadro: 32 con intensità 1, 7 con il valore di partenza e 4 a 10. Un volto grande e uno piccolo nella stessa foto ricevono lo stesso numero di blocchi, quindi sono nascosti più o meno allo stesso modo."
+    a: "Dipende dal riquadro. L'intensità decide quanti blocchi stanno sul lato più corto del riquadro: 32 con intensità 1, 7 con il valore di partenza e 4 a 10. Un volto grande e uno piccolo nella stessa foto ricevono lo stesso numero di blocchi, quindi sono nascosti più o meno allo stesso modo. Un riquadro lungo e stretto su una riga di testo, o uno piccolo su una parola corta, non ha mai più di 3 blocchi sul lato più corto."
   - q: "Posso pixelare tutta l'immagine?"
     a: "Sì. Trascina da un angolo dell'immagine a quello opposto, oppure disegna un riquadro e tira i bordi fino ai lati. Anche l'impostazione più fine dà 32 blocchi sul lato più corto, quindi il risultato è un mosaico grossolano, più vicino a una foto censurata che alla pixel art."
   - q: "La pixelatura si può annullare?"

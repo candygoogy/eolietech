@@ -1,7 +1,9 @@
 /**
  * Crop box math for the image cropper (pure, unit-tested; no DOM). Every rectangle is in pixels of
  * the decoded source image (EXIF orientation already applied), with integer x/y/w/h inside 0..W, 0..H.
+ * Also how the image workers name their errors (classifyError).
  */
+import type { JobErrorCode } from "../image-shared/protocol";
 
 export interface Rect {
   x: number;
@@ -211,4 +213,47 @@ export function croppedName(inputName: string, keepExtension: boolean, ext: stri
   const base = dot > 0 ? inputName.slice(0, dot) : inputName;
   const extension = keepExtension && dot > 0 ? inputName.slice(dot + 1) : ext;
   return `${base}-${suffix}.${extension}`;
+}
+
+/**
+ * Worker error codes for the cropper and the redactor. "reload": a script or codec file of this
+ * page could not be fetched (usually a tab left open across a deploy, so its hashed files are gone);
+ * only a reload helps.
+ */
+export type ImageErrorCode = JobErrorCode | "reload";
+
+/** Above this many pixels, a codec that aborts while encoding has run out of memory (see classifyError). */
+const LARGE_PIXELS = 16_000_000;
+
+const errorName = (err: unknown): string =>
+  typeof err === "object" && err !== null && "name" in err ? String((err as { name: unknown }).name) : "";
+const errorMessage = (err: unknown): string =>
+  typeof err === "object" && err !== null && "message" in err ? String((err as { message: unknown }).message) : String(err);
+export const errorDetail = (err: unknown): string => `${errorName(err)}: ${errorMessage(err)}`;
+
+/**
+ * Map an error thrown in the crop or redact worker to an error code. `encodedPixels` is set when
+ * encoding: the pixels were already decoded fine, so on a large image a WASM codec that aborts
+ * (mozjpeg calls exit() after "Insufficient memory", which throws Emscripten's ExitStatus; others
+ * throw a RuntimeError) has hit a memory limit.
+ */
+export function classifyError(err: unknown, fallback: JobErrorCode, encodedPixels = 0): ImageErrorCode {
+  const name = errorName(err);
+  const msg = errorMessage(err).toLowerCase();
+  if (isLoadFailure(name, msg)) return "reload";
+  if (msg.includes("unsupported")) return "unsupported";
+  if (err instanceof RangeError || msg.includes("memory") || msg.includes("allocation") || /\boom\b/.test(msg)) return "memory";
+  if (encodedPixels >= LARGE_PIXELS && (name === "ExitStatus" || name === "RuntimeError")) return "memory";
+  return fallback;
+}
+
+/** A codec's .wasm file (or a module) could not be fetched, as opposed to failing on the image. */
+function isLoadFailure(name: string, msg: string): boolean {
+  if (name === "CompileError" && msg.includes("magic")) return true;
+  return (
+    name === "TypeError" &&
+    /failed to fetch|fetch dynamically imported module|importing a module script failed|error loading dynamically imported module|networkerror|load failed|mime type/.test(
+      msg,
+    )
+  );
 }
