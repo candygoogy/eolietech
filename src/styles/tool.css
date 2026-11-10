@@ -12,11 +12,6 @@
  * 2px gap, never by outlines. The only lines are form-field borders and the drag-over ring.
  */
 
-/* The hidden attribute always wins over the display rules below. */
-[hidden]:not([hidden="until-found"]) {
-  display: none !important;
-}
-
 /* ---------- page head ---------- */
 .tool-page__head {
   padding-block: var(--space-6) var(--space-5);

@@ -4,6 +4,11 @@
  */
 
 /* ---------- reset ---------- */
+/* The hidden attribute always wins over any display rule (desk, waitlist, tool UI). */
+[hidden]:not([hidden="until-found"]) {
+  display: none !important;
+}
+
 *,
 *::before,
 *::after {
