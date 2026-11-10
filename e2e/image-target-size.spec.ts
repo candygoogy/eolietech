@@ -113,8 +113,8 @@ test("/compress-image-to-20kb/ gets a large photo under 20,000 bytes as JPG", as
   // Made smaller in pixels, keeping its 4:3 shape, and the quality is reported.
   await expect(row).toContainText(/2400 × 1800 → \d+ × \d+ px/);
   await expect(row).toContainText(/Quality \d+/);
-  const out = await download(page, row.getByRole("button", { name: "Download photo.jpg" }));
-  expect(out.name).toBe("photo.jpg");
+  const out = await download(page, row.getByRole("button", { name: "Download photo-compressed.jpg" }));
+  expect(out.name).toBe("photo-compressed.jpg");
   expect(isJpg(out.bytes)).toBe(true);
   expect(out.bytes.length).toBeLessThanOrEqual(20_000);
   // Not needlessly tiny: the search uses most of the budget.
@@ -140,8 +140,8 @@ test("a file already under the target keeps its image but loses its metadata", a
   await expect(row).toContainText("image kept as it is, without metadata");
   await expect(row).toContainText("48 × 64 px");
   await expect(row).not.toContainText("Quality");
-  const out = await download(page, row.getByRole("button", { name: "Download exif-gps.jpg" }));
-  expect(out.name).toBe("exif-gps.jpg");
+  const out = await download(page, row.getByRole("button", { name: "Download exif-gps-compressed.jpg" }));
+  expect(out.name).toBe("exif-gps-compressed.jpg");
   const original = await readFile(fixture("exif-gps.jpg"));
   expect(out.bytes.length).toBeLessThan(original.length);
   expect(scanData(out.bytes).equals(scanData(original))).toBe(true);
@@ -156,7 +156,7 @@ test("a file already under the target keeps its image but loses its metadata", a
 
   // Same file, but WebP was asked for: it is converted, not kept.
   await page.getByLabel("Save as").selectOption("webp");
-  await expect(row.getByRole("button", { name: "Download exif-gps.webp" })).toBeVisible({ timeout: 60_000 });
+  await expect(row.getByRole("button", { name: "Download exif-gps-compressed.webp" })).toBeVisible({ timeout: 60_000 });
   await expect(row).toContainText("Quality 92");
   w.assertPrivate();
 });
@@ -173,7 +173,7 @@ test("/compress-image-to-kb/ saves WebP under the typed size, and a batch zips",
   ]);
   await expect(page.locator('.tool-item[data-state="done"]')).toHaveCount(2, { timeout: 90_000 });
   const row = page.locator(".tool-item").first();
-  const out = await download(page, row.getByRole("button", { name: "Download photo.webp" }));
+  const out = await download(page, row.getByRole("button", { name: "Download photo-compressed.webp" }));
   expect(isWebp(out.bytes)).toBe(true);
   expect(out.bytes.length).toBeLessThanOrEqual(60_000);
   const zip = await download(page, page.getByRole("button", { name: "Download all (.zip)" }));

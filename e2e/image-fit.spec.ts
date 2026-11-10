@@ -88,14 +88,14 @@ test("/make-image-square/ makes a square PNG and JPG of the whole photo", async 
   const row = page.locator(".tool-item").first();
   await done(row);
   await expect(row).toContainText("64 × 48 → 64 × 64 px");
-  const png = await download(page, row.getByRole("button", { name: "Download sample.png" }));
+  const png = await download(page, row.getByRole("button", { name: "Download sample-fit.png" }));
   expect(isPng(png.bytes)).toBe(true);
   expect(pixelSize(png.bytes)).toEqual({ width: 64, height: 64 });
 
   await page.getByLabel("Save as").selectOption("jpg");
-  await expect(row.getByRole("button", { name: "Download sample.jpg" })).toBeVisible({ timeout: 60_000 });
-  const jpg = await download(page, row.getByRole("button", { name: "Download sample.jpg" }));
-  expect(jpg.name).toBe("sample.jpg");
+  await expect(row.getByRole("button", { name: "Download sample-fit.jpg" })).toBeVisible({ timeout: 60_000 });
+  const jpg = await download(page, row.getByRole("button", { name: "Download sample-fit.jpg" }));
+  expect(jpg.name).toBe("sample-fit.jpg");
   expect(isJpg(jpg.bytes)).toBe(true);
   expect(pixelSize(jpg.bytes)).toEqual({ width: 64, height: 64 });
 
@@ -120,7 +120,7 @@ test("/fit-image-to-16-9/ starts on 16:9", async ({ page, baseURL }) => {
   const row = page.locator(".tool-item").first();
   await done(row);
   await expect(row).toContainText("64 × 48 → 85 × 48 px");
-  const out = await download(page, row.getByRole("button", { name: "Download sample.jpg" }));
+  const out = await download(page, row.getByRole("button", { name: "Download sample-fit.jpg" }));
   expect(pixelSize(out.bytes)).toEqual({ width: 85, height: 48 });
   w.assertPrivate();
 });
@@ -133,7 +133,7 @@ test("blurred, coloured and transparent backgrounds produce files", async ({ pag
   await expect(page.locator('.tool-item[data-state="done"]')).toHaveCount(2, { timeout: 90_000 });
   const row = page.locator(".tool-item").first();
   await expect(row).toContainText("64 × 48 → 64 × 64 px");
-  const blurred = await download(page, row.getByRole("button", { name: "Download sample.jpg" }));
+  const blurred = await download(page, row.getByRole("button", { name: "Download sample-fit.jpg" }));
   expect(isJpg(blurred.bytes)).toBe(true);
   expect(pixelSize(blurred.bytes)).toEqual({ width: 64, height: 64 });
   const zip = await download(page, page.getByRole("button", { name: "Download all (.zip)" }));
@@ -147,7 +147,7 @@ test("blurred, coloured and transparent backgrounds produce files", async ({ pag
   await page.getByLabel("Save as").selectOption("png");
   await option(page, "Transparent").click();
   await expect(page.locator('.tool-item[data-state="done"]')).toHaveCount(2, { timeout: 90_000 });
-  const clear = await download(page, row.getByRole("button", { name: "Download sample.png" }));
+  const clear = await download(page, row.getByRole("button", { name: "Download sample-fit.png" }));
   expect(isPng(clear.bytes)).toBe(true);
   // The frame around the photo is transparent: an alpha channel (colour type 4 or 6) or a palette with tRNS.
   expect([4, 6].includes(clear.bytes[25]!) || clear.bytes.includes("tRNS")).toBe(true);

@@ -97,9 +97,9 @@ test("/resize-image/ resizes by width, does not enlarge unless allowed, and conv
 
   // Convert to JPG and download.
   await page.getByLabel("Output format").selectOption("jpg");
-  await expect(row.getByRole("button", { name: "Download sample.jpg" })).toBeVisible({ timeout: 60_000 });
-  const out = await download(page, row.getByRole("button", { name: "Download sample.jpg" }));
-  expect(out.name).toBe("sample.jpg");
+  await expect(row.getByRole("button", { name: "Download sample-resized.jpg" })).toBeVisible({ timeout: 60_000 });
+  const out = await download(page, row.getByRole("button", { name: "Download sample-resized.jpg" }));
+  expect(out.name).toBe("sample-resized.jpg");
   expect(isJpg(out.bytes)).toBe(true);
 
   // An empty size field is flagged and keeps the last size.
