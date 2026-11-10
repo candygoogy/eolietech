@@ -808,6 +808,15 @@
   line-height: 1;
 }
 
+/* Phones: a stamp as wide as its column, scaled up to 1.15 while it waits to land (stamp-land, global.css),
+ * ran past the gutter (/it/strumenti/ was 322px wide at 320px). Long text wraps inside the narrower stamp. */
+@media (max-width: 40rem) {
+  .page-head__stamp,
+  .section__head .section__note {
+    max-width: calc(100% - 1rem);
+  }
+}
+
 @media (max-width: 40rem) {
   .section__head--noted {
     grid-template-columns: minmax(0, 1fr);
@@ -2267,6 +2276,15 @@ a.tool-index__row:focus-visible::after {
   flex: 1 1 14rem;
   min-width: 0;
   background: var(--color-bg);
+}
+
+/* The form starts disabled until its script has run. The site-wide disabled fade (0.6 on the control, and
+   again on the fieldset) left the empty field's placeholder at 4.09:1; here the field and its fieldset stay
+   at full strength, so the placeholder is --color-text-muted (6.45:1 light, 6.9:1 dark) and the state is
+   still told by the not-allowed cursor and the faded button. */
+.waitlist-form fieldset:disabled,
+.waitlist-form__row input:disabled {
+  opacity: 1;
 }
 
 /* Reserve the Turnstile widget's height (65px) so it appears without a shift. It is the widget's

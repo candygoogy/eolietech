@@ -62,6 +62,31 @@
   margin-top: var(--space-3);
 }
 
+/* Phones: the tool is the point of the page, so it has to start inside the first screen (360x740).
+ * A slim head (no tall top gap, the back link tight under the header), a lede at body size and cut to
+ * four lines. The whole sentence stays in the DOM, so it is still read in full by screen readers, found
+ * in the page and shown in the page's own text below the tool. */
+@media (max-width: 36rem) {
+  .tool-page__head {
+    padding-block: var(--space-1) var(--space-3);
+  }
+
+  .tool-page__back {
+    margin-bottom: 0;
+  }
+
+  .tool-page__head .lede {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+    margin-top: var(--space-2);
+    font-size: var(--text-base);
+    line-height: 1.45;
+  }
+}
+
 /* ---------- panel ---------- */
 .tool-panel {
   /* Wells and rows inside the panel: sunken in light; the darker page ground in dark reads as inset. */
@@ -189,6 +214,15 @@
 [data-tool-id="exif-remover"] {
   --tool-shell: 28.9785rem;
   --tool-shell-rest: 14.4941rem;
+}
+
+/* Wide screens: the mounted EXIF panel never ends up shorter than its shell (WebKit lays the fieldset and
+ * its notes out a few px differently from Chromium, where the values above were measured; at 1280px that
+ * was an 8px jump on mount). Narrow screens already carry this floor above. */
+@media (min-width: 48rem) {
+  [data-tool-id="exif-remover"][data-mounted] {
+    min-height: calc(var(--drop-min) + var(--tool-shell-rest));
+  }
 }
 
 [data-tool-id="image-to-pdf"] {
@@ -462,15 +496,18 @@ fieldset.tool-options {
   align-items: flex-start;
   gap: var(--space-3);
   min-height: var(--target-min);
-  padding-block: 0.6rem;
 }
 
+/* The vertical room sits inside the label (not the row), so the label itself is the 44px target. */
 .tool-options > div:has(> input[type="radio"], > input[type="checkbox"]) > input {
   flex: none;
-  margin-top: 0.15rem;
+  margin-top: 0.75rem;
 }
 
 .tool-options > div:has(> input[type="radio"], > input[type="checkbox"]) > label {
+  flex: 1;
+  min-width: 0;
+  padding-block: 0.6rem;
   font-size: var(--text-base);
   font-weight: 400;
 }
@@ -1103,4 +1140,14 @@ div.tool-options select {
   gap: var(--space-2);
   padding: 0;
   list-style: none;
+}
+
+/* ---------- touch: segmented controls ----------
+ * The segmented controls of Crop, Fit, Redact image, Sign and Watermark build their options at the
+ * track's height minus its 3px padding (38px). On touch the option itself is the full 44px; the track
+ * grows by the same 6px. Fine pointers keep the compact control. */
+@media (pointer: coarse) {
+  .tool-panel :is(.crop-aspect__option, .fit-choice__option, .redact-effect__option, .sign-seg__option, .wm-seg__option) {
+    min-height: var(--target-min);
+  }
 }

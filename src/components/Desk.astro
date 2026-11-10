@@ -133,13 +133,15 @@ const pageName = (id: string) => t(locale, `home.play.pdf.name.${id}`);
     data-label-moved={t(locale, "home.play.pdf.moved")}
   >
     <div class="obj__paper pdf">
-      <ol class="pdf__pages" id="desk-pdf-pages" aria-label={t(locale, "home.play.pdf.pages")}>
+      <ol class="pdf__pages" id="desk-pdf-pages" role="listbox" aria-orientation="horizontal" aria-label={t(locale, "home.play.pdf.pages")}>
         {
           pdfPages.map((id, i) => (
             <li
               class={`pdf__page pdf__page--${id}`}
               data-page={id}
               data-name={pageName(id)}
+              role="option"
+              aria-selected="false"
               aria-label={t(locale, "home.play.pdf.page", { n: i + 1, total: pdfPages.length, name: pageName(id) })}
               aria-describedby="desk-pdf-hint"
             >

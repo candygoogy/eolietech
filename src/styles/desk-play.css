@@ -80,9 +80,11 @@
   margin-top: 0.2em;
 }
 
+/* May wrap inside the label's width (the lemon's is 8em; a long Italian link ran 26px out of it at 200%
+ * zoom and was clipped by the desk). Words stay whole unless one alone is wider than the label. */
 .obj__links a {
   font-weight: 700;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 /* The small "example" stamps (Stamp.astro): struck on the file label, beside the name, after the

@@ -142,6 +142,7 @@ function pdf(root: HTMLElement): void {
       el.setAttribute("aria-setsize", String(total));
       el.tabIndex = open && el === sel ? 0 : -1;
       el.toggleAttribute("data-selected", open && el === sel);
+      el.setAttribute("aria-selected", String(open && el === sel));
     });
     const at = order.indexOf(sel);
     moveBtns.forEach((b) => b.setAttribute("aria-disabled", String(Number(b.dataset.move) < 0 ? at <= 0 : at >= total - 1)));
