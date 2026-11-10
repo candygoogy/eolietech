@@ -78,10 +78,22 @@ export function formatDate(value: string | undefined, locale: Locale): string {
   return new Intl.DateTimeFormat(intlLocale(locale), opts).format(d);
 }
 
-/** Discount or surcharge on a line or the document: "-10%", "+5,00 €" (SC is a discount, MG a surcharge). */
+/** "2026-10-01T10:30:00" -> "01/10/2026 10:30" or "Oct 1, 2026 10:30". The time is shown as written, with no zone conversion. */
+export function formatDateTime(value: string | undefined, locale: Locale): string {
+  if (value === undefined) return "";
+  const day = formatDate(value, locale);
+  const time = /^\d{4}-\d{2}-\d{2}T(\d{2}:\d{2})/.exec(value.trim())?.[1];
+  return time && day !== value ? `${day} ${time}` : day;
+}
+
+/**
+ * Discount or surcharge on a line or the document: "-10%", "+5,00 €". SC is a discount (minus), MG a
+ * surcharge (plus); any other type gets no sign. Importo is shown as given; when the XML has both, the
+ * amount comes first because it is the figure that counts, with the rate after it.
+ */
 export function formatAdjustment(a: { type?: string; percent?: string; amount?: string }, currency: string, locale: Locale): string {
-  const sign = a.type === "MG" ? "+" : "-";
-  if (a.percent !== undefined) return `${sign}${formatPercent(a.percent, locale)}`;
-  if (a.amount !== undefined) return `${sign}${formatMoney(a.amount, currency, locale)}`;
-  return "";
+  const sign = a.type === "MG" ? "+" : a.type === "SC" ? "-" : "";
+  const percent = a.percent !== undefined ? `${sign}${formatPercent(a.percent, locale)}` : "";
+  const amount = a.amount !== undefined ? `${sign}${formatMoney(a.amount, currency, locale)}` : "";
+  return amount && percent ? `${amount} (${percent})` : amount || percent;
 }

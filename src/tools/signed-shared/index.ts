@@ -3,4 +3,4 @@
  * viewer. Pure TypeScript on WebCrypto: no DOM, no network, no dependencies.
  */
 export { P7mError, innerFileName, isP7m, openP7m } from "./p7m";
-export type { OpenedP7m, P7mErrorCode, SignerInfo } from "./p7m";
+export type { CertPeriod, OpenedP7m, P7mErrorCode, SignerInfo } from "./p7m";

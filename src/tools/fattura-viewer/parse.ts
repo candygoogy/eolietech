@@ -12,9 +12,11 @@ import type {
   Header,
   Invoice,
   Line,
+  OtherParty,
   ParsedFile,
   Party,
   Payment,
+  Transport,
   VatSummary,
 } from "./model";
 
@@ -89,11 +91,26 @@ type El = Element | undefined;
 const kids = (el: El, name: string): Element[] => (el ? Array.from(el.children).filter((c) => c.localName === name) : []);
 const kid = (el: El, name: string): El => (el ? Array.from(el.children).find((c) => c.localName === name) : undefined);
 const at = (el: El, path: string): El => path.split("/").reduce<El>((e, n) => kid(e, n), el);
+
+/**
+ * Leaf elements whose text went into the model, for the file being read (reading is synchronous, so
+ * one set at a time is enough). Whatever is left is counted as not shown: see countUnshown().
+ */
+let taken = new Set<Element>();
+
+/** Trimmed text of an element, undefined when missing or blank. Marks it as taken. */
+function take(leaf: El): string | undefined {
+  const v = leaf?.textContent?.trim();
+  if (!leaf || !v) return undefined;
+  taken.add(leaf);
+  return v;
+}
 /** Trimmed text at `path`, undefined when missing or blank. */
-const txt = (el: El, path: string): string | undefined => {
-  const v = at(el, path)?.textContent?.trim();
-  return v ? v : undefined;
-};
+const txt = (el: El, path: string): string | undefined => take(at(el, path));
+/** Text of every `name` child that has some. */
+const txts = (el: El, name: string): string[] => kids(el, name).flatMap((k) => take(k) ?? []);
+const yes = (el: El, path: string): boolean => /^si$/i.test(txt(el, path) ?? "");
+const some = <T>(list: T[]): T[] | undefined => (list.length ? list : undefined);
 
 function compact<T extends object>(o: T): T | undefined {
   return Object.values(o).some((v) => v !== undefined) ? o : undefined;
@@ -148,20 +165,64 @@ function party(el: El): Party {
     phone: txt(contacts, "Telefono"),
     email: txt(contacts, "Email"),
     rea: rea ? [txt(rea, "Ufficio"), txt(rea, "NumeroREA")].filter(Boolean).join(" ") || undefined : undefined,
+    eori: txt(ana, "CodEORI"),
+    register: compact({
+      name: txt(ids, "AlboProfessionale"),
+      province: txt(ids, "ProvinciaAlbo"),
+      number: txt(ids, "NumeroIscrizioneAlbo"),
+      date: txt(ids, "DataIscrizioneAlbo"),
+    }),
+    fax: txt(contacts, "Fax"),
+    establishment: address(kid(el, "StabileOrganizzazione") ?? kid(other, "StabileOrganizzazione")),
+    shareCapital: txt(rea, "CapitaleSociale"),
+    soleShareholder: txt(rea, "SocioUnico"),
+    liquidation: txt(rea, "StatoLiquidazione"),
+    adminRef: txt(el, "RiferimentoAmministrazione"),
   };
 }
 
-function header(el: El): Header {
+/** A fiscal representative or the third party that issued the invoice: tax IDs and a name, nothing else. */
+function otherParty(el: El, role: OtherParty["role"]): OtherParty[] {
+  if (!el) return [];
+  const ids = kid(el, "DatiAnagrafici") ?? el;
+  const ana = kid(ids, "Anagrafica") ?? ids;
+  const p: OtherParty = {
+    role,
+    name: personName(ana),
+    vat: idFiscale(kid(ids, "IdFiscaleIVA")),
+    taxCode: txt(ids, "CodiceFiscale"),
+    eori: txt(ana, "CodEORI"),
+  };
+  return p.name || p.vat || p.taxCode || p.eori ? [p] : [];
+}
+
+function header(el: El, root: Element): Header {
   const t = kid(el, "DatiTrasmissione");
+  const contacts = kid(t, "ContattiTrasmittente");
+  const seller = kid(el, "CedentePrestatore");
+  const buyer = kid(el, "CessionarioCommittente");
+  /** A party's own representative: a direct child, or inside AltriDatiIdentificativi (simplified buyer). */
+  const repOf = (p: El) => kid(p, "RappresentanteFiscale") ?? kid(kid(p, "AltriDatiIdentificativi"), "RappresentanteFiscale");
   return {
     transmission: {
+      senderId: idFiscale(kid(t, "IdTrasmittente")),
       progressive: txt(t, "ProgressivoInvio"),
       format: txt(t, "FormatoTrasmissione"),
       recipientCode: txt(t, "CodiceDestinatario"),
       recipientPec: txt(t, "PECDestinatario"),
+      senderPhone: txt(contacts, "Telefono"),
+      senderEmail: txt(contacts, "Email"),
+      system: root.getAttribute("SistemaEmittente")?.trim() || undefined,
     },
-    seller: party(kid(el, "CedentePrestatore")),
-    buyer: party(kid(el, "CessionarioCommittente")),
+    seller: party(seller),
+    buyer: party(buyer),
+    others: [
+      // Ordinary invoices name the supplier's representative next to the supplier, simplified ones inside it.
+      ...otherParty(kid(el, "RappresentanteFiscale") ?? repOf(seller), "sellerRep"),
+      ...otherParty(repOf(buyer), "buyerRep"),
+      ...otherParty(kid(el, "TerzoIntermediarioOSoggettoEmittente"), "intermediary"),
+    ],
+    issuer: txt(el, "SoggettoEmittente"),
   };
 }
 
@@ -176,8 +237,16 @@ const attachments = (body: El): Attachment[] =>
     format: txt(a, "FormatoAttachment"),
     description: txt(a, "DescrizioneAttachment"),
     compression: txt(a, "AlgoritmoCompressione"),
-    data: at(a, "Attachment")?.textContent ?? "",
+    // The data itself is offered as a download, so it counts as taken even when it is empty.
+    data: take(at(a, "Attachment")) === undefined ? "" : (at(a, "Attachment")?.textContent ?? ""),
   }));
+
+/** Cents as a "123.45" string. */
+function fromCents(cents: number): string {
+  const sign = cents < 0 ? "-" : "";
+  const abs = Math.abs(cents);
+  return `${sign}${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, "0")}`;
+}
 
 /** Sum of decimal strings in cents, as a "123.45" string; undefined if any is unreadable or none given. */
 export function sumAmounts(values: (string | undefined)[]): string | undefined {
@@ -190,10 +259,50 @@ export function sumAmounts(values: (string | undefined)[]): string | undefined {
     cents += Math.round(n * 100);
     any = true;
   }
-  if (!any) return undefined;
-  const sign = cents < 0 ? "-" : "";
-  const abs = Math.abs(cents);
-  return `${sign}${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, "0")}`;
+  return any ? fromCents(cents) : undefined;
+}
+
+/**
+ * A total with the document's ScontoMaggiorazione applied, in file order: SC takes away, MG adds.
+ * Importo is used as given; with no Importo, Percentuale is taken of the running total. An entry with
+ * no readable type or figure changes nothing.
+ */
+export function applyAdjustments(total: string | undefined, list: Adjustment[]): string | undefined {
+  if (total === undefined || !Number.isFinite(Number(total))) return total;
+  let cents = Math.round(Number(total) * 100);
+  for (const a of list) {
+    const sign = a.type === "MG" ? 1 : a.type === "SC" ? -1 : 0;
+    const change = a.amount !== undefined ? Number(a.amount) * 100 : a.percent !== undefined ? (cents * Number(a.percent)) / 100 : NaN;
+    if (sign !== 0 && Number.isFinite(change)) cents += sign * Math.round(change);
+  }
+  return fromCents(cents);
+}
+
+function transport(el: El): Transport | undefined {
+  if (!el) return undefined;
+  const carrier = kid(el, "DatiAnagraficiVettore");
+  const ana = kid(carrier, "Anagrafica") ?? carrier;
+  return compact({
+    carrier: compact({
+      name: personName(ana),
+      vat: idFiscale(kid(carrier, "IdFiscaleIVA")),
+      taxCode: txt(carrier, "CodiceFiscale"),
+      eori: txt(ana, "CodEORI"),
+      licence: txt(carrier, "NumeroLicenzaGuida"),
+    }),
+    means: txt(el, "MezzoTrasporto"),
+    reason: txt(el, "CausaleTrasporto"),
+    packages: txt(el, "NumeroColli"),
+    description: txt(el, "Descrizione"),
+    weightUnit: txt(el, "UnitaMisuraPeso"),
+    grossWeight: txt(el, "PesoLordo"),
+    netWeight: txt(el, "PesoNetto"),
+    pickup: txt(el, "DataOraRitiro"),
+    start: txt(el, "DataInizioTrasporto"),
+    incoterms: txt(el, "TipoResa"),
+    deliveryAddress: address(kid(el, "IndirizzoResa")),
+    delivery: txt(el, "DataOraConsegna"),
+  });
 }
 
 const REF_KINDS: [string, DocRef["kind"]][] = [
@@ -209,6 +318,8 @@ function ordinaryBody(body: Element): Invoice {
   const doc = kid(gen, "DatiGeneraliDocumento");
   const goods = kid(body, "DatiBeniServizi");
   const bollo = kid(doc, "DatiBollo");
+  const main = kid(gen, "FatturaPrincipale");
+  const vehicle = kid(body, "DatiVeicoli");
 
   const lines: Line[] = kids(goods, "DettaglioLinee").map((l) => ({
     number: txt(l, "NumeroLinea"),
@@ -223,6 +334,15 @@ function ordinaryBody(body: Element): Invoice {
     total: txt(l, "PrezzoTotale"),
     vatRate: txt(l, "AliquotaIVA"),
     natura: txt(l, "Natura"),
+    kind: txt(l, "TipoCessionePrestazione"),
+    withholding: yes(l, "Ritenuta"),
+    adminRef: txt(l, "RiferimentoAmministrazione"),
+    extra: kids(l, "AltriDatiGestionali").map((d) => ({
+      type: txt(d, "TipoDato"),
+      text: txt(d, "RiferimentoTesto"),
+      number: txt(d, "RiferimentoNumero"),
+      date: txt(d, "RiferimentoData"),
+    })),
   }));
 
   const summaries: VatSummary[] = kids(goods, "DatiRiepilogo").map((s) => ({
@@ -247,13 +367,27 @@ function ordinaryBody(body: Element): Invoice {
       bank: txt(d, "IstitutoFinanziario"),
       bic: txt(d, "BIC"),
       code: txt(d, "CodicePagamento"),
+      termsFrom: txt(d, "DataRiferimentoTerminiPagamento"),
+      termsDays: txt(d, "GiorniTerminiPagamento"),
+      postOffice: txt(d, "CodUfficioPostale"),
+      receiptName: [txt(d, "TitoloQuietanzante"), txt(d, "NomeQuietanzante"), txt(d, "CognomeQuietanzante")].filter(Boolean).join(" ") || undefined,
+      receiptTaxCode: txt(d, "CFQuietanzante"),
+      abi: txt(d, "ABI"),
+      cab: txt(d, "CAB"),
+      earlyDiscount: txt(d, "ScontoPagamentoAnticipato"),
+      earlyLimit: txt(d, "DataLimitePagamentoAnticipato"),
+      latePenalty: txt(d, "PenalitaPagamentiRitardati"),
+      penaltyFrom: txt(d, "DataDecorrenzaPenale"),
     })),
   }));
 
+  // ImportoTotaleDocumento is net of the document's own discount or surcharge, so a total added up
+  // here from the VAT summary has to take it into account too.
+  const docAdjustments = adjustments(doc);
   const declared = txt(doc, "ImportoTotaleDocumento");
   const computed = declared
     ? undefined
-    : sumAmounts(summaries.flatMap((s) => [s.taxable, s.tax]).filter((v): v is string => v !== undefined));
+    : applyAdjustments(sumAmounts(summaries.flatMap((s) => [s.taxable, s.tax]).filter((v): v is string => v !== undefined)), docAdjustments);
 
   return {
     kind: "ordinaria",
@@ -264,9 +398,7 @@ function ordinaryBody(body: Element): Invoice {
     total: declared ?? computed,
     totalComputed: !declared && computed !== undefined,
     rounding: txt(doc, "Arrotondamento"),
-    reasons: kids(doc, "Causale")
-      .map((c) => c.textContent?.trim() ?? "")
-      .filter(Boolean),
+    reasons: txts(doc, "Causale"),
     withholdings: kids(doc, "DatiRitenuta").map((r) => ({
       type: txt(r, "TipoRitenuta"),
       amount: txt(r, "ImportoRitenuta"),
@@ -281,8 +413,10 @@ function ordinaryBody(body: Element): Invoice {
       taxable: txt(f, "ImponibileCassa"),
       vatRate: txt(f, "AliquotaIVA"),
       natura: txt(f, "Natura"),
+      withholding: yes(f, "Ritenuta") || undefined,
+      adminRef: txt(f, "RiferimentoAmministrazione"),
     })),
-    adjustments: adjustments(doc),
+    adjustments: docAdjustments,
     refs: REF_KINDS.flatMap(([tag, kind]) =>
       kids(gen, tag).map((r) => ({
         kind,
@@ -290,13 +424,22 @@ function ordinaryBody(body: Element): Invoice {
         date: txt(r, "Data"),
         cup: txt(r, "CodiceCUP"),
         cig: txt(r, "CodiceCIG"),
+        lines: some(txts(r, "RiferimentoNumeroLinea")),
+        item: txt(r, "NumItem"),
+        jobCode: txt(r, "CodiceCommessaConvenzione"),
       })),
     ),
-    ddts: kids(gen, "DatiDDT").map((d) => ({ number: txt(d, "NumeroDDT"), date: txt(d, "DataDDT") })),
+    ddts: kids(gen, "DatiDDT").map((d) => ({ number: txt(d, "NumeroDDT"), date: txt(d, "DataDDT"), lines: some(txts(d, "RiferimentoNumeroLinea")) })),
+    art73: yes(doc, "Art73"),
+    stages: kids(gen, "DatiSAL").flatMap((s) => txts(s, "RiferimentoFase")),
+    transport: transport(kid(gen, "DatiTrasporto")),
+    mainInvoice: compact({ number: txt(main, "NumeroFatturaPrincipale"), date: txt(main, "DataFatturaPrincipale") }),
+    vehicle: compact({ date: txt(vehicle, "Data"), distance: txt(vehicle, "TotalePercorso") }),
     lines,
     summaries,
     payments,
     attachments: attachments(body),
+    unshown: 0,
   };
 }
 
@@ -312,6 +455,8 @@ function simplifiedBody(body: Element): Invoice {
     vatRate: txt(l, "DatiIVA/Aliquota"),
     vatAmount: txt(l, "DatiIVA/Imposta"),
     natura: txt(l, "Natura"),
+    extra: [],
+    normRef: txt(l, "RiferimentoNormativo"),
   }));
   const total = sumAmounts(lines.map((l) => l.total));
   const bollo = txt(doc, "BolloVirtuale");
@@ -330,11 +475,13 @@ function simplifiedBody(body: Element): Invoice {
     adjustments: [],
     refs: [],
     ddts: [],
-    corrects: fr ? { number: txt(fr, "NumeroFR"), date: txt(fr, "DataFR") } : undefined,
+    corrects: fr ? { number: txt(fr, "NumeroFR"), date: txt(fr, "DataFR"), elements: txt(fr, "ElementiRettificati") } : undefined,
+    stages: [],
     lines,
     summaries: [],
     payments: [],
     attachments: attachments(body),
+    unshown: 0,
   };
 }
 
@@ -349,6 +496,27 @@ function findRoot(doc: Document): Element | undefined {
   return Array.from(doc.getElementsByTagName("*")).find((e) => ROOTS.has(e.localName));
 }
 
+/**
+ * For each body, how many fields of the file the reader did not take: leaf elements with text, in that
+ * body or outside every body (the header is shared by all the invoices of a file). An XML signature is
+ * left out: the view has its own note for it.
+ */
+function countUnshown(root: Element, bodies: Element[]): number[] {
+  const perBody = bodies.map(() => 0);
+  let shared = 0;
+  for (const top of Array.from(root.children)) {
+    if (top.localName === "Signature") continue;
+    let n = 0;
+    for (const e of [top, ...Array.from(top.getElementsByTagName("*"))]) {
+      if (e.children.length === 0 && !taken.has(e) && e.textContent?.trim()) n++;
+    }
+    const i = bodies.indexOf(top);
+    if (i >= 0) perBody[i]! += n;
+    else shared += n;
+  }
+  return perBody.map((n) => n + shared);
+}
+
 /** Read the invoices in a parsed Document. Throws FatturaError("not-invoice") or ("empty"). */
 export function readInvoices(doc: Document): ParsedFile {
   const root = findRoot(doc);
@@ -356,10 +524,15 @@ export function readInvoices(doc: Document): ParsedFile {
   const simplified = root.localName === "FatturaElettronicaSemplificata";
   const bodies = kids(root, "FatturaElettronicaBody");
   if (bodies.length === 0) throw new FatturaError("empty");
+  taken = new Set();
+  const head = header(kid(root, "FatturaElettronicaHeader"), root);
+  const invoices = bodies.map(simplified ? simplifiedBody : ordinaryBody);
+  countUnshown(root, bodies).forEach((n, i) => (invoices[i]!.unshown = n));
+  taken = new Set(); // do not keep the document alive
   return {
     version: root.getAttribute("versione") ?? undefined,
-    header: header(kid(root, "FatturaElettronicaHeader")),
-    invoices: bodies.map(simplified ? simplifiedBody : ordinaryBody),
+    header: head,
+    invoices,
     xmlSigned:
       root.getElementsByTagNameNS(DSIG, "Signature").length > 0 ||
       Array.from(root.children).some((c) => c.localName === "Signature"),

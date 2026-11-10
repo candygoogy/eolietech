@@ -5,7 +5,7 @@ h1: "Italian e-invoice viewer"
 intro: "The .xml file of an Italian e-invoice is not meant for human eyes. Drop it here, even if it is a signed .p7m, and you get the supplier, lines, VAT and payment laid out like a paper invoice. Save it as a PDF if you need one. The file stays on your device."
 howTo:
   - "Choose your invoices or drop them on the box above. Both .xml and .xml.p7m files work, up to 50 at a time."
-  - "Each invoice gets a row with the supplier, number, date and total. For a signed file, a line underneath says who signed it and whether the signature matches."
+  - "Each invoice gets a row with the supplier, number, date and total. For a signed file, a line underneath gives the name on the signing certificate and the date the signer declared, as the file states them, and whether the signature matches."
   - "Press View to read the whole invoice: both parties, the lines, the VAT summary, the payment details and any attachments."
   - "Press Download PDF to save a readable copy, or Download all PDFs to get them in one .zip."
 faq:
@@ -38,11 +38,11 @@ ui:
   fv.attachmentFallback: "attachment-{n}"
   fv.status.reading: "Reading…"
   fv.status.zipping: "Making the PDFs…"
-  fv.sig.byOn: "Signed by {name} on {date}."
-  fv.sig.by: "Signed by {name}."
+  fv.sig.byOn: "Signed with a certificate in the name of {name} (identity not checked here). Date as declared by the signer: {date}."
+  fv.sig.by: "Signed with a certificate in the name of {name} (identity not checked here)."
   fv.sig.signed: "Signed file (.p7m)."
-  fv.sig.more.one: "{name} and one other person"
-  fv.sig.more.other: "{name} and {count} other people"
+  fv.sig.more.one: "{name}, plus one other signature"
+  fv.sig.more.other: "{name}, plus {count} other signatures"
   fv.sig.valid: "The signature matches: the file has not changed since it was signed."
   fv.sig.invalid: "The signature does not match: the file may have been changed after signing."
   fv.sig.unsupported: "This signature cannot be checked here."
@@ -52,7 +52,7 @@ ui:
   fv.error.not-invoice: "this is an XML file, but not an Italian e-invoice."
   fv.error.empty: "this e-invoice has no document inside."
   fv.error.detached: "this holds only the signature, without the invoice. You need the full .xml.p7m file."
-  fv.error.p7m: "this looks like a signed .p7m file, but it cannot be opened. It may be damaged."
+  fv.error.p7m: "this looks like a signed .p7m file, but it cannot be opened. It may be damaged or built in a way this page does not support."
   fv.error.generic: "this file could not be read."
   fv.error.pdf: "The PDF for {name} could not be made."
   fv.error.attachment: "The attachment {name} cannot be extracted: its data in the XML file is damaged."
@@ -74,7 +74,7 @@ This page puts it back in order: supplier and customer at the top, then the docu
 
 The file name nearly always follows one pattern: the country code and tax ID of whoever sent it, an underscore and a running number, like IT01234567890_00001.xml. If it ends in .xml.p7m, the file was digitally signed: the signature wraps the XML in an envelope that has to be opened before the invoice can be read. Invoices to the Italian public administration must be signed; between businesses the signature is optional, but plenty of software adds one anyway.
 
-Here the envelope opens by itself, and the invoice row tells you who signed, when, and whether the signature matches the content. Some invoices carry their signature inside the XML instead (this is called XAdES). They read normally, but the page does not check that kind of signature.
+Here the envelope opens by itself, and the invoice row tells you whether the signature matches the content. It also shows the name on the signing certificate and the date the signer declared, as written in the file: the page does not check who really signed, since anyone can make a certificate with any name in it. Some invoices carry their signature inside the XML instead (this is called XAdES). They read normally, but the page does not check that kind of signature.
 
 ## The courtesy copy
 

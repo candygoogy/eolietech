@@ -26,6 +26,20 @@ describe("sniffContent", () => {
     expect(sniffContent(bytes("PK", [3, 4, 20, 0]))).toMatchObject({ kind: "zip", ext: "zip" });
   });
 
+  it("lets a PDF be opened in a tab only when the bytes start with the PDF header", () => {
+    expect(sniffContent(fixture("sample.pdf")).openable).toBe(true);
+    expect(sniffContent(bytes([0xef, 0xbb, 0xbf], "\r\n %PDF-1.4\n")).openable).toBe(true);
+    // Junk before the header: readers may still accept it, so it keeps its .pdf name, but there is no Open link.
+    const late = sniffContent(bytes("garbage first\n%PDF-1.7\n"));
+    expect(late).toMatchObject({ kind: "pdf", ext: "pdf" });
+    expect(late.openable).toBeUndefined();
+    // Markup that only mentions a PDF header is not a PDF at all.
+    const html = sniffContent(bytes("<html><body>%PDF-1.7 <script>alert(1)</script></body></html>"));
+    expect(html.kind).toBe("xml");
+    expect(html.openable).toBeUndefined();
+    expect(downloadName("contratto", html)).toBe("contratto.xml");
+  });
+
   it("calls anything else other, with no extension to add", () => {
     expect(sniffContent(bytes("Hello, this is plain text"))).toEqual({ kind: "other", mime: "application/octet-stream" });
     expect(sniffContent(new Uint8Array())).toMatchObject({ kind: "other" });

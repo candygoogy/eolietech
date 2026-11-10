@@ -5,7 +5,7 @@ h1: "Visualizzare fatture elettroniche"
 intro: "Il file .xml di una fattura elettronica non si legge a occhio. Trascinalo qui, anche se è firmato .p7m, e vedrai fornitore, righe, IVA e pagamento come su una fattura di carta. Se ti serve, scarica un PDF. Il file resta sul tuo dispositivo."
 howTo:
   - "Scegli le fatture o trascinale nel riquadro qui sopra. Vanno bene i file .xml e .xml.p7m, fino a 50 alla volta."
-  - "Per ogni fattura compare una riga con fornitore, numero, data e totale. Se il file è firmato, sotto trovi chi l'ha firmato e se la firma corrisponde."
+  - "Per ogni fattura compare una riga con fornitore, numero, data e totale. Se il file è firmato, sotto trovi il nome scritto nel certificato di firma e la data dichiarata da chi ha firmato, così come li riporta il file, e se la firma corrisponde."
   - "Premi Visualizza per leggerla per intero: le due parti, le righe, il riepilogo IVA, il pagamento e gli eventuali allegati."
   - "Premi Scarica PDF per salvarne una copia leggibile, oppure Scarica tutti i PDF per averle in un unico .zip."
 faq:
@@ -42,11 +42,11 @@ ui:
   fv.attachmentFallback: "allegato-{n}"
   fv.status.reading: "Lettura…"
   fv.status.zipping: "Preparo i PDF…"
-  fv.sig.byOn: "Firmato da {name} il {date}."
-  fv.sig.by: "Firmato da {name}."
+  fv.sig.byOn: "Firmato con un certificato intestato a {name} (identità non verificata qui). Data dichiarata da chi ha firmato: {date}."
+  fv.sig.by: "Firmato con un certificato intestato a {name} (identità non verificata qui)."
   fv.sig.signed: "File firmato (.p7m)."
-  fv.sig.more.one: "{name} e un'altra persona"
-  fv.sig.more.other: "{name} e altre {count} persone"
+  fv.sig.more.one: "{name}, più un'altra firma"
+  fv.sig.more.other: "{name}, più altre {count} firme"
   fv.sig.valid: "La firma corrisponde: il file non è cambiato dopo la firma."
   fv.sig.invalid: "La firma non corrisponde: il file potrebbe essere stato modificato dopo la firma."
   fv.sig.unsupported: "Questa firma non si può controllare qui."
@@ -56,7 +56,7 @@ ui:
   fv.error.not-invoice: "è un file XML, ma non una fattura elettronica."
   fv.error.empty: "è una fattura elettronica senza nessun documento dentro."
   fv.error.detached: "contiene solo la firma, senza la fattura. Serve il file .xml.p7m completo."
-  fv.error.p7m: "sembra un file firmato .p7m, ma non si riesce ad aprire. Potrebbe essere danneggiato."
+  fv.error.p7m: "sembra un file firmato .p7m, ma non si riesce ad aprire. Potrebbe essere danneggiato o costruito in un modo che questa pagina non supporta."
   fv.error.generic: "non è stato possibile leggere questo file."
   fv.error.pdf: "Non è stato possibile creare il PDF di {name}."
   fv.error.attachment: "L'allegato {name} non si può estrarre: nel file XML i suoi dati sono danneggiati."
@@ -78,7 +78,7 @@ Questa pagina rimette le cose in ordine: fornitore e cliente in alto, poi i dati
 
 Il nome del file segue quasi sempre lo stesso schema: il codice del paese e l'identificativo fiscale di chi trasmette, un trattino basso e un progressivo, come IT01234567890_00001.xml. Se finisce in .xml.p7m, il file è stato firmato digitalmente: la firma chiude l'XML in una busta, e per leggerlo bisogna prima aprirla. Le fatture verso la pubblica amministrazione devono essere firmate; tra privati la firma è facoltativa, ma molti programmi la aggiungono comunque.
 
-Qui la busta si apre da sola, e sotto la fattura trovi una riga con chi ha firmato, quando e se la firma corrisponde al contenuto. Alcune fatture invece portano la firma dentro l'XML stesso (si chiama XAdES): si leggono normalmente, ma quella firma la pagina non la verifica.
+Qui la busta si apre da sola, e sotto la fattura trovi una riga che ti dice se la firma corrisponde al contenuto. Riporta anche il nome scritto nel certificato di firma e la data dichiarata da chi ha firmato, così come sono nel file: la pagina non verifica chi ha firmato davvero, perché chiunque può creare un certificato con dentro un nome qualsiasi. Alcune fatture invece portano la firma dentro l'XML stesso (si chiama XAdES): si leggono normalmente, ma quella firma la pagina non la verifica.
 
 ## La copia di cortesia
 

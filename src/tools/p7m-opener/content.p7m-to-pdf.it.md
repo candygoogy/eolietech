@@ -5,7 +5,7 @@ h1: "Da P7M a PDF"
 intro: "Ti è arrivato un contratto.pdf.p7m che non si apre? Il PDF è lì dentro, intatto. Trascina qui il file per salvarlo come un normale PDF, e intanto guarda chi l'ha firmato. Non viene caricato niente."
 howTo:
   - "Scegli i file .pdf.p7m o trascinali nel riquadro qui sopra. Puoi aggiungerne fino a 20 alla volta, anche quelli con doppia firma (.pdf.p7m.p7m)."
-  - "Controlla chi ha firmato ciascun file e se la riga sotto il firmatario è verde: vuol dire che il PDF non è cambiato dalla firma."
+  - "Leggi il nome scritto in ogni certificato di firma e guarda se la riga sotto è verde: vuol dire che il PDF non è cambiato dalla firma. Il nome è riportato come lo dichiara il file, e l'identità qui non viene verificata."
   - "Premi Scarica il PDF per salvarlo, oppure Apri per guardarlo prima in una nuova scheda. Se hai più file, Scarica tutto ti dà un unico .zip."
 faq:
   - q: "Come si trasforma un file .p7m in PDF?"
@@ -37,4 +37,4 @@ Se firmi tu dei documenti e chi li riceve fa fatica con i .p7m, quasi tutti i pr
 
 ## Cosa vuol dire la riga verde
 
-Per ogni firmatario c'è una riga con l'esito del controllo. Verde vuol dire che l'impronta del PDF è uguale a quella firmata e che la firma è stata fatta con la chiave del certificato contenuto nel file. Non conferma che il certificato fosse qualificato o non revocato: per questo serve un controllo online, e lo fanno i [programmi di verifica indicati da AgID](https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica). Per gli altri tipi di .p7m, come le fatture elettroniche, [Aprire file P7M](/it/aprire-file-p7m/) spiega cosa puoi trovarci dentro.
+Per ogni firmatario c'è una riga con l'esito del controllo. Verde vuol dire che l'impronta del PDF è uguale a quella firmata e che la firma è stata fatta con la chiave del certificato contenuto nel file. Il nome di chi ha firmato e la data della firma sono riportati come li dichiara il file, quindi il verde non dimostra chi ha firmato. Non conferma nemmeno che il certificato fosse qualificato o non revocato: per questo serve un controllo online, e lo fanno i [programmi di verifica indicati da AgID](https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica). Per gli altri tipi di .p7m, come le fatture elettroniche, [Aprire file P7M](/it/aprire-file-p7m/) spiega cosa puoi trovarci dentro.

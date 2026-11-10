@@ -14,6 +14,8 @@ export interface Sniffed {
   mime: string;
   /** Image format label, e.g. "PNG". */
   format?: string;
+  /** PDF only: the file starts with the "%PDF-" header, so it can be offered to open in a tab. */
+  openable?: boolean;
 }
 
 const starts = (b: Uint8Array, sig: number[], at = 0) => sig.every((v, i) => b[at + i] === v);
@@ -38,15 +40,28 @@ export function sniffContent(b: Uint8Array): Sniffed {
   if (starts(b, [0x50, 0x4b, 0x03, 0x04]) || starts(b, [0x50, 0x4b, 0x05, 0x06])) {
     return { kind: "zip", ext: "zip", mime: "application/zip" };
   }
-  // PDF readers accept the header anywhere in the first 1 KB.
-  const head = b.subarray(0, 1024);
-  for (let i = 0; i + 5 <= head.length; i++) {
-    if (starts(head, ascii("%PDF-"), i)) return { kind: "pdf", ext: "pdf", mime: "application/pdf" };
-  }
+  if (startsWithPdfHeader(b)) return { kind: "pdf", ext: "pdf", mime: "application/pdf", openable: true };
   if (/^<(?:\?xml|!--|[A-Za-z_])/.test(skipProlog(decodeHead(b), false))) {
     return { kind: "xml", ext: "xml", mime: "application/xml" };
   }
+  // PDF readers accept the header anywhere in the first 1 KB. Such a file is still saved as a PDF,
+  // but it is not offered to open in a tab: only bytes that really start as a PDF are.
+  const head = b.subarray(0, 1024);
+  for (let i = 0; i + 5 <= head.length; i++) {
+    if (starts(head, PDF_HEADER, i)) return { kind: "pdf", ext: "pdf", mime: "application/pdf" };
+  }
   return { kind: "other", mime: "application/octet-stream" };
+}
+
+const PDF_HEADER = ascii("%PDF-");
+/** PDF white space (ISO 32000-1, 7.2.2): NUL, tab, line feed, form feed, carriage return, space. */
+const PDF_SPACE = new Set([0x00, 0x09, 0x0a, 0x0c, 0x0d, 0x20]);
+
+/** "%PDF-" at the very start, after at most a UTF-8 byte order mark and white space. */
+export function startsWithPdfHeader(b: Uint8Array): boolean {
+  let i = starts(b, [0xef, 0xbb, 0xbf]) ? 3 : 0;
+  while (i < 1024 && i < b.length && PDF_SPACE.has(b[i]!)) i++;
+  return starts(b, PDF_HEADER, i);
 }
 
 /** The first 64 KB as text: UTF-16 when it has a byte order mark, UTF-8 (lenient) otherwise. */

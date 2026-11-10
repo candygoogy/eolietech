@@ -5,7 +5,7 @@ h1: "Open P7M files"
 intro: "A .p7m file is a document sealed inside a digital signature, and most computers can't open it. Drop it here to get the original PDF, XML or other file back, see who signed it and when, and check that it hasn't changed since. It all happens in your browser."
 howTo:
   - "Choose your .p7m files or drop them on the box above. You can add up to 20 at a time, including .pdf.p7m, .xml.p7m and files signed twice (.p7m.p7m)."
-  - "Read who signed each one: the name, the tax code, the authority that issued the certificate and the date of the signature."
+  - "Read what each signature says: the name and tax code on the certificate, the authority that issued it and the date the signer declared. The page shows them as written in the file and does not check the identity."
   - "Look at the line under each signer. Green means the document hasn't changed since it was signed and the signature matches the certificate."
   - "Download the document inside, or open a PDF in a new tab. With more than one file, Download all gives you a .zip."
 faq:
@@ -23,7 +23,7 @@ ui:
   p7m.drop.hint: "Any .p7m file. Opened on your device, never uploaded."
   p7m.progress: "Progress"
   p7m.list: "Your files"
-  p7m.note: "This page checks the signature mathematically: the document is unchanged and the signature matches the certificate inside the file. It does not confirm that the certificate is a qualified one or that it hadn't been revoked; that takes an online check with the authority that issued it. For a check with legal value, use one of the"
+  p7m.note: "This page checks the signature mathematically: the document is unchanged and the signature matches the certificate inside the file. The signer's name and the signing date are shown as the file declares them. The page does not confirm the signer's identity, that the certificate is a qualified one or that it hadn't been revoked; that takes an online check with the authority that issued it. For a check with legal value, use one of the"
   p7m.note.link: "verifiers listed by AgID"
   p7m.note.end: " (page in Italian)."
   p7m.note.href: "https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica"
@@ -41,9 +41,13 @@ ui:
   p7m.signer.id: "ID: {id}"
   p7m.signer.organization: "Organization: {name}"
   p7m.signer.issuer: "Certificate issued by: {name}"
-  p7m.signer.signedOn: "Signed on {date}"
+  p7m.signer.asDeclared: "Name and details as written in the certificate in the file. The signer's identity is not checked here."
+  p7m.signer.signedOn: "Date declared by the signer: {date}"
   p7m.signer.validity: "Certificate valid from {from} to {until}"
-  p7m.signer.notValidAtSigning: "The certificate was not valid on the date of the signature."
+  p7m.signer.expired: "The certificate expired on {date}. That is normal for a file signed before then."
+  p7m.signer.expiredAtSigning: "The certificate expired on {date}, before the signing date the signer declared."
+  p7m.signer.notYetValid: "The certificate is not valid yet: its validity starts on {date}."
+  p7m.signer.notYetValidAtSigning: "On the signing date the signer declared, the certificate was not valid yet."
   p7m.signer.timestamp: "Timestamp attached (not checked here)"
   p7m.check.valid: "Signature intact: the document hasn't changed since it was signed, and the signature matches the certificate."
   p7m.check.changed: "Doesn't match: the document was changed after it was signed."
@@ -58,7 +62,7 @@ ui:
   p7m.status.reading: "Opening ({size})…"
   p7m.error.not-p7m: "this isn't a signed .p7m file. If it is already a PDF or an XML file, you can open it directly."
   p7m.error.detached: "it holds only the signature, not the document. The signed document is a separate file that should have come with it."
-  p7m.error.malformed: "this file is damaged or incomplete, so the document inside can't be read. Try downloading it again."
+  p7m.error.malformed: "this file is damaged, incomplete or built in a way this page does not support, so the document inside can't be read. Try downloading it again."
   p7m.error.too-deep: "it has more than five envelopes one inside the other, which this page doesn't open."
   p7m.downloadPdf: "Download PDF"
   p7m.downloadPdfNamed: "Download PDF {name}"
@@ -101,6 +105,8 @@ When a second person signs a file that is already signed, many apps wrap the who
 ## What the check covers, and what it doesn't
 
 For every signature, the page checks two things. First, that the document's fingerprint matches the one the signer sealed, which proves that not a single byte has changed since. Second, that the signature was made with the private key belonging to the certificate in the file. If both hold, the line turns green.
+
+The name, the tax code and the organization are read from the certificate inside the file, and the signing date comes from the signer's own clock. The page shows them as declared: anyone can make a certificate with any name in it, so a green line does not prove who signed. The page also compares the certificate's dates with today and with the declared signing date, and tells you when the certificate has expired or was not valid yet. That is information for you, and it does not change the result of the check.
 
 What it can't see from inside your browser: whether the certificate comes from a qualified provider on the European trusted lists, and whether it was revoked before the signature, for example because the smart card was lost. Both need an online check with the authority that issued it. A timestamp attached to the file is noted but not checked either. For a verification with legal value, use one of the [verifiers listed by AgID](https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica) (page in Italian).
 

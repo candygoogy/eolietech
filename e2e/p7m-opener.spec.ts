@@ -147,7 +147,7 @@ test("/it/aprire-file-p7m/ works in Italian at 360px without sideways scrolling"
   const rows = page.locator(".tool-item");
   await expect(rows.nth(0)).toContainText("Codice fiscale: RSSMRA80A01H501U");
   await expect(rows.nth(0)).toContainText(/Certificato valido (dal |dall')\d+°? \w+ \d{4} (al |all')\d+°? \w+ \d{4}/);
-  await expect(rows.nth(0)).toContainText(/Firmato (il |l')\d/);
+  await expect(rows.nth(0)).toContainText(/Data dichiarata da chi ha firmato: \d/);
   await expect(rows.nth(0).locator(".p7m-check")).toHaveText(/^Firma integra/);
   await expect(rows.nth(1).getByRole("link", { name: "visualizzatore di fatture elettroniche" })).toHaveAttribute(
     "href",

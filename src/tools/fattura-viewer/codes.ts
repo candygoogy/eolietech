@@ -157,6 +157,28 @@ export const ESIGIBILITA_IVA: Table = {
   S: ["Scissione dei pagamenti", "Split payment"],
 };
 
+export const SOCIO_UNICO: Table = {
+  SU: ["Socio unico", "Single shareholder"],
+  SM: ["Più soci", "Several shareholders"],
+};
+
+export const STATO_LIQUIDAZIONE: Table = {
+  LS: ["In liquidazione", "In liquidation"],
+  LN: ["Non in liquidazione", "Not in liquidation"],
+};
+
+export const TIPO_CESSIONE_PRESTAZIONE: Table = {
+  SC: ["Sconto", "Discount"],
+  PR: ["Premio", "Bonus"],
+  AB: ["Abbuono", "Allowance"],
+  AC: ["Spesa accessoria", "Additional charge"],
+};
+
+export const SOGGETTO_EMITTENTE: Table = {
+  CC: ["Cessionario o committente", "The customer"],
+  TZ: ["Terzo", "A third party"],
+};
+
 /** The label for a code, or undefined when the code is not in the table. */
 export function codeLabel(table: Table, code: string | undefined, locale: Locale): string | undefined {
   if (!code) return undefined;

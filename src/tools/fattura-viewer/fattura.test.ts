@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import { openP7m } from "../signed-shared";
 import { MODALITA_PAGAMENTO, NATURA, REGIME_FISCALE, TIPO_DOCUMENTO, codeLabel, describeCode } from "./codes";
 import { attachmentFileName, decodeBase64, pdfFileName } from "./files";
-import { formatDate, formatMoney, formatPercent, formatQuantity } from "./format";
-import { FatturaError, decodeXml, parseFattura } from "./parse";
+import { formatAdjustment, formatDate, formatMoney, formatPercent, formatQuantity } from "./format";
+import { FatturaError, applyAdjustments, decodeXml, parseFattura } from "./parse";
 import { buildInvoicePdf, toWinAnsi } from "./pdf";
 import { presentInvoice } from "./present";
 
@@ -222,7 +222,7 @@ describe("presentInvoice", () => {
     expect(it.parties[0]).toMatchObject({ name: "Studio Tecnico Esempio S.r.l." });
     expect(it.parties[0]!.lines).toContain("Regime fiscale: Ordinario (RF01)");
     const lines = it.sections.find((s) => s.id === "lines");
-    expect(lines?.kind === "table" && lines.table.rows[1]).toEqual(["2", "Sopralluogo in cantiere", "3 ore", "80,00\u00a0€", "-10%", "22%", "216,00\u00a0€"]);
+    expect(lines?.kind === "table" && lines.table.rows[1]).toEqual(["2", "Sopralluogo in cantiere\nSoggetta a ritenuta", "3 ore", "80,00\u00a0€", "-10%", "22%", "216,00\u00a0€"]);
     const extras = it.sections.find((s) => s.id === "extras");
     expect(extras?.kind === "fields" && extras.groups[0]!.rows).toEqual([
       ["Ritenuta", "Ritenuta persone fisiche (RT01) · 20% · 290,00\u00a0€ · causale A"],
@@ -232,6 +232,127 @@ describe("presentInvoice", () => {
     const en = presentInvoice(file, file.invoices[0]!, "en");
     expect(en.title).toBe("Invoice no. 2026/118");
     expect(en.sections.map((s) => s.id)).toEqual(it.sections.map((s) => s.id));
+    expect(it.notes).toEqual([]);
+  });
+
+  /** An FPR12 invoice that uses the less common blocks; `extra` is spliced into DatiGeneraliDocumento. */
+  const fullXml = (extra = "") => `<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" SistemaEmittente="Gestionale Prova 3.1" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+<FatturaElettronicaHeader>
+<DatiTrasmissione><IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>11122233344</IdCodice></IdTrasmittente><ProgressivoInvio>9</ProgressivoInvio><FormatoTrasmissione>FPR12</FormatoTrasmissione><CodiceDestinatario>0000000</CodiceDestinatario><ContattiTrasmittente><Email>invio@example.com</Email></ContattiTrasmittente></DatiTrasmissione>
+<CedentePrestatore><DatiAnagrafici><IdFiscaleIVA><IdPaese>DE</IdPaese><IdCodice>123456789</IdCodice></IdFiscaleIVA><Anagrafica><Denominazione>Beispiel GmbH</Denominazione><CodEORI>DE1234567</CodEORI></Anagrafica><AlboProfessionale>Ingegneri</AlboProfessionale><ProvinciaAlbo>ME</ProvinciaAlbo><NumeroIscrizioneAlbo>A123</NumeroIscrizioneAlbo><RegimeFiscale>RF01</RegimeFiscale></DatiAnagrafici>
+<Sede><Indirizzo>Hauptstrasse</Indirizzo><CAP>10115</CAP><Comune>Berlin</Comune><Nazione>DE</Nazione></Sede>
+<StabileOrganizzazione><Indirizzo>Via Roma</Indirizzo><NumeroCivico>5</NumeroCivico><CAP>98055</CAP><Comune>Lipari</Comune><Provincia>ME</Provincia><Nazione>IT</Nazione></StabileOrganizzazione>
+<IscrizioneREA><Ufficio>ME</Ufficio><NumeroREA>999</NumeroREA><CapitaleSociale>10000.00</CapitaleSociale><SocioUnico>SU</SocioUnico><StatoLiquidazione>LN</StatoLiquidazione></IscrizioneREA>
+<Contatti><Fax>090 111</Fax></Contatti><RiferimentoAmministrazione>AMM-7</RiferimentoAmministrazione></CedentePrestatore>
+<RappresentanteFiscale><DatiAnagrafici><IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>55566677788</IdCodice></IdFiscaleIVA><Anagrafica><Denominazione>Rappresentanze S.r.l.</Denominazione></Anagrafica></DatiAnagrafici></RappresentanteFiscale>
+<CessionarioCommittente><DatiAnagrafici><CodiceFiscale>PRVLCU90A41F205X</CodiceFiscale><Anagrafica><Nome>Lucia</Nome><Cognome>Prova</Cognome></Anagrafica></DatiAnagrafici></CessionarioCommittente>
+<TerzoIntermediarioOSoggettoEmittente><DatiAnagrafici><IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>99988877766</IdCodice></IdFiscaleIVA><Anagrafica><Denominazione>Intermediario S.p.A.</Denominazione></Anagrafica></DatiAnagrafici></TerzoIntermediarioOSoggettoEmittente>
+<SoggettoEmittente>TZ</SoggettoEmittente>
+</FatturaElettronicaHeader>
+<FatturaElettronicaBody>
+<DatiGenerali><DatiGeneraliDocumento><TipoDocumento>TD24</TipoDocumento><Divisa>EUR</Divisa><Data>2026-10-01</Data><Numero>7</Numero><Art73>SI</Art73>${extra}</DatiGeneraliDocumento>
+<DatiDDT><NumeroDDT>D-1</NumeroDDT><DataDDT>2026-09-30</DataDDT><RiferimentoNumeroLinea>1</RiferimentoNumeroLinea></DatiDDT>
+<DatiSAL><RiferimentoFase>3</RiferimentoFase></DatiSAL>
+<DatiTrasporto><DatiAnagraficiVettore><IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>12312312312</IdCodice></IdFiscaleIVA><Anagrafica><Denominazione>Trasporti Eolie</Denominazione></Anagrafica><NumeroLicenzaGuida>PA1234567</NumeroLicenzaGuida></DatiAnagraficiVettore>
+<MezzoTrasporto>Furgone</MezzoTrasporto><CausaleTrasporto>Vendita</CausaleTrasporto><NumeroColli>4</NumeroColli><Descrizione>Scatole</Descrizione><UnitaMisuraPeso>kg</UnitaMisuraPeso><PesoLordo>120.50</PesoLordo><PesoNetto>110.00</PesoNetto>
+<DataOraRitiro>2026-09-30T08:15:00</DataOraRitiro><TipoResa>DAP</TipoResa><IndirizzoResa><Indirizzo>Via Mare</Indirizzo><CAP>98050</CAP><Comune>Lipari</Comune><Provincia>ME</Provincia><Nazione>IT</Nazione></IndirizzoResa></DatiTrasporto>
+<FatturaPrincipale><NumeroFatturaPrincipale>5</NumeroFatturaPrincipale><DataFatturaPrincipale>2026-09-01</DataFatturaPrincipale></FatturaPrincipale>
+</DatiGenerali>
+<DatiBeniServizi><DettaglioLinee><NumeroLinea>1</NumeroLinea><TipoCessionePrestazione>AC</TipoCessionePrestazione><Descrizione>Imballo</Descrizione><PrezzoUnitario>100.00</PrezzoUnitario><PrezzoTotale>100.00</PrezzoTotale><AliquotaIVA>22.00</AliquotaIVA>
+<AltriDatiGestionali><TipoDato>COMMESSA</TipoDato><RiferimentoTesto>C-55</RiferimentoTesto></AltriDatiGestionali></DettaglioLinee>
+<DatiRiepilogo><AliquotaIVA>22.00</AliquotaIVA><ImponibileImporto>100.00</ImponibileImporto><Imposta>22.00</Imposta></DatiRiepilogo></DatiBeniServizi>
+<DatiVeicoli><Data>2020-05-01</Data><TotalePercorso>15000</TotalePercorso></DatiVeicoli>
+<DatiPagamento><CondizioniPagamento>TP02</CondizioniPagamento><DettaglioPagamento><ModalitaPagamento>MP05</ModalitaPagamento><DataRiferimentoTerminiPagamento>2026-10-01</DataRiferimentoTerminiPagamento><GiorniTerminiPagamento>30</GiorniTerminiPagamento><ImportoPagamento>122.00</ImportoPagamento>
+<ABI>01234</ABI><CAB>56789</CAB><ScontoPagamentoAnticipato>2.00</ScontoPagamentoAnticipato><DataLimitePagamentoAnticipato>2026-10-10</DataLimitePagamentoAnticipato><PenalitaPagamentiRitardati>5.00</PenalitaPagamentiRitardati><DataDecorrenzaPenale>2026-11-15</DataDecorrenzaPenale></DettaglioPagamento></DatiPagamento>
+</FatturaElettronicaBody>
+</p:FatturaElettronica>`;
+
+  it("shows transport, representatives, intermediary, SAL, vehicles, payment terms and line data, on the page and in the PDF", async () => {
+    const file = parseFattura(encode(fullXml()));
+    const inv = file.invoices[0]!;
+    expect(inv.unshown).toBe(0);
+    const p = presentInvoice(file, inv, "it");
+    const rows = (id: string) => p.sections.filter((s) => s.id === id).flatMap((s) => (s.kind === "fields" ? s.groups.flatMap((g) => g.rows) : []));
+    expect(p.parties[0]!.lines).toEqual(
+      expect.arrayContaining([
+        "EORI DE1234567",
+        "Stabile organizzazione: Via Roma 5, 98055 Lipari (ME)",
+        "Albo professionale: Ingegneri (ME) n. A123",
+        "Capitale sociale 10.000,00 €",
+        "Socio unico (SU)",
+        "Fax 090 111",
+        "Riferimento amministrazione: AMM-7",
+      ]),
+    );
+    expect(rows("document")).toEqual(
+      expect.arrayContaining([
+        ["Emessa ai sensi dell'art. 73 DPR 633/72", "Sì"],
+        ["Documento di trasporto", "D-1 del 30/09/2026 · righe 1"],
+        ["Stato avanzamento lavori, fase", "3"],
+        ["Fattura principale", "5 del 01/09/2026"],
+        ["Veicolo, percorso totale", "15000"],
+      ]),
+    );
+    expect(rows("transport")).toEqual(
+      expect.arrayContaining([
+        ["Vettore", "Trasporti Eolie · Partita IVA IT12312312312"],
+        ["Patente di guida", "PA1234567"],
+        ["Peso lordo", "120,5 kg"],
+        ["Ritiro", "30/09/2026 08:15"],
+        ["Luogo di resa", "Via Mare, 98050 Lipari (ME)"],
+      ]),
+    );
+    expect(rows("others")).toEqual([
+      ["Rappresentante fiscale del fornitore", "Rappresentanze S.r.l. · Partita IVA IT55566677788"],
+      ["Terzo intermediario o soggetto emittente", "Intermediario S.p.A. · Partita IVA IT99988877766"],
+      ["Fattura emessa da", "Terzo (TZ)"],
+    ]);
+    expect(rows("payment")).toEqual(
+      expect.arrayContaining([
+        ["Giorni per il pagamento", "30"],
+        ["Sconto per pagamento anticipato", "2,00 €"],
+        ["Pagamento anticipato entro", "10/10/2026"],
+        ["Penale per ritardato pagamento", "5,00 €"],
+        ["ABI", "01234"],
+      ]),
+    );
+    expect(rows("transmission")).toEqual(expect.arrayContaining([["Trasmittente", "IT11122233344"], ["Programma che ha creato il file", "Gestionale Prova 3.1"]]));
+    const lines = p.sections.find((s) => s.id === "lines");
+    expect(lines?.kind === "table" && lines.table.rows[0]![1]).toBe("Imballo\nTipo: Spesa accessoria (AC)\nCOMMESSA: C-55");
+    expect(p.notes).toEqual([]);
+    await expect(buildInvoicePdf(presentInvoice(file, inv, "en"), { locale: "en", sourceName: "x.xml" })).resolves.toBeInstanceOf(Uint8Array);
+  });
+
+  it("counts the fields it does not show and says so on the page and in the PDF", async () => {
+    const file = parseFattura(encode(fullXml("<CampoNuovo>A</CampoNuovo><AltroBlocco><Uno>1</Uno><Due>2</Due><Vuoto> </Vuoto></AltroBlocco>")));
+    expect(file.invoices[0]!.unshown).toBe(3);
+    expect(presentInvoice(file, file.invoices[0]!, "en").notes).toEqual(["3 fields in this file are not shown here. They are in the XML file."]);
+    const one = parseFattura(encode(fullXml("<CampoNuovo>A</CampoNuovo>")));
+    const it = presentInvoice(one, one.invoices[0]!, "it");
+    expect(it.notes).toEqual(["1 campo di questo file non è mostrato qui. Lo trovi nel file XML."]);
+    // The PDF draws the same notes (pdf.ts writes Presented.notes under the sections).
+    const doc = await PDFDocument.load(await buildInvoicePdf(it, { locale: "it", sourceName: "x.xml" }));
+    expect(doc.getPageCount()).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("discounts and surcharges", () => {
+  it("shows Importo as given, with SC as minus and MG as plus", () => {
+    expect(formatAdjustment({ type: "SC", amount: "5.00" }, "EUR", "it")).toBe("-5,00 €");
+    expect(formatAdjustment({ type: "MG", amount: "5.00" }, "EUR", "it")).toBe("+5,00 €");
+    expect(formatAdjustment({ type: "SC", percent: "10.00", amount: "12.00" }, "EUR", "en")).toBe("-€12.00 (-10%)");
+    expect(formatAdjustment({ type: "XX", percent: "3.00" }, "EUR", "en")).toBe("3%");
+  });
+
+  it("applies the document's discounts to a total added up here: SC reduces, MG increases, Importo before Percentuale", () => {
+    expect(applyAdjustments("100.00", [{ type: "SC", amount: "10.00" }])).toBe("90.00");
+    expect(applyAdjustments("100.00", [{ type: "MG", amount: "2.50" }])).toBe("102.50");
+    expect(applyAdjustments("100.00", [{ type: "SC", percent: "10.00", amount: "4.00" }])).toBe("96.00");
+    expect(applyAdjustments("200.00", [{ type: "SC", percent: "10.00" }, { type: "MG", percent: "5.00" }])).toBe("189.00");
+    expect(applyAdjustments("100.00", [{ amount: "10.00" }])).toBe("100.00");
+    const xml = invoiceXml().replace("<ImportoTotaleDocumento>122.00</ImportoTotaleDocumento>", "<ScontoMaggiorazione><Tipo>SC</Tipo><Importo>22.00</Importo></ScontoMaggiorazione>");
+    expect(parseFattura(encode(xml)).invoices[0]).toMatchObject({ total: "100.00", totalComputed: true });
   });
 });
 

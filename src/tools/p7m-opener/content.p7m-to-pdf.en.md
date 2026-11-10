@@ -5,7 +5,7 @@ h1: "P7M to PDF"
 intro: "Got a contract.pdf.p7m that nothing will open? The PDF is inside, untouched. Drop the file here to save it as a normal PDF, and see who signed it while you're at it. Nothing is uploaded."
 howTo:
   - "Choose your .pdf.p7m files or drop them on the box above. You can add up to 20 at a time, and files signed twice (.pdf.p7m.p7m) work too."
-  - "Check who signed each one and whether the line under the signer is green: that means the PDF hasn't changed since it was signed."
+  - "Read the name on each signing certificate and see whether the line under it is green: that means the PDF hasn't changed since it was signed. The name is shown as the file declares it, and the identity is not checked here."
   - "Press Download PDF to save it, or Open to look at it in a new tab first. With more than one file, Download all gives you a .zip."
 faq:
   - q: "Is the PDF converted or rebuilt?"
@@ -35,4 +35,4 @@ If you sign documents yourself and the recipients struggle with .p7m files, most
 
 ## What the green line means
 
-Each signer gets a line with the result of the check. Green means the PDF's fingerprint matches the one that was signed and the signature was made with the key of the certificate in the file. It does not confirm that the certificate was qualified or not revoked: that needs an online check, and the [verifiers listed by AgID](https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica) (page in Italian) do it. For other kinds of .p7m, such as e-invoices, [Open P7M files](/open-p7m-file/) explains what you'll find inside.
+Each signer gets a line with the result of the check. Green means the PDF's fingerprint matches the one that was signed and the signature was made with the key of the certificate in the file. The signer's name and the signing date are shown as the file declares them, so green does not prove who signed. It also does not confirm that the certificate was qualified or not revoked: that needs an online check, and the [verifiers listed by AgID](https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica) (page in Italian) do it. For other kinds of .p7m, such as e-invoices, [Open P7M files](/open-p7m-file/) explains what you'll find inside.

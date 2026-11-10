@@ -32,7 +32,7 @@ interface Item {
   state: "reading" | "ready" | "error";
   error?: P7mErrorCode;
   opened?: Opened;
-  /** Object URL behind the Open link (PDFs only). */
+  /** Object URL behind the Open link (only for content that starts with the PDF header). */
   openUrl?: string;
   li: HTMLLIElement;
 }
@@ -176,22 +176,33 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     const name = signerName(s);
     const lines: HTMLLIElement[] = [];
     const line = (text: string) => lines.push(h("li", { text }));
+    const hasCert = valid(s.notBefore) && valid(s.notAfter);
+    // The name, the tax code and the rest are whatever the certificate in the file says; the date is the
+    // signer's own clock. Say so next to them: the check below is about the mathematics only.
+    if (name || hasCert) line(t("p7m.signer.asDeclared"));
     const id = signerId(s.serialNumber);
     if (id) line("taxCode" in id ? t("p7m.signer.taxCode", { code: id.taxCode }) : t("p7m.signer.id", { id: id.id }));
     if (s.organization) line(t("p7m.signer.organization", { name: s.organization }));
     if (s.issuer) line(t("p7m.signer.issuer", { name: s.issuer }));
     if (s.signingTime && valid(s.signingTime)) {
-      line(t("p7m.signer.signedOn", { date: withPreposition(ctx.locale, "il", dateTime.format(s.signingTime)) }));
+      line(t("p7m.signer.signedOn", { date: dateTime.format(s.signingTime) }));
     }
-    if (valid(s.notBefore) && valid(s.notAfter)) {
+    if (hasCert) {
       line(
         t("p7m.signer.validity", {
           from: withPreposition(ctx.locale, "dal", dateOnly.format(s.notBefore)),
           until: withPreposition(ctx.locale, "al", dateOnly.format(s.notAfter)),
         }),
       );
+      // Certificate dates against the declared signing date and against today: information for the
+      // reader, never part of the check result.
+      const expiry = { date: withPreposition(ctx.locale, "il", dateOnly.format(s.notAfter)) };
+      const start = { date: withPreposition(ctx.locale, "dal", dateOnly.format(s.notBefore)) };
+      if (s.certAtSigning === "expired") line(t("p7m.signer.expiredAtSigning", expiry));
+      else if (s.certNow === "expired") line(t("p7m.signer.expired", expiry));
+      if (s.certAtSigning === "not-yet-valid") line(t("p7m.signer.notYetValidAtSigning"));
+      if (s.certNow === "not-yet-valid") line(t("p7m.signer.notYetValid", start));
     }
-    if (s.certValidAtSigning === false) line(t("p7m.signer.notValidAtSigning"));
     if (s.hasTimestamp) line(t("p7m.signer.timestamp"));
     return h(
       "div",
@@ -254,7 +265,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           onClick: () => downloadBlob(opened.blob, opened.name),
         }),
       );
-      if (isPdf) {
+      // Open in a tab only what really starts as a PDF; anything else is a download.
+      if (opened.sniff.openable) {
         item.openUrl ??= URL.createObjectURL(opened.blob);
         row.append(
           h("a", {

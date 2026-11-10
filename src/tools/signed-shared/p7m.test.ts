@@ -178,6 +178,67 @@ describe("openP7m", () => {
     }
   });
 
+  it("compares the certificate's dates with today, without touching the result of the check", async () => {
+    const bytes = fixture("rsa-sha256.xml.p7m");
+    const day = 86_400_000;
+    const first = (await openP7m(bytes)).layers[0][0];
+    const at = async (now: Date) => (await openP7m(bytes, now)).layers[0][0];
+    expect(await at(new Date(first.signingTime!.getTime() + day))).toMatchObject({ certNow: "valid", certAtSigning: "valid", check: "valid" });
+    expect(await at(new Date(first.notAfter.getTime() + day))).toMatchObject({ certNow: "expired", certAtSigning: "valid", check: "valid" });
+    expect(await at(new Date(first.notBefore.getTime() - day))).toMatchObject({ certNow: "not-yet-valid", check: "valid" });
+    // No certificate in the file: nothing to compare.
+    const bare = (await openP7m(fixture("rsa-nocerts.xml.p7m"))).layers[0][0];
+    expect(bare.certNow).toBeUndefined();
+    expect(bare.certAtSigning).toBeUndefined();
+  });
+
+  it("compares the certificate's dates with the signing time the signer declared", async () => {
+    // signingTime attribute: its OID, then SET { UTCTime "YYMMDDhhmmssZ" }. Rewriting the year breaks the
+    // signature (the attribute is signed), which is the point: the date is only what the file says.
+    const oid = [0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x05, 0x31, 0x0f, 0x17, 0x0d];
+    const declared = async (yy: string) => {
+      const bytes = fixture("rsa-sha256.xml.p7m");
+      const at = bytes.findIndex((_, i) => oid.every((v, k) => bytes[i + k] === v));
+      expect(at).toBeGreaterThan(0);
+      bytes.set(text(yy), at + oid.length);
+      return (await openP7m(bytes)).layers[0][0];
+    };
+    expect(await declared("49")).toMatchObject({ certAtSigning: "expired", certValidAtSigning: false, check: "invalid" });
+    expect(await declared("00")).toMatchObject({ certAtSigning: "not-yet-valid", certValidAtSigning: false });
+  });
+
+  it("turns away a file stuffed with empty BER chunks at once, however the string is framed", async () => {
+    // The audit's repro: 16 MiB of empty OCTET STRING chunks (04 00) as the eContent, 8 million of them.
+    const fill = 16 * 1024 * 1024;
+    const open = [0x30, 0x80, ...OID_SIGNED_DATA, 0xa0, 0x80, 0x30, 0x80, 0x02, 0x01, 0x01, 0x31, 0x00, 0x30, 0x80, ...OID_DATA, 0xa0, 0x80];
+    const close = [0, 0, 0, 0, 0x31, 0x00, 0, 0, 0, 0, 0, 0]; // [0], encapContentInfo, signerInfos, SignedData, [0], ContentInfo
+    const hostile = (stringHead: number[], stringTail: number[]) => {
+      const head = [...open, ...stringHead];
+      const file = new Uint8Array(head.length + fill + stringTail.length + close.length);
+      file.set(head);
+      for (let i = head.length; i < head.length + fill; i += 2) file[i] = 0x04;
+      file.set([...stringTail, ...close], head.length + fill);
+      return file;
+    };
+    const files = [
+      hostile([0x24, 0x80], [0, 0]), // indefinite length: found while looking for the end-of-contents
+      hostile([0x24, 0x84, fill >>> 24, (fill >> 16) & 0xff, (fill >> 8) & 0xff, fill & 0xff], []), // definite: found while joining the chunks
+    ];
+    for (const file of files) {
+      expect(isP7m(file)).toBe(true);
+      const t0 = performance.now();
+      expect(await rejectCode(file)).toBe("malformed");
+      expect(performance.now() - t0).toBeLessThan(1000);
+    }
+  });
+
+  it("still joins a document split into many small chunks", async () => {
+    const chunks = Array.from({ length: 20_000 }, (_, i) => tlv(0x04, [i & 0xff]));
+    const { content } = await openP7m(unsignedEnvelope(indefinite(0x24, ...chunks)));
+    expect(content).toHaveLength(20_000);
+    expect([content[0], content[255], content[256], content[19_999]]).toEqual([0, 255, 0, 19_999 & 0xff]);
+  });
+
   it("unwraps up to five envelopes and refuses a sixth", async () => {
     let bytes = text("inner");
     for (let i = 0; i < 5; i++) bytes = wrap(bytes);

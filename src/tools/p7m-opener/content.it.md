@@ -5,7 +5,7 @@ h1: "Aprire file P7M"
 intro: "Un file .p7m è un documento chiuso dentro una firma digitale, e quasi nessun computer sa aprirlo da solo. Trascinalo qui: riavrai il PDF, l'XML o il file originale, vedrai chi l'ha firmato e quando, e saprai se è cambiato da allora. Tutto avviene nel tuo browser."
 howTo:
   - "Scegli i file .p7m o trascinali nel riquadro qui sopra. Puoi aggiungerne fino a 20 alla volta, compresi .pdf.p7m, .xml.p7m e i file con doppia firma (.p7m.p7m)."
-  - "Leggi chi ha firmato ciascun file: nome, codice fiscale, l'ente che ha rilasciato il certificato e la data della firma."
+  - "Leggi cosa dice ogni firma: nome e codice fiscale scritti nel certificato, l'ente che l'ha rilasciato e la data dichiarata da chi ha firmato. La pagina li riporta come sono scritti nel file e non verifica l'identità."
   - "Guarda la riga sotto ogni firmatario. In verde vuol dire che il documento non è cambiato dalla firma e che la firma corrisponde al certificato."
   - "Scarica il documento contenuto, oppure apri il PDF in una nuova scheda. Se hai più file, Scarica tutto ti dà un unico .zip."
 faq:
@@ -27,7 +27,7 @@ ui:
   p7m.drop.hint: "Qualsiasi file .p7m. Resta sul tuo dispositivo."
   p7m.progress: "Avanzamento"
   p7m.list: "I tuoi file"
-  p7m.note: "Questa pagina controlla la firma dal punto di vista matematico: il documento non è cambiato e la firma corrisponde al certificato contenuto nel file. Non conferma che il certificato sia qualificato né che non fosse stato revocato: per questo serve un controllo online presso l'ente che l'ha rilasciato. Per una verifica con valore legale usa uno dei"
+  p7m.note: "Questa pagina controlla la firma dal punto di vista matematico: il documento non è cambiato e la firma corrisponde al certificato contenuto nel file. Il nome di chi ha firmato e la data della firma sono riportati come li dichiara il file. La pagina non conferma l'identità di chi ha firmato, né che il certificato sia qualificato o che non fosse stato revocato: per questo serve un controllo online presso l'ente che l'ha rilasciato. Per una verifica con valore legale usa uno dei"
   p7m.note.link: "programmi di verifica indicati da AgID"
   p7m.note.end: "."
   p7m.note.href: "https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica"
@@ -45,9 +45,13 @@ ui:
   p7m.signer.id: "Identificativo: {id}"
   p7m.signer.organization: "Organizzazione: {name}"
   p7m.signer.issuer: "Certificato rilasciato da: {name}"
-  p7m.signer.signedOn: "Firmato {date}"
+  p7m.signer.asDeclared: "Nome e dati come sono scritti nel certificato contenuto nel file. Qui l'identità di chi ha firmato non viene verificata."
+  p7m.signer.signedOn: "Data dichiarata da chi ha firmato: {date}"
   p7m.signer.validity: "Certificato valido {from} {until}"
-  p7m.signer.notValidAtSigning: "Alla data della firma il certificato non era valido."
+  p7m.signer.expired: "Il certificato è scaduto {date}. È normale per un file firmato prima di quella data."
+  p7m.signer.expiredAtSigning: "Il certificato è scaduto {date}, prima della data di firma dichiarata."
+  p7m.signer.notYetValid: "Il certificato non è ancora valido: la validità parte {date}."
+  p7m.signer.notYetValidAtSigning: "Alla data di firma dichiarata il certificato non era ancora valido."
   p7m.signer.timestamp: "Con marca temporale (qui non verificata)"
   p7m.check.valid: "Firma integra: il documento non è cambiato da quando è stato firmato e la firma corrisponde al certificato."
   p7m.check.changed: "La firma non corrisponde: il documento è stato modificato dopo la firma."
@@ -62,7 +66,7 @@ ui:
   p7m.status.reading: "Apertura in corso ({size})…"
   p7m.error.not-p7m: "questo non è un file firmato .p7m. Se è già un PDF o un XML, puoi aprirlo direttamente."
   p7m.error.detached: "contiene solo la firma, non il documento. Il documento firmato è un file a parte, che dovrebbe esserti arrivato insieme a questo."
-  p7m.error.malformed: "il file è danneggiato o incompleto, quindi il documento che contiene non si può leggere. Prova a scaricarlo di nuovo."
+  p7m.error.malformed: "il file è danneggiato, incompleto o costruito in un modo che questa pagina non supporta, quindi il documento che contiene non si può leggere. Prova a scaricarlo di nuovo."
   p7m.error.too-deep: "ha più di cinque buste una dentro l'altra, e questa pagina non lo apre."
   p7m.downloadPdf: "Scarica il PDF"
   p7m.downloadPdfNamed: "Scarica il PDF {name}"
@@ -105,6 +109,8 @@ Quando una seconda persona firma un file già firmato, molti programmi chiudono 
 ## Cosa controlla la verifica, e cosa no
 
 Per ogni firma la pagina controlla due cose. La prima: che l'impronta del documento sia uguale a quella sigillata da chi ha firmato, il che dimostra che da allora non è cambiato nemmeno un byte. La seconda: che la firma sia stata fatta con la chiave privata del certificato contenuto nel file. Se valgono entrambe, la riga diventa verde.
+
+Il nome, il codice fiscale e l'organizzazione vengono letti dal certificato contenuto nel file, e la data della firma viene dall'orologio di chi ha firmato. La pagina li riporta come dichiarati: chiunque può creare un certificato con dentro un nome qualsiasi, quindi la riga verde non dimostra chi ha firmato. La pagina confronta anche le date del certificato con oggi e con la data di firma dichiarata, e ti dice se il certificato è scaduto o non era ancora valido. È un'informazione per te, e non cambia l'esito del controllo.
 
 Quello che dal browser non si può vedere: se il certificato viene da un prestatore qualificato presente negli elenchi di fiducia europei, e se era stato revocato prima della firma, per esempio perché la smart card era stata smarrita. Per entrambe le cose serve un controllo online presso l'ente che l'ha rilasciato. Anche l'eventuale marca temporale viene segnalata ma non verificata. Per una verifica con valore legale usa uno dei [programmi di verifica indicati da AgID](https://www.agid.gov.it/it/piattaforme/firma-elettronica-qualificata/software-verifica).
 

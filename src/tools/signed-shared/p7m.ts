@@ -25,6 +25,13 @@ import {
   type Asn1,
 } from "./asn1";
 
+/** Where a moment falls against a certificate's notBefore / notAfter. */
+export type CertPeriod = "valid" | "expired" | "not-yet-valid";
+
+/**
+ * One signature as the file describes it. The names come from whatever certificate is in the file
+ * and signingTime from the signer's own clock: neither is verified here, so show them as declared.
+ */
 export interface SignerInfo {
   commonName?: string;
   givenName?: string;
@@ -37,10 +44,14 @@ export interface SignerInfo {
   /** Certificate validity. An Invalid Date when the file carries no certificate for this signer (reason "no-certificate"). */
   notBefore: Date;
   notAfter: Date;
-  /** From the signingTime signed attribute, when present. */
+  /** From the signingTime signed attribute, when present: the signer's own clock, not a verified time. */
   signingTime?: Date;
   /** notBefore <= signingTime <= notAfter; undefined when there is no signingTime. */
   certValidAtSigning?: boolean;
+  /** The certificate's period against the declared signingTime; undefined without a certificate or a signingTime. */
+  certAtSigning?: CertPeriod;
+  /** The certificate's period against the time the file was opened (this device's clock); undefined without a certificate. */
+  certNow?: CertPeriod;
   /** true when an unsigned signature-time-stamp attribute is present (not verified). */
   hasTimestamp: boolean;
   /** "SHA-256", ... (the dotted OID when unknown). */
@@ -540,7 +551,13 @@ async function verify(signer: RawSigner, buf: Uint8Array, content: Uint8Array<Ar
   return ok ? { check: "valid" } : { check: "invalid", reason: "bad-signature" };
 }
 
-async function describe(signer: RawSigner, env: Envelope, buf: Uint8Array): Promise<SignerInfo> {
+/** Information only: an expired certificate does not change the result of the cryptographic check. */
+function certPeriod(cert: Cert, at: Date): CertPeriod {
+  if (at < cert.notBefore) return "not-yet-valid";
+  return at > cert.notAfter ? "expired" : "valid";
+}
+
+async function describe(signer: RawSigner, env: Envelope, buf: Uint8Array, now: Date): Promise<SignerInfo> {
   const cert = findCert(signer, env.certs);
   const st = signer.attrs.get(OID.signingTime)?.[0];
   let signingTime: Date | undefined;
@@ -568,9 +585,13 @@ async function describe(signer: RawSigner, env: Envelope, buf: Uint8Array): Prom
       if (v) info[key] = v;
     }
   }
+  if (cert && !Number.isNaN(now.getTime())) info.certNow = certPeriod(cert, now);
   if (signingTime) {
     info.signingTime = signingTime;
-    if (cert) info.certValidAtSigning = cert.notBefore <= signingTime && signingTime <= cert.notAfter;
+    if (cert) {
+      info.certAtSigning = certPeriod(cert, signingTime);
+      info.certValidAtSigning = info.certAtSigning === "valid";
+    }
   }
   return info;
 }
@@ -589,14 +610,15 @@ function envelope(bytes: Uint8Array): { buf: Uint8Array; env: Envelope } {
 /**
  * Unwraps a .p7m (DER, BER or base64 / PEM) down to the signed document, through nested envelopes,
  * and checks every signature. Throws P7mError: "not-p7m", "detached" (signature without the
- * document), "malformed" (truncated or broken) or "too-deep" (more than 5 envelopes).
+ * document), "malformed" (truncated, broken or split into more pieces than this reader accepts) or
+ * "too-deep" (more than 5 envelopes). `now` is the moment certificates are compared with (tests pass one).
  */
-export async function openP7m(bytes: Uint8Array): Promise<OpenedP7m> {
+export async function openP7m(bytes: Uint8Array, now: Date = new Date()): Promise<OpenedP7m> {
   let { buf, env } = envelope(bytes);
   const layers: SignerInfo[][] = [];
   for (;;) {
     const current = { buf, env };
-    layers.push(await Promise.all(current.env.signers.map((s) => describe(s, current.env, current.buf))));
+    layers.push(await Promise.all(current.env.signers.map((s) => describe(s, current.env, current.buf, now))));
     if (!isP7m(env.content)) break;
     try {
       ({ buf, env } = envelope(env.content));

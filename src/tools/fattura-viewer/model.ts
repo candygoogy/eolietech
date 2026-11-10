@@ -25,19 +25,54 @@ export interface Party {
   email?: string;
   /** IscrizioneREA as "ME 123456". */
   rea?: string;
+  /** CodEORI. */
+  eori?: string;
+  /** AlboProfessionale, ProvinciaAlbo, NumeroIscrizioneAlbo, DataIscrizioneAlbo. */
+  register?: { name?: string; province?: string; number?: string; date?: string };
+  fax?: string;
+  /** StabileOrganizzazione. */
+  establishment?: Address;
+  /** IscrizioneREA/CapitaleSociale. */
+  shareCapital?: string;
+  /** SocioUnico code: "SU" or "SM". */
+  soleShareholder?: string;
+  /** StatoLiquidazione code: "LS" or "LN". */
+  liquidation?: string;
+  /** RiferimentoAmministrazione. */
+  adminRef?: string;
+}
+
+/** A party named only by its tax IDs: a fiscal representative, or the third party that issued the invoice. */
+export interface OtherParty {
+  role: "sellerRep" | "buyerRep" | "intermediary";
+  name?: string;
+  vat?: string;
+  taxCode?: string;
+  eori?: string;
 }
 
 export interface Transmission {
+  /** IdTrasmittente as "IT01234567890". */
+  senderId?: string;
   progressive?: string;
   format?: string;
   recipientCode?: string;
   recipientPec?: string;
+  /** ContattiTrasmittente. */
+  senderPhone?: string;
+  senderEmail?: string;
+  /** Root attribute SistemaEmittente: the software that made the file. */
+  system?: string;
 }
 
 export interface Header {
   transmission: Transmission;
   seller: Party;
   buyer: Party;
+  /** RappresentanteFiscale (of either party) and TerzoIntermediarioOSoggettoEmittente. */
+  others: OtherParty[];
+  /** SoggettoEmittente: "CC" (the customer) or "TZ" (a third party). */
+  issuer?: string;
 }
 
 export interface Adjustment {
@@ -68,6 +103,9 @@ export interface Fund {
   taxable?: string;
   vatRate?: string;
   natura?: string;
+  /** Ritenuta "SI": the contribution is subject to withholding tax. */
+  withholding?: boolean;
+  adminRef?: string;
 }
 
 export interface DocRef {
@@ -76,9 +114,43 @@ export interface DocRef {
   date?: string;
   cup?: string;
   cig?: string;
+  /** RiferimentoNumeroLinea: the invoice lines it refers to (none = the whole invoice). */
+  lines?: string[];
+  /** NumItem. */
+  item?: string;
+  /** CodiceCommessaConvenzione. */
+  jobCode?: string;
 }
 
 export interface Ddt {
+  number?: string;
+  date?: string;
+  lines?: string[];
+}
+
+/** DatiTrasporto. */
+export interface Transport {
+  carrier?: { name?: string; vat?: string; taxCode?: string; eori?: string; licence?: string };
+  means?: string;
+  reason?: string;
+  packages?: string;
+  description?: string;
+  weightUnit?: string;
+  grossWeight?: string;
+  netWeight?: string;
+  /** DataOraRitiro, DataOraConsegna: date and time as written. */
+  pickup?: string;
+  delivery?: string;
+  start?: string;
+  /** TipoResa (Incoterms code). */
+  incoterms?: string;
+  deliveryAddress?: Address;
+}
+
+/** AltriDatiGestionali: free data a line can carry. */
+export interface LineExtra {
+  type?: string;
+  text?: string;
   number?: string;
   date?: string;
 }
@@ -99,6 +171,14 @@ export interface Line {
   /** Simplified invoice only: Imposta. */
   vatAmount?: string;
   natura?: string;
+  /** TipoCessionePrestazione: "SC", "PR", "AB" or "AC". */
+  kind?: string;
+  /** Ritenuta "SI". */
+  withholding?: boolean;
+  adminRef?: string;
+  extra: LineExtra[];
+  /** Simplified invoice only: RiferimentoNormativo. */
+  normRef?: string;
 }
 
 export interface VatSummary {
@@ -121,6 +201,21 @@ export interface PaymentDetail {
   bank?: string;
   bic?: string;
   code?: string;
+  /** DataRiferimentoTerminiPagamento and GiorniTerminiPagamento. */
+  termsFrom?: string;
+  termsDays?: string;
+  postOffice?: string;
+  /** Quietanzante: who collects a cash payment (title, name, surname) and their tax code. */
+  receiptName?: string;
+  receiptTaxCode?: string;
+  abi?: string;
+  cab?: string;
+  /** ScontoPagamentoAnticipato and DataLimitePagamentoAnticipato. */
+  earlyDiscount?: string;
+  earlyLimit?: string;
+  /** PenalitaPagamentiRitardati and DataDecorrenzaPenale. */
+  latePenalty?: string;
+  penaltyFrom?: string;
 }
 
 export interface Payment {
@@ -156,12 +251,26 @@ export interface Invoice {
   adjustments: Adjustment[];
   refs: DocRef[];
   ddts: Ddt[];
-  /** Simplified invoice: the invoice it corrects. */
-  corrects?: { number?: string; date?: string };
+  /** Simplified invoice: the invoice it corrects (ElementiRettificati says what changed). */
+  corrects?: { number?: string; date?: string; elements?: string };
+  /** Art73 "SI". */
+  art73?: boolean;
+  /** DatiSAL/RiferimentoFase. */
+  stages: string[];
+  transport?: Transport;
+  /** FatturaPrincipale. */
+  mainInvoice?: { number?: string; date?: string };
+  /** DatiVeicoli: Data and TotalePercorso. */
+  vehicle?: { date?: string; distance?: string };
   lines: Line[];
   summaries: VatSummary[];
   payments: Payment[];
   attachments: Attachment[];
+  /**
+   * Fields of the XML (leaf elements with text, in the header or in this invoice's body) that did not
+   * go into this model, so the view and the PDF cannot show them. An XML signature is not counted.
+   */
+  unshown: number;
 }
 
 export interface ParsedFile {

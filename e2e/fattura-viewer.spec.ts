@@ -103,7 +103,7 @@ test("/fatturapa-viewer/ reads a signed .p7m, several bodies and other formats, 
 
   const signed = rows.nth(0);
   await expect(signed.locator(".tool-item__name")).toHaveText("Esempio Società S.r.l.");
-  await expect(signed.locator(".fv-signature")).toContainText("Signed by Mario Rossi on");
+  await expect(signed.locator(".fv-signature")).toContainText("Signed with a certificate in the name of Mario Rossi (identity not checked here). Date as declared by the signer:");
   await expect(signed.locator(".fv-signature")).toContainText("The signature matches");
   await expect(signed.getByRole("link", { name: "Signature details" })).toHaveAttribute("href", "/open-p7m-file/");
 

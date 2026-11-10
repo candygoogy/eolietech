@@ -43,10 +43,17 @@ export const TAG = {
 
 /** Nesting cap for indefinite lengths and constructed strings (real files stay under ~10). */
 const MAX_DEPTH = 64;
+/**
+ * Elements one walk may visit: the children of an indefinite-length element, or the chunks of a
+ * constructed string. A 100 MiB document streamed in 1000-byte chunks has about 105,000; a file
+ * stuffed with millions of empty chunks is turned away before it costs time or memory.
+ */
+const MAX_ELEMENTS = 1_000_000;
+/** Direct children listed for one structural element (a certificate bag, a name, a set of signers). */
+const MAX_CHILDREN = 10_000;
 
-/** Reads the element starting at `pos`, which must end by `limit`. */
-export function readTlv(buf: Uint8Array, pos: number, limit: number, depth = 0): Asn1 {
-  if (depth > MAX_DEPTH) throw new Asn1Error("too deeply nested");
+/** Identifier and length octets of the element at `pos`. An indefinite length gives bodyEnd = end = -1. */
+function header(buf: Uint8Array, pos: number, limit: number): Asn1 {
   if (limit > buf.length || pos + 2 > limit) throw new Asn1Error("truncated");
   const start = pos;
   const tag = buf[pos++];
@@ -62,14 +69,8 @@ export function readTlv(buf: Uint8Array, pos: number, limit: number, depth = 0):
   const lenByte = buf[pos++];
 
   if (lenByte === 0x80) {
-    // Indefinite length: walk the children up to the end-of-contents octets (00 00).
     if (!constructed) throw new Asn1Error("indefinite primitive");
-    let p = pos;
-    for (;;) {
-      if (p + 2 > limit) throw new Asn1Error("missing end-of-contents");
-      if (buf[p] === 0 && buf[p + 1] === 0) return { tag, constructed, start, bodyStart: pos, bodyEnd: p, end: p + 2 };
-      p = readTlv(buf, p, limit, depth + 1).end;
-    }
+    return { tag, constructed, start, bodyStart: pos, bodyEnd: -1, end: -1 };
   }
 
   let len = lenByte;
@@ -84,11 +85,35 @@ export function readTlv(buf: Uint8Array, pos: number, limit: number, depth = 0):
   return { tag, constructed, start, bodyStart: pos, bodyEnd: pos + len, end: pos + len };
 }
 
+function read(buf: Uint8Array, pos: number, limit: number, depth: number, budget: { left: number }): Asn1 {
+  if (depth > MAX_DEPTH) throw new Asn1Error("too deeply nested");
+  if (--budget.left < 0) throw new Asn1Error("too many elements");
+  const node = header(buf, pos, limit);
+  if (node.end >= 0) return node;
+  // Indefinite length: walk the children up to the end-of-contents octets (00 00).
+  let p = node.bodyStart;
+  for (;;) {
+    if (p + 2 > limit) throw new Asn1Error("missing end-of-contents");
+    if (buf[p] === 0 && buf[p + 1] === 0) {
+      node.bodyEnd = p;
+      node.end = p + 2;
+      return node;
+    }
+    p = read(buf, p, limit, depth + 1, budget).end;
+  }
+}
+
+/** Reads the element starting at `pos`, which must end by `limit`. */
+export function readTlv(buf: Uint8Array, pos: number, limit: number): Asn1 {
+  return read(buf, pos, limit, 0, { left: MAX_ELEMENTS });
+}
+
 /** Direct children of a constructed element. */
 export function children(buf: Uint8Array, node: Asn1): Asn1[] {
   if (!node.constructed) throw new Asn1Error("not constructed");
   const out: Asn1[] = [];
   for (let p = node.bodyStart; p < node.bodyEnd; ) {
+    if (out.length >= MAX_CHILDREN) throw new Asn1Error("too many elements");
     const child = readTlv(buf, p, node.bodyEnd);
     out.push(child);
     p = child.end;
@@ -113,24 +138,47 @@ export function raw(buf: Uint8Array, node: Asn1): Uint8Array {
 
 /**
  * Contents of a string type, primitive or constructed (BER chunks, possibly nested, concatenated).
- * Always a fresh copy.
+ * Always a fresh copy. The chunks are walked once and only their offsets are kept, then copied into
+ * one buffer: no object per chunk, so memory stays near the size of the content however it is split.
  */
 export function stringBytes(buf: Uint8Array, node: Asn1): Uint8Array<ArrayBuffer> {
   if (!node.constructed) return buf.slice(node.bodyStart, node.bodyEnd);
-  const parts: Uint8Array[] = [];
-  const collect = (n: Asn1, depth: number) => {
-    if (depth > MAX_DEPTH) throw new Asn1Error("too deeply nested");
-    if (!n.constructed) parts.push(body(buf, n));
-    else for (const c of children(buf, n)) collect(c, depth + 1);
-  };
-  collect(node, 0);
+  /** [start, end, start, end, ...] of the non-empty chunks, in file order. */
+  const ranges: number[] = [];
   let size = 0;
-  for (const p of parts) size += p.length;
+  let left = MAX_ELEMENTS;
+  /** Collects the chunks from `p` up to `end`, or up to the end-of-contents octets when `end` is -1. Returns the offset after them. */
+  const collect = (p: number, end: number, limit: number, depth: number): number => {
+    if (depth > MAX_DEPTH) throw new Asn1Error("too deeply nested");
+    for (;;) {
+      if (end >= 0) {
+        if (p >= end) return p;
+      } else {
+        if (p + 2 > limit) throw new Asn1Error("missing end-of-contents");
+        if (buf[p] === 0 && buf[p + 1] === 0) return p + 2;
+      }
+      if (--left < 0) throw new Asn1Error("too many chunks");
+      const c = header(buf, p, limit);
+      if (!c.constructed) {
+        if (c.bodyEnd > c.bodyStart) {
+          ranges.push(c.bodyStart, c.bodyEnd);
+          size += c.bodyEnd - c.bodyStart;
+        }
+        p = c.end;
+      } else if (c.end >= 0) {
+        collect(c.bodyStart, c.bodyEnd, c.bodyEnd, depth + 1);
+        p = c.end;
+      } else {
+        p = collect(c.bodyStart, -1, limit, depth + 1);
+      }
+    }
+  };
+  collect(node.bodyStart, node.bodyEnd, node.bodyEnd, 0);
   const out = new Uint8Array(size);
   let at = 0;
-  for (const p of parts) {
-    out.set(p, at);
-    at += p.length;
+  for (let i = 0; i < ranges.length; i += 2) {
+    out.set(buf.subarray(ranges[i], ranges[i + 1]), at);
+    at += ranges[i + 1] - ranges[i];
   }
   return out;
 }
