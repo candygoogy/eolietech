@@ -62,6 +62,12 @@ function memoryCache(): ChunkCache & { store: Map<string, Uint8Array> } {
     async put(url, res) {
       store.set(url, new Uint8Array(await res.arrayBuffer()));
     },
+    async keys() {
+      return [...store.keys()].map((url) => new Request(url));
+    },
+    async delete(req) {
+      return store.delete(typeof req === "string" ? req : req.url);
+    },
   };
 }
 
@@ -97,6 +103,29 @@ describe("model chunk loading", () => {
     const cache = memoryCache();
     await expect(loadModel("demo", { fetch: f.fetchFn, cache })).rejects.toBeInstanceOf(ModelIntegrityError);
     expect([...cache.store.keys()].some((k) => k.endsWith("aaaa-1.bin"))).toBe(false);
+  });
+
+  it("verifies chunks read back from the cache and downloads a bad one again", async () => {
+    const f = fixture();
+    const cache = memoryCache();
+    await loadModel("demo", { fetch: f.fetchFn, cache });
+    const key = [...cache.store.keys()].find((k) => k.endsWith("aaaa-1.bin"))!;
+    cache.store.set(key, new Uint8Array(10).fill(7)); // right size, wrong bytes
+    f.requests.length = 0;
+    const out = await loadModel("demo", { fetch: f.fetchFn, cache });
+    expect(out.files.get("onnx/model.onnx")).toEqual(f.big);
+    expect(f.requests).toEqual(["/models/demo/manifest.json", "/models/demo/aaaa-1.bin"]);
+    expect(cache.store.get(key)).toEqual(f.big.slice(10, 20));
+  });
+
+  it("prunes cached chunks of older pins and retired models, keeps other shipped models", async () => {
+    const f = fixture();
+    const cache = memoryCache();
+    cache.store.set("http://localhost/models/demo/old-0.bin", new Uint8Array(1));
+    cache.store.set("http://localhost/models/retired/y.bin", new Uint8Array(1));
+    cache.store.set("http://localhost/models/whisper-base/x.bin", new Uint8Array(1));
+    await loadModel("demo", { fetch: f.fetchFn, cache, only: (p) => p === "config.json" });
+    expect([...cache.store.keys()].map((k) => new URL(k).pathname).sort()).toEqual(["/models/demo/bbbb-0.bin", "/models/whisper-base/x.bin"]);
   });
 
   it("validates manifests and chunk sizes", () => {

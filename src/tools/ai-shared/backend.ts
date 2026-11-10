@@ -42,12 +42,60 @@ export async function webgpuUsable(): Promise<boolean> {
   }
 }
 
+/**
+ * localStorage key remembering that WebGPU failed on this device. It only ever holds a backend
+ * name ("wasm"), never anything about the user's files.
+ */
+export const BACKEND_STORAGE_KEY = "eolietech-ai-backend";
+
+/** The backend to use: a forced one (testing) first, then a remembered WebGPU failure, then detection. */
+export function chooseDevice(o: { forced?: string | null; remembered?: string | null; webgpu: boolean }): Device {
+  if (o.forced === "wasm" || o.forced === "webgpu") return o.forced;
+  if (o.remembered === "wasm") return "wasm";
+  return o.webgpu ? "webgpu" : "wasm";
+}
+
+/**
+ * After a job failed: the backend to retry it on, or null for no retry. Only a runtime failure on
+ * WebGPU (not a bad input file) is retried, on WebAssembly; WebAssembly has nothing to fall back to.
+ */
+export function retryDevice(device: Device, failure: "runtime" | "input"): Device | null {
+  return device === "webgpu" && failure === "runtime" ? "wasm" : null;
+}
+
+function readRemembered(): string | null {
+  try {
+    return localStorage.getItem(BACKEND_STORAGE_KEY);
+  } catch {
+    return null; // Workers, storage disabled.
+  }
+}
+
 let detected: Promise<Device> | null = null;
+
+/**
+ * WebGPU failed on this device: use WebAssembly for the rest of the session (both AI tools) and
+ * after reloads.
+ */
+export function rememberWasm(): void {
+  try {
+    localStorage.setItem(BACKEND_STORAGE_KEY, "wasm");
+  } catch {
+    // Storage disabled: the choice still holds for this page.
+  }
+  detected = Promise.resolve("wasm");
+}
 
 /** The backend to use on this device; `?ai-backend=wasm|webgpu` forces one (testing). */
 export function detectDevice(): Promise<Device> {
   const forced = typeof location === "undefined" ? null : new URLSearchParams(location.search).get("ai-backend");
   if (forced === "wasm" || forced === "webgpu") return Promise.resolve(forced);
-  detected ??= webgpuUsable().then((ok): Device => (ok ? "webgpu" : "wasm"));
+  if (!detected) {
+    const remembered = readRemembered();
+    detected =
+      remembered === "wasm"
+        ? Promise.resolve<Device>("wasm")
+        : webgpuUsable().then((webgpu) => chooseDevice({ remembered, webgpu }));
+  }
   return detected;
 }

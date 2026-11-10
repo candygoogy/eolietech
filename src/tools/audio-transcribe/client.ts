@@ -6,9 +6,10 @@
  */
 import { createDropzone, downloadBlob, formatBytes, renameExtension } from "../../lib/tool-ui";
 import { tPlural } from "../../i18n/plural";
-import { detectDevice, ENGINE_BYTES, type Device } from "../ai-shared/backend";
+import { detectDevice, ENGINE_BYTES, rememberWasm, retryDevice, type Device } from "../ai-shared/backend";
 import { button, errorRegion, h, statusRegion } from "../ai-shared/dom";
 import { firstDownloadBytes } from "../ai-shared/model-files";
+import { classifyLoadFailure, downloadMilestone, joinNames, missingFeatures, WORKER_LOAD_ERROR } from "../ai-shared/support";
 import type { ToolCtx } from "../types";
 import { AudioDecodeError, decodeToMono16k } from "./audio";
 import { formatClock, toPlainText, toSegments, toSrt, toVtt, type Segment } from "./subtitles";
@@ -84,13 +85,23 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     h("p", { className: "tool-note", text: t("asr.language.note") }),
   );
 
+  // Checked before anything is downloaded: without these the model download would be wasted.
+  const missing = missingFeatures(globalThis as unknown as Record<string, unknown>, ["wasm", "worker", "webAudio"]);
+  const unsupported = missing.length > 0;
+
   // The page picks the backend up front so the notice shows exactly what will be downloaded.
   let device: Device = "wasm";
   const downloadSize = () => formatBytes(firstDownloadBytes(MODEL_ID, device));
-  const modelNote = h("p", { className: "tool-note", text: t("asr.modelNote", { size: downloadSize() }) });
+  const modelNote = h("p", { className: "tool-note" });
+  const showModelNote = () => {
+    modelNote.textContent = unsupported
+      ? t("asr.unsupported", { features: joinNames(missing, ctx.locale) })
+      : t("asr.modelNote", { size: downloadSize() });
+  };
+  showModelNote();
   const deviceReady = detectDevice().then((d) => {
     device = d;
-    modelNote.textContent = t("asr.modelNote", { size: downloadSize() });
+    showModelNote();
   });
   const backendNote = h("p", { className: "tool-note", hidden: true });
   const item = h("ul", { className: "tool-list", "aria-label": t("asr.listLabel"), hidden: true });
@@ -99,7 +110,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   const resetBtn = button(t("tool.reset"), { variant: "ghost", onClick: reset });
   const actions = h("div", { className: "tool-actions", hidden: true }, runBtn, resetBtn);
 
-  const transcript = h("div", { className: "asr-transcript", tabindex: 0, "aria-label": t("asr.transcriptLabel") });
+  // Focusable so keyboard users can scroll it; a named region so screen readers say what it is.
+  const transcript = h("div", { className: "asr-transcript", role: "region", tabindex: 0, "aria-label": t("asr.transcriptLabel") });
   const summary = h("p", { className: "tool-note" });
   const copyBtn = button(t("asr.copy"), { onClick: () => void copyText() });
   const txtBtn = button(t("asr.download.txt"), { variant: "primary", onClick: () => save("txt") });
@@ -164,7 +176,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           ]
         : []),
     );
-    runBtn.disabled = busy || !file;
+    runBtn.disabled = busy || !file || unsupported;
     resetBtn.disabled = busy;
     langSelect.disabled = busy;
     drop.toggleAttribute("inert", busy);
@@ -173,20 +185,27 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   function startWorker(): Promise<Ready> {
     const w = new Worker(new URL("./worker.ts", import.meta.url), { type: "module", name: "audio-transcribe" });
     worker = w;
+    // No message at all before an error means the worker script itself did not load.
+    let heard = false;
     return new Promise<Ready>((resolve, reject) => {
       onLoadMessage = (msg) => {
         if (msg.type === "progress") {
           progress.max = msg.total || 1;
           progress.value = msg.loaded;
-          status.set(
-            msg.downloaded > 0
-              ? t("asr.downloading", {
-                  loaded: formatBytes(msg.loaded),
-                  total: formatBytes(msg.total),
-                  engine: formatBytes(ENGINE_BYTES[device]),
-                })
-              : t("asr.fromCache"),
-          );
+          // The bytes change many times a second: shown, but only quarter points are announced.
+          const milestone = downloadMilestone(msg.loaded, msg.total);
+          if (msg.downloaded > 0) {
+            status.quiet(
+              t("asr.downloading", {
+                loaded: formatBytes(msg.loaded),
+                total: formatBytes(msg.total),
+                engine: formatBytes(ENGINE_BYTES[device]),
+              }),
+              milestone > 0 && milestone < 100 ? t("asr.downloadedPercent", { percent: milestone }) : "",
+            );
+          } else {
+            status.quiet(t("asr.fromCache"), t("asr.fromCache"));
+          }
           if (msg.loaded >= msg.total) {
             progress.removeAttribute("value");
             status.set(t("asr.starting"));
@@ -201,6 +220,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       };
       w.addEventListener("message", (event: MessageEvent<AsrResponse>) => {
         const msg = event.data;
+        heard = true;
         if (onLoadMessage) {
           onLoadMessage(msg);
           return;
@@ -220,7 +240,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         // A crash (usually out of memory) kills the worker: fail what is pending, start fresh next time.
         const message = e.message || "worker error";
         onLoadMessage = null;
-        reject(new Error(message));
+        reject(heard ? new Error(message) : Object.assign(new Error(message), { name: WORKER_LOAD_ERROR }));
         pendingRun?.({ type: "error", stage: "run", message });
         pendingRun = null;
         stopWorker();
@@ -244,8 +264,21 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     render(meta, "error");
   }
 
+  /** Message for a model or worker that did not load: offline, an updated page, or anything else. */
+  function loadErrorText(err: unknown): string {
+    const kind = classifyLoadFailure(err, navigator.onLine);
+    return kind === "offline" ? t("asr.error.offline") : kind === "updated" ? t("asr.error.updated") : t("asr.error.load");
+  }
+
+  /** WebGPU failed here: WebAssembly for the rest of the session and after reloads. */
+  function switchToWasm() {
+    rememberWasm();
+    device = "wasm";
+    showModelNote();
+  }
+
   async function transcribe() {
-    if (!file || busy) return;
+    if (!file || busy || unsupported) return;
     const current = file;
     busy = true;
     errors.clear();
@@ -265,40 +298,65 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       return;
     }
     const length = formatClock(audio.duration);
-
-    // 2. Load the model (first time only).
-    try {
-      if (!ready) {
-        await deviceReady;
-        status.set(t("asr.loading", { size: downloadSize() }));
-        ready = startWorker();
-      }
-      const info = await ready;
-      modelLoaded = true;
-      backendNote.hidden = false;
-      backendNote.textContent =
-        info.device === "webgpu" ? t("asr.backend.webgpu") : tPlural(ctx, "asr.backend.wasm", info.threads, { threads: info.threads });
-    } catch (err) {
-      console.error(err);
-      stopWorker();
-      fail(t("asr.error.load"), formatBytes(current.size));
-      return;
-    }
-
-    // 3. Transcribe.
-    render(t("asr.working", { length }), "working");
-    progress.max = 1;
-    progress.value = 0;
     const language = langSelect.value || null;
-    status.set(language ? t("asr.progress", { percent: 0 }) : t("asr.detecting"));
-    const samples = audio.samples;
-    const outcome = await new Promise<Outcome>((resolve) => {
-      pendingRun = resolve;
-      worker!.postMessage({ type: "run", audio: samples, language } satisfies AsrRequest, [samples.buffer]);
-    });
-    if (outcome.type === "error") {
-      fail(t("asr.error.failed", { name: current.name }), t("asr.error.failedShort"));
-      return;
+
+    let outcome: Outcome;
+    let retrying = false;
+    for (;;) {
+      // 2. Load the model (first time, or again on WebAssembly after a WebGPU failure).
+      let info: Ready;
+      try {
+        if (!ready) {
+          await deviceReady;
+          // On a retry the status already says what is happening.
+          if (!retrying) status.set(t("asr.loading", { size: downloadSize() }));
+          ready = startWorker();
+        }
+        info = await ready;
+        // WebGPU did not start on this device (the worker fell back): skip it from now on.
+        if (device === "webgpu" && info.device === "wasm") switchToWasm();
+        modelLoaded = true;
+        backendNote.hidden = false;
+        backendNote.textContent =
+          info.device === "webgpu" ? t("asr.backend.webgpu") : tPlural(ctx, "asr.backend.wasm", info.threads, { threads: info.threads });
+      } catch (err) {
+        console.error(err);
+        stopWorker();
+        fail(loadErrorText(err), formatBytes(current.size));
+        return;
+      }
+
+      // 3. Transcribe.
+      render(t("asr.working", { length }), "working");
+      progress.max = 1;
+      progress.value = 0;
+      status.set(language ? t("asr.progress", { percent: 0 }) : t("asr.detecting"));
+      const samples = audio.samples;
+      outcome = await new Promise<Outcome>((resolve) => {
+        pendingRun = resolve;
+        worker!.postMessage({ type: "run", audio: samples, language } satisfies AsrRequest, [samples.buffer]);
+      });
+      if (outcome.type !== "error") break;
+
+      // The file decoded, so this is a runtime failure. On WebGPU it leaves the GPU session unusable:
+      // retry this file on WebAssembly in a fresh worker and keep WebAssembly from now on.
+      if (!retryDevice(info.device, "runtime")) {
+        fail(t("asr.error.failed", { name: current.name }), t("asr.error.failedShort"));
+        return;
+      }
+      console.warn("[audio-transcribe] WebGPU failed while transcribing, retrying on WebAssembly:", outcome.message);
+      switchToWasm();
+      stopWorker();
+      retrying = true;
+      progress.removeAttribute("value");
+      status.set(t("asr.retryWasm"));
+      try {
+        audio = await decodeToMono16k(current); // the samples went to the old worker
+      } catch (err) {
+        console.error(err);
+        fail(t("asr.error.decode", { name: current.name }), t("asr.error.decodeShort"));
+        return;
+      }
     }
 
     segments = toSegments(outcome.chunks, audio.duration);

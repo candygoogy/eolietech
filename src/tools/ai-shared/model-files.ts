@@ -12,7 +12,10 @@ export type ModelId = keyof typeof spec.models;
 
 /** Where fetch-models.mjs publishes the models (public/models/ -> /models/). */
 export const MODELS_BASE = "/models/";
-/** Cache API bucket for model chunks. Chunk names contain the file hash, so entries never go stale. */
+/**
+ * Cache API bucket for model chunks. Chunk names contain the file hash, so an entry never changes
+ * meaning; entries the current manifest no longer lists (an older pin) are pruned on load.
+ */
 export const MODEL_CACHE = "eolietech-models-v1";
 
 export interface ChunkInfo {
@@ -175,8 +178,9 @@ export interface LoadedModel {
 }
 
 /**
- * Fetch a model's manifest and all of its files from this origin. Chunks are verified against
- * the manifest's sha256 before they are cached or used.
+ * Fetch a model's manifest and all of its files from this origin. Every chunk is verified against
+ * the manifest's size and sha256 before it is used: downloaded chunks before they are cached, cached
+ * chunks when they are read back (a bad entry is dropped and downloaded again).
  */
 export async function loadModel(id: string, opts: LoadOptions = {}): Promise<LoadedModel> {
   const doFetch = opts.fetch ?? fetch.bind(globalThis);
@@ -186,6 +190,9 @@ export async function loadModel(id: string, opts: LoadOptions = {}): Promise<Loa
   if (!res.ok) throw new Error(`model manifest ${id}: HTTP ${res.status}`);
   const manifest: unknown = await res.json();
   if (!isManifest(manifest)) throw new Error(`model manifest ${id} is malformed`);
+
+  // Before downloading, so an older pin does not hold quota next to the new one.
+  if (cache?.keys && cache.delete) await pruneCache(cache, base, manifest);
 
   const wanted = manifest.files.filter((f) => !opts.only || opts.only(f.path));
   const total = wanted.reduce((n, f) => n + f.size, 0);
@@ -201,11 +208,14 @@ export async function loadModel(id: string, opts: LoadOptions = {}): Promise<Loa
       let bytes: Uint8Array | null = null;
       const hit = cache ? await cache.match(url).catch(() => undefined) : undefined;
       if (hit) {
-        const buf = new Uint8Array(await hit.arrayBuffer());
-        if (buf.byteLength === chunk.size) {
+        const buf = await hit.arrayBuffer().then((b) => new Uint8Array(b), () => null);
+        if (buf && (await chunkMatches(buf, chunk))) {
           bytes = buf;
           progress.loaded += buf.byteLength;
           report();
+        } else {
+          // Truncated or altered on disk: never use it, drop it, download it again below.
+          await cache?.delete?.(url).catch(() => false);
         }
       }
       if (!bytes) {
@@ -217,7 +227,7 @@ export async function loadModel(id: string, opts: LoadOptions = {}): Promise<Loa
           progress.downloaded += n;
           report();
         });
-        if (bytes.byteLength !== chunk.size || (await sha256Hex(bytes as Uint8Array<ArrayBuffer>)) !== chunk.sha256) {
+        if (!(await chunkMatches(bytes, chunk))) {
           progress.loaded = before;
           throw new ModelIntegrityError(chunk.name);
         }
@@ -232,17 +242,29 @@ export async function loadModel(id: string, opts: LoadOptions = {}): Promise<Loa
     files.set(file.path, concatChunks(parts, file.size));
   }
 
-  if (cache?.keys && cache.delete) await pruneCache(cache, base, manifest);
   return { manifest, files, fromCache: progress.downloaded === 0 };
 }
 
-/** Drop cached chunks of this model that the current manifest no longer lists (older pins). */
+/** Does a chunk have the size and sha256 the manifest pins? */
+async function chunkMatches(bytes: Uint8Array, chunk: ChunkInfo): Promise<boolean> {
+  return bytes.byteLength === chunk.size && (await sha256Hex(bytes as Uint8Array<ArrayBuffer>)) === chunk.sha256;
+}
+
+/**
+ * Housekeeping in this site's model cache: drop chunks of this model that the current manifest no
+ * longer lists (an older pin), and chunks of models this site no longer ships.
+ */
 async function pruneCache(cache: ChunkCache, base: string, manifest: ModelManifest): Promise<void> {
   try {
     const current = new Set(manifest.files.flatMap((f) => f.chunks.map((c) => c.name)));
+    const shipped = new Set(Object.keys(spec.models).map(modelBase));
     for (const req of (await cache.keys?.()) ?? []) {
       const path = new URL(req.url).pathname;
-      if (path.startsWith(base) && !current.has(path.slice(base.length))) await cache.delete?.(req);
+      if (!path.startsWith(MODELS_BASE)) continue;
+      const stale = path.startsWith(base)
+        ? !current.has(path.slice(base.length))
+        : !shipped.has(path.slice(0, path.indexOf("/", MODELS_BASE.length) + 1));
+      if (stale) await cache.delete?.(req);
     }
   } catch {
     // Housekeeping only.

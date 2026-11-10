@@ -35,10 +35,31 @@ export function button(
   return b;
 }
 
-/** Polite live region for progress and results. */
-export function statusRegion(): { el: HTMLParagraphElement; set: (msg: string) => void } {
+/**
+ * Polite live region for progress and results. `set` shows and announces a message. `quiet` is for
+ * text that changes many times a second (download bytes): it updates what is seen, hidden from
+ * screen readers, and announces `spoken` only when that changes (pass "" to stay silent).
+ */
+export function statusRegion(): {
+  el: HTMLParagraphElement;
+  set: (msg: string) => void;
+  quiet: (visible: string, spoken: string) => void;
+} {
   const el = h("p", { className: "tool-note", role: "status", "aria-live": "polite" });
-  return { el, set: (msg) => (el.textContent = msg) };
+  const seen = h("span", { "aria-hidden": "true" });
+  const heard = h("span", { className: "visually-hidden" });
+  return {
+    el,
+    set: (msg) => (el.textContent = msg),
+    quiet(visible, spoken) {
+      if (seen.parentNode !== el) {
+        heard.textContent = "";
+        el.replaceChildren(seen, heard);
+      }
+      seen.textContent = visible;
+      if (heard.textContent !== spoken) heard.textContent = spoken;
+    },
+  };
 }
 
 /** `.tool-error` with role="alert", hidden while empty. */

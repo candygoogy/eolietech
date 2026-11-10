@@ -5,9 +5,10 @@
  */
 import { createDropzone, downloadBlob, downloadZip, formatBytes } from "../../lib/tool-ui";
 import { tPlural } from "../../i18n/plural";
-import { detectDevice, ENGINE_BYTES, type Device } from "../ai-shared/backend";
+import { detectDevice, ENGINE_BYTES, rememberWasm, retryDevice, type Device } from "../ai-shared/backend";
 import { button, errorRegion, h, statusRegion } from "../ai-shared/dom";
 import { firstDownloadBytes } from "../ai-shared/model-files";
+import { classifyLoadFailure, downloadMilestone, joinNames, missingFeatures, WORKER_LOAD_ERROR } from "../ai-shared/support";
 import { entryTracker } from "../pdf-shared/dom";
 import type { ToolCtx } from "../types";
 import { outputName } from "./mask";
@@ -64,13 +65,24 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     },
   });
 
+  // Checked before anything is downloaded: without these the model download would be wasted.
+  // The page's OffscreenCanvas stands in for the worker's (browsers ship both together).
+  const missing = missingFeatures(globalThis as unknown as Record<string, unknown>, ["wasm", "worker", "offscreenCanvas"]);
+  const unsupported = missing.length > 0;
+
   // The page picks the backend up front so the notice shows exactly what will be downloaded.
   let device: Device = "wasm";
   const downloadSize = () => formatBytes(firstDownloadBytes(MODEL_ID, device));
-  const modelNote = h("p", { className: "tool-note", text: t("bg.modelNote", { size: downloadSize() }) });
+  const modelNote = h("p", { className: "tool-note" });
+  const showModelNote = () => {
+    modelNote.textContent = unsupported
+      ? t("bg.unsupported", { features: joinNames(missing, ctx.locale) })
+      : t("bg.modelNote", { size: downloadSize() });
+  };
+  showModelNote();
   const deviceReady = detectDevice().then((d) => {
     device = d;
-    modelNote.textContent = t("bg.modelNote", { size: downloadSize() });
+    showModelNote();
   });
   const backendNote = h("p", { className: "tool-note", hidden: true });
   const list = h("ul", { className: "tool-list", "aria-label": t("bg.listLabel"), hidden: true });
@@ -152,7 +164,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       }),
     );
     const done = entries.filter((e) => e.state === "done" && e.output);
-    runBtn.disabled = busy || !entries.some((e) => e.state === "pending");
+    runBtn.disabled = busy || unsupported || !entries.some((e) => e.state === "pending");
     zipBtn.hidden = done.length < 2;
     zipBtn.disabled = busy;
     resetBtn.disabled = busy;
@@ -161,20 +173,27 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   function startWorker(): Promise<Ready> {
     const w = new Worker(new URL("./worker.ts", import.meta.url), { type: "module", name: "background-remover" });
     worker = w;
+    // No message at all before an error means the worker script itself did not load.
+    let heard = false;
     return new Promise<Ready>((resolve, reject) => {
       onLoadMessage = (msg) => {
         if (msg.type === "progress") {
           progress.max = msg.total || 1;
           progress.value = msg.loaded;
-          status.set(
-            msg.downloaded > 0
-              ? t("bg.downloading", {
-                  loaded: formatBytes(msg.loaded),
-                  total: formatBytes(msg.total),
-                  engine: formatBytes(ENGINE_BYTES[device]),
-                })
-              : t("bg.fromCache"),
-          );
+          // The bytes change many times a second: shown, but only quarter points are announced.
+          const milestone = downloadMilestone(msg.loaded, msg.total);
+          if (msg.downloaded > 0) {
+            status.quiet(
+              t("bg.downloading", {
+                loaded: formatBytes(msg.loaded),
+                total: formatBytes(msg.total),
+                engine: formatBytes(ENGINE_BYTES[device]),
+              }),
+              milestone > 0 && milestone < 100 ? t("bg.downloadedPercent", { percent: milestone }) : "",
+            );
+          } else {
+            status.quiet(t("bg.fromCache"), t("bg.fromCache"));
+          }
           if (msg.loaded >= msg.total) {
             progress.removeAttribute("value");
             status.set(t("bg.starting"));
@@ -189,6 +208,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       };
       w.addEventListener("message", (event: MessageEvent<BgResponse>) => {
         const msg = event.data;
+        heard = true;
         if ((msg.type === "result" || msg.type === "error") && msg.id !== null) {
           jobs.get(msg.id)?.resolve(msg);
           jobs.delete(msg.id);
@@ -197,6 +217,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       w.addEventListener("error", (e) => {
         // A crash (usually out of memory) kills the worker: fail what is pending, start fresh next time.
         const err = new Error(e.message || "worker error");
+        if (!heard) err.name = WORKER_LOAD_ERROR;
         onLoadMessage = null;
         reject(err);
         for (const job of jobs.values()) job.resolve({ type: "error", id: -1, code: "failed", message: err.message });
@@ -231,29 +252,51 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     return t("bg.error.failed", { name: e.file.name });
   }
 
+  /** Message for a model, worker or module that did not load: offline, an updated page, or anything else. */
+  function loadErrorText(err: unknown, other: string): string {
+    const kind = classifyLoadFailure(err, navigator.onLine);
+    return kind === "offline" ? t("bg.error.offline") : kind === "updated" ? t("bg.error.updated") : other;
+  }
+
+  /** Start the worker if needed and wait for the model; throws when it does not load. */
+  async function ensureReady(statusText: string | null): Promise<Ready> {
+    if (!ready) {
+      progress.removeAttribute("value");
+      await deviceReady;
+      if (statusText) status.set(statusText);
+      ready = startWorker();
+    }
+    const info = await ready;
+    // WebGPU did not start on this device (the worker fell back): skip it from now on.
+    if (device === "webgpu" && info.device === "wasm") switchToWasm();
+    modelLoaded = true;
+    backendNote.hidden = false;
+    backendNote.textContent =
+      info.device === "webgpu" ? t("bg.backend.webgpu") : tPlural(ctx, "bg.backend.wasm", info.threads, { threads: info.threads });
+    return info;
+  }
+
+  /** WebGPU failed here: WebAssembly for the rest of the session and after reloads. */
+  function switchToWasm() {
+    rememberWasm();
+    device = "wasm";
+    showModelNote();
+  }
+
   async function processAll() {
     const todo = entries.filter((e) => e.state === "pending");
-    if (todo.length === 0 || busy) return;
+    if (todo.length === 0 || busy || unsupported) return;
     busy = true;
     errors.clear();
     render();
     progress.hidden = false;
+    let info: Ready;
     try {
-      if (!ready) {
-        progress.removeAttribute("value");
-        await deviceReady;
-        status.set(t("bg.loading", { size: downloadSize() }));
-        ready = startWorker();
-      }
-      const info = await ready;
-      modelLoaded = true;
-      backendNote.hidden = false;
-      backendNote.textContent =
-        info.device === "webgpu" ? t("bg.backend.webgpu") : tPlural(ctx, "bg.backend.wasm", info.threads, { threads: info.threads });
+      info = await ensureReady(t("bg.loading", { size: downloadSize() }));
     } catch (err) {
       console.error(err);
       stopWorker();
-      errors.show(t("bg.error.load"));
+      errors.show(loadErrorText(err, t("bg.error.load")));
       status.set("");
       progress.hidden = true;
       busy = false;
@@ -262,13 +305,35 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     }
 
     const failures: string[] = [];
-    progress.max = todo.length;
     for (const [n, e] of todo.entries()) {
       e.state = "working";
       render();
+      progress.max = todo.length;
       progress.value = n;
       status.set(t("bg.fileStatus", { current: n + 1, total: todo.length, name: e.file.name }));
-      const msg = await runJob(e);
+      let msg = await runJob(e);
+      // A decode or size error is about the file. Anything else on WebGPU is a runtime failure that
+      // leaves the GPU session unusable: retry this file on WebAssembly in a fresh worker and keep
+      // WebAssembly from now on.
+      const kind = msg.type === "error" && msg.code !== "decode" && msg.code !== "tooLarge" ? "runtime" : "input";
+      if (msg.type === "error" && retryDevice(info.device, kind)) {
+        console.warn("[background-remover] WebGPU failed on a photo, retrying on WebAssembly:", msg.message);
+        switchToWasm();
+        stopWorker();
+        status.set(t("bg.retryWasm", { name: e.file.name }));
+        try {
+          info = await ensureReady(null);
+        } catch (err) {
+          console.error(err);
+          stopWorker();
+          e.state = "pending";
+          failures.push(loadErrorText(err, t("bg.error.load")));
+          break;
+        }
+        progress.max = todo.length;
+        progress.value = n;
+        msg = await runJob(e);
+      }
       if (msg.type === "result") {
         e.output = msg.png;
         e.preview = URL.createObjectURL(msg.png);
@@ -305,7 +370,14 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         used.add(name);
         return { name, blob: e.output! };
       });
-    await downloadZip(files, t("bg.zipName"));
+    errors.clear();
+    try {
+      await downloadZip(files, t("bg.zipName"));
+    } catch (err) {
+      // The zip code loads on first use, so this can also be an offline or updated page.
+      console.error(err);
+      errors.show(loadErrorText(err, t("bg.error.zip")));
+    }
   }
 
   return () => {
