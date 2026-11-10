@@ -40,15 +40,24 @@ for (const path of ["/tools/", "/it/strumenti/"]) {
 
 test("a tool page links only its own tool's stylesheet, added when the tool mounts", async ({ page }) => {
   const sheets = () => page.locator('link[rel="stylesheet"]').evaluateAll((links) => links.map((l) => l.getAttribute("href")!));
+  // Merge PDF has no stylesheet of its own: what it links is what every tool page shares.
+  await page.goto("/merge-pdf/");
+  await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
+  const shared = await sheets();
+
   await page.goto("/crop-image/");
   await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
   const crop = await sheets();
-  expect(crop.filter((href) => /\/_astro\/crop\.[^/]+\.css$/.test(href))).toHaveLength(1);
-  expect(crop.filter((href) => !/\/_astro\/(Base|crop)\.[^/]+\.css$/.test(href))).toEqual([]);
+  const own = crop.filter((href) => !shared.includes(href));
+  expect(own).toHaveLength(1);
+  expect(own[0]).toMatch(/\/_astro\/crop\.[^/]+\.css$/);
+  expect(shared.every((href) => crop.includes(href))).toBe(true);
 
-  await page.goto("/merge-pdf/");
-  await expect(page.locator("[data-tool-root][data-mounted]")).toBeAttached();
-  expect((await sheets()).filter((href) => !/\/_astro\/Base\.[^/]+\.css$/.test(href))).toEqual([]);
+  // The tool page styles ship on tool pages only.
+  await page.goto("/about/");
+  const about = await sheets();
+  expect(about.every((href) => shared.includes(href))).toBe(true);
+  expect(about.length).toBeLessThan(shared.length);
 });
 
 test("a tool page links its presets, and a preset page links back and marks itself current", async ({ page }) => {

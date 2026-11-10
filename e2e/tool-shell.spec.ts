@@ -50,7 +50,10 @@ for (const width of WIDTHS) {
     test.use({ viewport: { width, height: 900 } });
 
     for (const [id, slug] of Object.entries(TOOLS)) {
-      test(`${id}: mounting does not change the panel height`, async ({ page }) => {
+      test(`${id}: mounting does not change the panel height`, async ({ page, browserName }) => {
+        // Playwright's WebKit lacks OffscreenCanvas in workers, so these tools mount their "this browser
+        // cannot run this tool" notice instead of the tool (real Safari has it).
+        test.skip(browserName === "webkit" && (id === "heic-to-jpg" || id === "background-remover"), "no OffscreenCanvas in Playwright's WebKit");
         // The shell, as first painted: no script may run, so the tool never mounts.
         await page.route("**/*.js", (route) => route.abort());
         await page.goto(`/${slug}/`);

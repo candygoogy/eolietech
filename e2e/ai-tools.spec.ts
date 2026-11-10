@@ -118,7 +118,8 @@ test("/remove-background/ cuts out the subject on the device and caches the mode
   w.assertPrivate();
 });
 
-test("/transcribe-audio/ transcribes a speech clip on the device", async ({ page, baseURL }) => {
+test("/transcribe-audio/ transcribes a speech clip on the device", async ({ page, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's Windows WebKit has no Web Audio (OfflineAudioContext), so the page correctly says the browser cannot run the tool");
   test.setTimeout(300_000);
   const w = watch(page, baseURL!);
   await page.goto("/transcribe-audio/");
