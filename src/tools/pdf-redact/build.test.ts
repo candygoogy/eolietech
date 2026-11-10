@@ -12,6 +12,7 @@ import {
   type PDFObject,
 } from "pdf-lib";
 import { describe, expect, it } from "vitest";
+import { holds, png, xobjects } from "../pdf-shared/test-fixtures";
 import { buildRedactedPdf } from "./build";
 
 const SECRET = "ZEBRAQUOKKA";
@@ -124,5 +125,50 @@ describe("buildRedactedPdf", () => {
       [400, 300, 0],
       [500, 600, 0],
     ]);
+  });
+});
+
+describe("buildRedactedPdf with resources shared between pages", () => {
+  it("keeps none of the redacted page's images and forms, and all of the kept page's", async () => {
+    const IBAN = "IBAN IT60X0542811101000000123456";
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const p1 = doc.addPage([300, 300]);
+    const p2 = doc.addPage([300, 300]);
+    // Page 1: a signature scan (37x11) and a Form XObject holding the IBAN.
+    p1.drawImage(await doc.embedPng(png(37, 11, [0xc0, 0xff, 0xee])), { x: 20, y: 200, width: 111, height: 33 });
+    const inner = await PDFDocument.create();
+    inner.addPage([200, 40]).drawText(IBAN, { x: 2, y: 15, size: 9, font: await inner.embedFont(StandardFonts.Helvetica) });
+    p1.drawPage(await doc.embedPage((await PDFDocument.load(await inner.save())).getPage(0)), { x: 20, y: 100 });
+    // Page 2: its own logo (5x3) and its own form, plus text.
+    p2.drawImage(await doc.embedPng(png(5, 3, [0, 0, 0xff])), { x: 20, y: 200, width: 50, height: 30 });
+    const stamp = await PDFDocument.create();
+    stamp.addPage([100, 20]).drawText("KEPTFORM", { x: 2, y: 5, size: 9, font: await stamp.embedFont(StandardFonts.Helvetica) });
+    p2.drawPage(await doc.embedPage((await PDFDocument.load(await stamp.save())).getPage(0)), { x: 20, y: 100 });
+    p2.drawText("Page two, nothing sensitive", { x: 20, y: 250, size: 12, font });
+    await doc.flush();
+    // One resources dictionary for both pages, as FPDF, TCPDF and dompdf write them.
+    const shared = doc.context.obj({});
+    for (const page of [p1, p2]) {
+      const resources = page.node.Resources()!;
+      for (const [kind, entries] of resources.entries()) {
+        const dict = doc.context.lookup(entries);
+        if (!(dict instanceof PDFDict)) continue;
+        if (!shared.has(kind)) shared.set(kind, doc.context.obj({}));
+        for (const [key, value] of dict.entries()) shared.lookup(kind, PDFDict).set(key, value);
+      }
+    }
+    const ref = doc.context.register(shared);
+    p1.node.set(PDFName.of("Resources"), ref);
+    p2.node.set(PDFName.of("Resources"), ref);
+    const source = await doc.save({ useObjectStreams: false });
+    expect(await holds(source, IBAN)).toBe(true);
+    expect(await xobjects(source)).toEqual(["Form", "Form", "Image 37x11", "Image 5x3"]);
+
+    const out = await buildRedactedPdf(source, [{ index: 0, jpeg: JPEG, width: 300, height: 300 }]);
+    expect(await holds(out, IBAN)).toBe(false);
+    // The redacted page's picture (1x1), and page 2's logo and form; no 37x11 image, no IBAN form.
+    expect(await xobjects(out)).toEqual(["Form", "Image 1x1", "Image 5x3"]);
+    expect(await pageTexts(out)).toEqual(["", "KEPTFORMPage two, nothing sensitive"]);
   });
 });

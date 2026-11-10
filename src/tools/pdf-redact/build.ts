@@ -3,12 +3,16 @@
  * JPEG pictures already painted black by the client; each becomes a new page of the same visible
  * size holding only that picture, so no text, font or drawing of the original page survives.
  * Pages without boxes are copied from the original, minus anything that could carry text from
- * elsewhere in the file (comments, form fields, links into other pages). The document gets no
- * properties, no XMP, no bookmarks, no attachments and no form, and objects nothing points to
- * are dropped before saving, so the original of a redacted page cannot ride along unseen.
+ * elsewhere in the file (comments, form fields, links into other pages), and each gets its own
+ * resources dictionary with only what it draws: pages often share one, which also holds the images
+ * and forms of the redacted pages. The document gets no properties, no XMP, no bookmarks, no
+ * attachments and no form (layers keep their on/off state), and objects nothing points to are
+ * dropped before saving, so the original of a redacted page cannot ride along unseen.
  */
-import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRef, PDFStream, type PDFContext, type PDFObject } from "pdf-lib";
-import { loadPdf } from "../pdf-shared/pdf-ops";
+import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRef, PDFStream, type PDFContext, type PDFObject, type PDFPage } from "pdf-lib";
+import { copyPagesDetached, loadPdf, pruneUnreachable } from "../pdf-shared/pdf-ops";
+
+export { pruneUnreachable };
 
 export interface RedactedPage {
   /** 0-based index in the original document. */
@@ -41,7 +45,7 @@ const PAGE_KEYS = new Set([
 const DROP_ANNOTS = new Set(["Popup", "Text", "FileAttachment", "Sound", "Movie", "Screen", "RichMedia", "3D", "Redact"]);
 
 /** What a kept annotation keeps: where it is and how it looks. No /Contents, /T, /P, /Parent, /Popup. */
-const ANNOT_KEYS = ["Type", "Subtype", "Rect", "AP", "AS", "F", "Border", "BS", "C", "CA", "QuadPoints"];
+const ANNOT_KEYS = ["Type", "Subtype", "Rect", "AP", "AS", "F", "Border", "BS", "C", "CA", "QuadPoints", "OC"];
 
 const name = (v: PDFObject | undefined): string | undefined => (v instanceof PDFName ? v.decodeText() : undefined);
 
@@ -85,8 +89,10 @@ function flattenWidget(ctx: PDFContext, dict: PDFDict): PDFRef | null {
   const rect = dict.get(PDFName.of("Rect"));
   if (!normal || !rect) return null;
   const out = ctx.obj({ Type: "Annot", Subtype: "Stamp", Rect: rect, AP: { N: normal } }) as PDFDict;
-  const flags = dict.get(PDFName.of("F"));
-  if (flags) out.set(PDFName.of("F"), flags);
+  for (const key of ["F", "OC"]) {
+    const v = dict.get(PDFName.of(key));
+    if (v) out.set(PDFName.of(key), v);
+  }
   return ctx.register(out);
 }
 
@@ -108,39 +114,6 @@ function cleanPage(src: PDFDocument, index: number): void {
   }
 }
 
-/** Delete every indirect object that cannot be reached from the document catalog. */
-export function pruneUnreachable(ctx: PDFContext): number {
-  const seen = new Set<string>();
-  const stack: PDFObject[] = [];
-  const root = ctx.trailerInfo.Root;
-  if (root) stack.push(root);
-  if (ctx.trailerInfo.Info) stack.push(ctx.trailerInfo.Info);
-  while (stack.length) {
-    const obj = stack.pop()!;
-    if (obj instanceof PDFRef) {
-      const key = obj.toString();
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const target = ctx.lookup(obj);
-      if (target) stack.push(target);
-    } else if (obj instanceof PDFDict) {
-      for (const [, v] of obj.entries()) stack.push(v);
-    } else if (obj instanceof PDFArray) {
-      stack.push(...obj.asArray());
-    } else if (obj instanceof PDFStream) {
-      stack.push(obj.dict);
-    }
-  }
-  let removed = 0;
-  for (const [ref] of ctx.enumerateIndirectObjects()) {
-    if (!seen.has(ref.toString())) {
-      ctx.delete(ref);
-      removed++;
-    }
-  }
-  return removed;
-}
-
 /**
  * Build the redacted document: `redacted` replaces those pages, every other page of `source` is
  * copied as it is (in the original order).
@@ -153,8 +126,9 @@ export async function buildRedactedPdf(source: Uint8Array, redacted: readonly Re
   const count = src.getPageCount();
   const keep = src.getPageIndices().filter((i) => !byIndex.has(i));
   for (const i of keep) cleanPage(src, i);
-  const copied = new Map<number, Awaited<ReturnType<PDFDocument["copyPages"]>>[number]>();
-  if (keep.length) (await out.copyPages(src, keep)).forEach((page, k) => copied.set(keep[k]!, page));
+  const copied = new Map<number, PDFPage>();
+  // Strict: a page whose content cannot be read would otherwise keep its whole resources.
+  if (keep.length) (await copyPagesDetached(out, src, keep, { strict: true })).forEach((page, k) => copied.set(keep[k]!, page));
 
   for (let i = 0; i < count; i++) {
     const r = byIndex.get(i);

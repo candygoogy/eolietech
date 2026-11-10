@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { statSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { degrees, PDFDocument, pushGraphicsState, scale as scaleOp, StandardFonts } from "pdf-lib";
+import { degrees, PDFArray, PDFDict, PDFDocument, PDFName, PDFString, pushGraphicsState, scale as scaleOp, StandardFonts } from "pdf-lib";
 import { describe, expect, it } from "vitest";
 import { checkFile, folderFor, sourceUrl, validateSpec } from "../../../scripts/fetch-ocr-data.mjs";
 import { linesFromBlocks } from "./page-text";
@@ -206,5 +206,24 @@ describe("searchable PDF", () => {
     const source = await scannedPdf();
     const out = await buildSearchablePdf(source, [null, undefined]);
     expect((await extract(out)).map((p) => p.text)).toEqual(["", ""]);
+  });
+
+  it("keeps internal links pointing at the copied pages, and hidden layers hidden", async () => {
+    const doc = await PDFDocument.create();
+    const ctx = doc.context;
+    const p1 = doc.addPage([300, 300]);
+    const p2 = doc.addPage([300, 300]);
+    p1.node.set(PDFName.of("Annots"), ctx.obj([ctx.register(ctx.obj({ Type: "Annot", Subtype: "Link", Rect: [0, 0, 50, 50], Dest: [p2.ref, "Fit"] }))]));
+    const hidden = ctx.register(ctx.obj({ Type: "OCG", Name: PDFString.of("Hidden") }));
+    p2.node.set(PDFName.of("Resources"), ctx.obj({ Properties: { MC0: hidden } }));
+    p2.node.set(PDFName.of("Contents"), ctx.register(ctx.stream("/OC /MC0 BDC 0 0 10 10 re f EMC")));
+    doc.catalog.set(PDFName.of("OCProperties"), ctx.obj({ OCGs: [hidden], D: { OFF: [hidden] } }));
+    const out = await PDFDocument.load(await buildSearchablePdf(await doc.save(), [null, null]));
+
+    const link = out.getPage(0).node.lookup(PDFName.of("Annots"), PDFArray).lookup(0, PDFDict);
+    expect(link.lookup(PDFName.of("Dest"), PDFArray).get(0)).toBe(out.getPage(1).ref);
+    const layer = out.getPage(1).node.Resources()!.lookup(PDFName.of("Properties"), PDFDict).get(PDFName.of("MC0"));
+    const d = out.catalog.lookup(PDFName.of("OCProperties"), PDFDict).lookup(PDFName.of("D"), PDFDict);
+    expect(d.lookup(PDFName.of("OFF"), PDFArray).asArray()).toEqual([layer]);
   });
 });

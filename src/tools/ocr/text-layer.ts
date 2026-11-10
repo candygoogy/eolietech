@@ -24,7 +24,7 @@ import {
   type PDFOperator,
   type PDFPage,
 } from "pdf-lib";
-import { loadPdf } from "../pdf-shared/pdf-ops";
+import { copyPagesDetached, loadPdf, pruneUnreachable } from "../pdf-shared/pdf-ops";
 
 /** Affine matrix [a, b, c, d, e, f], as in PDF and PDF.js: x' = a*x + c*y + e, y' = b*x + d*y + f. */
 export type Matrix = [number, number, number, number, number, number];
@@ -207,8 +207,9 @@ export function addTextLayer(page: PDFPage, font: PDFFont, layer: PageLayer): bo
 }
 
 /**
- * The searchable copy: every page of `source` copied unchanged (pdf-lib copyPages), with an
- * invisible text layer on the pages that have one in `layers` (indexed by 0-based page number).
+ * The searchable copy: every page of `source` copied unchanged (copyPagesDetached: internal links
+ * point at the copied pages, layers keep their on/off state, form fields stay), with an invisible
+ * text layer on the pages that have one in `layers` (indexed by 0-based page number).
  */
 export async function buildSearchablePdf(source: Uint8Array, layers: (PageLayer | null | undefined)[]): Promise<Uint8Array> {
   const src = await loadPdf(source);
@@ -216,11 +217,13 @@ export async function buildSearchablePdf(source: Uint8Array, layers: (PageLayer 
   const title = src.getTitle();
   if (title) out.setTitle(title);
   const font = await out.embedFont(StandardFonts.Helvetica);
-  const pages = await out.copyPages(src, src.getPageIndices());
+  const pages = await copyPagesDetached(out, src, src.getPageIndices());
   pages.forEach((page, i) => {
     out.addPage(page);
     const layer = layers[i];
     if (layer && layer.lines.length > 0) addTextLayer(page, font, layer);
   });
+  await out.flush();
+  pruneUnreachable(out.context);
   return out.save({ useObjectStreams: true });
 }
