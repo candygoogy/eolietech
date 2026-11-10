@@ -5,6 +5,9 @@
   "compatibility_date": "2026-10-15",
   "compatibility_flags": ["nodejs_compat"],
   "upload_source_maps": true,
+  // Only eolietech.com serves the site: no indexable copy on *.workers.dev or on preview URLs.
+  "workers_dev": false,
+  "preview_urls": false,
   "observability": { "enabled": true },
   "assets": {
     "directory": "./dist",
