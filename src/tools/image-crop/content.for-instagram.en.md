@@ -1,6 +1,6 @@
 ---
-title: "Crop a photo for Instagram: 4:5, 3:4 or square | Eolietech"
-description: "Crop photos for Instagram feed posts in 4:5 portrait, 3:4 or square, at full resolution. JPG, PNG, WebP and AVIF, cropped in your browser and never uploaded."
+title: "Crop photos for Instagram: 4:5, 3:4 or square, free | Eolietech"
+description: "Free Instagram photo cropper, no app to install: crop to 4:5 (1080 x 1350 px), 3:4 or square, full resolution, in your browser. Photos are never uploaded."
 h1: "Crop for Instagram"
 intro: "The box opens at 4:5, the portrait shape Instagram has long used for feed posts, 1080 × 1350 px at full size. Move it over the part you want, or switch to 3:4 or 1:1, and save. Your photo is cropped in the browser and stays on your device until you post it."
 howTo:

@@ -1,6 +1,6 @@
 ---
 title: "Comprimere PDF in privato | Eolietech"
-description: "Riduci il peso dei PDF con Ghostscript, che gira nel tuo browser. Scegli un livello di qualità e confronta le dimensioni prima di scaricare. Nessun caricamento."
+description: "Gratis: riduci il peso dei PDF con Ghostscript, nel tuo browser. Scegli la qualità e confronta le dimensioni prima di scaricare. Nessun caricamento."
 h1: "Comprimere un PDF"
 intro: "Riduci un PDF quanto basta per allegarlo a un'email o caricarlo in un modulo. Scegli quanta qualità sei disposto a cedere in cambio di un file più leggero; lo strumento ti mostra il peso prima e dopo, e tiene l'originale se non riesce a fare di meglio."
 howTo:

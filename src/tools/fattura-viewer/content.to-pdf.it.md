@@ -1,6 +1,6 @@
 ---
 title: "Fattura elettronica in PDF gratis, da XML o .p7m | Eolietech"
-description: "Trasforma gratis la fattura elettronica XML o .xml.p7m in un PDF da stampare o archiviare. Senza programmi: tutto nel browser, la fattura non viene caricata."
+description: "Gratis: trasforma la fattura elettronica XML o .xml.p7m in un PDF da stampare o archiviare. Tutto nel browser, la fattura non viene caricata."
 h1: "Fattura elettronica in PDF"
 intro: "Hai il file .xml o .xml.p7m di una fattura e ti serve un PDF da stampare, inoltrare o mettere in una cartella? Trascinalo qui: il PDF si crea nel browser, con tutte le righe e il riepilogo IVA. La fattura non lascia il tuo dispositivo."
 howTo:

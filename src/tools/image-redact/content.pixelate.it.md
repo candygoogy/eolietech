@@ -1,6 +1,6 @@
 ---
-title: "Pixelare un'immagine o un volto, nel browser | Eolietech"
-description: "Pixela volti, passanti o qualsiasi parte di una foto con grossi blocchi quadrati. Disegni un riquadro, scegli la grandezza dei blocchi e salvi una copia. Non carichi niente."
+title: "Pixelare un'immagine o un volto, gratis, senza caricare | Eolietech"
+description: "Gratis: pixela un volto, i passanti o qualsiasi parte di una foto. Disegna un riquadro, scegli la grandezza dei blocchi e salva. Non carichi niente."
 h1: "Pixelare un'immagine"
 intro: "Disegna un riquadro su un volto o su qualsiasi parte della foto e diventa subito a grossi blocchi quadrati. La pixelatura fa capire a colpo d'occhio che qualcosa è stato nascosto apposta, e conserva i colori della scena. L'immagine non lascia mai il tuo dispositivo."
 howTo:

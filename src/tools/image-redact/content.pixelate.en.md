@@ -1,6 +1,6 @@
 ---
-title: "Pixelate an image or a face, in your browser | Eolietech"
-description: "Pixelate faces, people in the background or any part of a photo with large square blocks. Draw a box, set the block size and save a copy. Nothing is uploaded."
+title: "Pixelate an image or a face, free, no upload | Eolietech"
+description: "Free: pixelate a face, people in the background or any part of a photo. Draw a box, set the block size and save a copy. Nothing is uploaded."
 h1: "Pixelate an image"
 intro: "Draw a box over a face or any part of a picture and it turns into large square blocks right away. Pixelation makes it plain that something was hidden on purpose, and it keeps the colours of the scene. The image never leaves your device."
 howTo:

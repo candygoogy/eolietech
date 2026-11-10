@@ -1,6 +1,6 @@
 ---
 title: "Unire PDF nel browser | Eolietech"
-description: "Unisci più PDF in un unico file, nell'ordine che scegli tu. L'unione avviene nel browser, quindi i tuoi documenti non vengono mai caricati. Gratis, senza account."
+description: "Gratis: unisci più PDF in un unico file, nell'ordine che scegli. L'unione avviene nel browser, quindi i documenti non vengono mai caricati. Senza account."
 h1: "Unire PDF"
 intro: "Metti insieme più PDF in un unico documento. Aggiungi i file, mettili nell'ordine che preferisci e scarica un solo PDF unito. Il lavoro si svolge sul tuo dispositivo: non viene inviato niente a un server."
 howTo:

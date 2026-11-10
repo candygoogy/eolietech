@@ -1,6 +1,6 @@
 ---
 title: "Blur faces in a photo, privately in your browser | Eolietech"
-description: "Blur children's faces, people in the background or anyone who doesn't want to appear in your photo. Draw a box over each face and save a copy. Nothing is uploaded."
+description: "Free: blur children's faces, people in the background or anyone who doesn't want to appear in your photo. Draw a box, save a copy. Nothing is uploaded."
 h1: "Blur faces in a photo"
 intro: "Draw a box over each face you want to hide and it blurs right away in the preview. The blur is strong from the start and grows with the box, so a face close to the camera and one far in the background end up about as hard to recognise. The photo stays on your device."
 howTo:

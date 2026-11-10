@@ -1,6 +1,6 @@
 ---
 title: "Convertire PNG in JPG senza caricare nulla | Eolietech"
-description: "Converti immagini PNG e screenshot in file JPG più leggeri. Le zone trasparenti diventano bianche. Scegli la qualità e converti in blocco, tutto sul tuo dispositivo."
+description: "Gratis: converti PNG e screenshot in JPG più leggeri. Le zone trasparenti diventano bianche. Scegli la qualità, in blocco, senza caricare nulla."
 h1: "Convertitore da PNG a JPG"
 intro: "Trasforma file PNG pesanti in JPG compatti per email, documenti e moduli di caricamento con limiti di dimensione. Imposta la qualità, converti tanti file in una volta e tieni tutto sul tuo dispositivo."
 howTo:

@@ -1,6 +1,6 @@
 ---
-title: "Resize photos for email attachments | Eolietech"
-description: "Shrink phone photos to 1600 px JPGs so a whole set fits in one email. Up to 50 at a time, resized in your browser, so your photos are never uploaded."
+title: "Resize photos for email: reduce the size, free | Eolietech"
+description: "Free: reduce the size of phone photos for email. Each one becomes a 1600 px JPG, so a whole set fits in one message. Up to 50 at a time, never uploaded."
 h1: "Resize images for email"
 intro: "Photos straight from a phone often weigh 3 to 12 MB each, so a handful can push an email past its limit. This page turns them into 1600 px JPGs that still look sharp on any screen, without uploading them anywhere."
 howTo:

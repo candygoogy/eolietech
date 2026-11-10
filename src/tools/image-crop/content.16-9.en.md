@@ -1,6 +1,6 @@
 ---
-title: "Crop an image to 16:9 | Eolietech"
-description: "Crop photos and screenshots to 16:9 for video thumbnails, slides, banners and widescreen wallpapers. Full resolution, in your browser, with nothing uploaded."
+title: "Crop an image to 16:9, free and without uploading | Eolietech"
+description: "Free: crop photos and screenshots to 16:9 for video thumbnails, slides, banners and wallpapers. Full resolution, in your browser, nothing uploaded."
 h1: "Crop to 16:9"
 intro: "16:9 is the shape of most TVs, video players and presentation slides. The box opens at 16:9 and as wide as your image allows; move it over the part you want and save. The image never leaves your device."
 howTo:
@@ -29,7 +29,7 @@ A 16:9 image fits a YouTube thumbnail, a widescreen slide, a TV or most video pl
 
 ## Choosing what stays in the frame
 
-Most photos are squarer than 16:9, so the crop removes some of the top and bottom. A full-width 16:9 crop of a typical landscape phone photo (4:3) loses a quarter of its height. From a portrait phone photo it keeps less than half the height, so pick the part that matters and leave the rest out. Drag the box up or down until the horizon, the faces or the text sit where you want them.
+Most photos are squarer than 16:9, so the crop removes some of the top and bottom. A full-width 16:9 crop of a typical landscape phone photo (4:3) loses a quarter of its height. From a portrait phone photo it keeps less than half the height, so pick the part that matters and leave the rest out. Drag the box up or down until the horizon, the faces or the text sit where you want them. If you would rather keep the whole photo, [Fit an image to 16:9](/fit-image-to-16-9/) puts it inside a 16:9 frame on a blurred or plain background and cuts nothing off.
 
 To get an exact final size, such as 1280 × 720 or 1920 × 1080 px, crop here and then use [Resize images](/resize-image/). For other shapes, [Crop an image](/crop-image/) has every ratio and the free box.
 

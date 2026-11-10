@@ -1,6 +1,6 @@
 ---
 title: "Convertire AVIF in PNG mantenendo la trasparenza | Eolietech"
-description: "Converti le immagini AVIF in file PNG senza perdita, con gli sfondi trasparenti conservati. Conversione in blocco nel browser: le tue immagini non vengono mai caricate."
+description: "Gratis: converti le immagini AVIF in PNG senza perdita, con la trasparenza conservata. Conversione in blocco nel browser, senza caricare nulla."
 h1: "Convertitore da AVIF a PNG"
 intro: "Converti le immagini AVIF in PNG per aprirle in qualsiasi editor mantenendo la trasparenza. Il PNG conserva i pixel decodificati senza ulteriori perdite, e la conversione avviene interamente nel tuo browser."
 howTo:

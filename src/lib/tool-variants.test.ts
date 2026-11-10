@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getTool, publishedTools } from "../tools/registry";
 import { LOCALES } from "../tools/types";
-import { formatName, variantLinks } from "./tool-variants";
+import { formatName, pageH1, variantLinks } from "./tool-variants";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -12,8 +12,8 @@ describe("variantLinks", () => {
     const { converters, presets } = variantLinks(getTool("image-compress")!, "en");
     expect(presets).toEqual([]);
     expect(converters).toHaveLength(10);
-    expect(converters[0]).toEqual({ id: "webp-to-png", href: "/webp-to-png/", label: "WebP to PNG" });
-    expect(variantLinks(getTool("image-compress")!, "it").converters[0]).toEqual({
+    expect(converters[0]).toMatchObject({ id: "webp-to-png", href: "/webp-to-png/", label: "WebP to PNG" });
+    expect(variantLinks(getTool("image-compress")!, "it").converters[0]).toMatchObject({
       id: "webp-to-png",
       href: "/it/webp-in-png/",
       label: "WebP in PNG",
@@ -21,11 +21,11 @@ describe("variantLinks", () => {
   });
 
   it("labels presets from the dictionary, per locale", () => {
-    expect(variantLinks(getTool("image-resize")!, "en").presets).toEqual([
+    expect(variantLinks(getTool("image-resize")!, "en").presets).toMatchObject([
       { id: "for-email", href: "/resize-image-for-email/", label: "For email" },
       { id: "for-instagram", href: "/resize-image-for-instagram/", label: "For Instagram" },
     ]);
-    expect(variantLinks(getTool("image-resize")!, "it").presets[0]).toEqual({
+    expect(variantLinks(getTool("image-resize")!, "it").presets[0]).toMatchObject({
       id: "for-email",
       href: "/it/ridimensionare-immagini-per-email/",
       label: "Per email",
@@ -66,5 +66,28 @@ describe("formatName", () => {
   it("writes WebP in mixed case and other formats in capitals", () => {
     expect(formatName("webp")).toBe("WebP");
     expect(formatName("avif")).toBe("AVIF");
+  });
+});
+
+describe("variant link names", () => {
+  it("reads each page's H1 as the link name", () => {
+    expect(pageH1("image-crop", "en", "square")).toBe("Crop to a square");
+    expect(variantLinks(getTool("image-resize")!, "en").presets.map((p) => p.name)).toEqual([
+      "Resize images for email",
+      "Resize images for Instagram",
+    ]);
+  });
+
+  it("gives every preset and converter on the tools index a name no other link shares", () => {
+    for (const locale of LOCALES) {
+      const seen = new Map<string, string>();
+      for (const tool of publishedTools()) {
+        const { converters, presets } = variantLinks(tool, locale);
+        for (const link of [...converters, ...presets]) {
+          expect(seen.get(link.name), `${locale}: "${link.name}" for ${link.href}`).toBeUndefined();
+          seen.set(link.name, link.href);
+        }
+      }
+    }
   });
 });

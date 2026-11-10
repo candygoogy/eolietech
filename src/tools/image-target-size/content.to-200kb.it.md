@@ -1,6 +1,6 @@
 ---
 title: "Ridurre una foto a 200 KB | Eolietech"
-description: "Porta le foto sotto i 200 KB per un forum, un sito meno recente o un'email più leggera, con ancora molti dettagli. JPG o WebP, fino a 50 alla volta, nel browser."
+description: "Gratis: porta le foto sotto i 200 KB per un forum, un sito datato o un'email leggera, con ancora molti dettagli. JPG o WebP, nel browser, senza caricarle."
 h1: "Comprimi foto a 200 KB"
 intro: "Forum, CMS meno recenti e alcuni moduli online si fermano a circa 200 KB per immagine. Bastano per una foto che si vede ancora bene a tutto schermo su un portatile. Aggiungi qui le foto e ognuna torna sotto i 200.000 byte, compressa nel browser, quindi non viene caricato niente."
 howTo:

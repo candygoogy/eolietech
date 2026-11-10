@@ -1,6 +1,6 @@
 ---
 title: "Unlock PDF: remove the password from a PDF | Eolietech"
-description: "Remove the password from a PDF when you know it, or lift printing and copying restrictions. It runs in your browser, so the file and the password are never uploaded."
+description: "Free: remove the password from a PDF when you know it, or lift printing and copying limits. In your browser, so file and password are never uploaded."
 h1: "Unlock PDF"
 intro: "Remove the password from a PDF you already know the password for, so the file opens without it and works in other PDF tools. Files that open freely but block printing, copying or editing have those restrictions removed, with no password needed. Nothing is guessed or cracked, and the PDF and the password stay in this browser tab."
 howTo:

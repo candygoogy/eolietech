@@ -1,6 +1,6 @@
 ---
-title: "Filigrana PDF: aggiungi una scritta o un logo, gratis dal browser | Eolietech"
-description: "Metti RISERVATO, BOZZA, un nome o il tuo logo su tutte le pagine di un PDF, o solo su alcune. Scegli dimensione, colore, inclinazione e opacità. È gratis e il PDF non viene caricato."
+title: "Filigrana PDF: aggiungi una scritta o un logo, gratis | Eolietech"
+description: "Gratis: metti RISERVATO, BOZZA, un nome o il tuo logo su ogni pagina di un PDF o solo su alcune. Dimensione, colore, angolo, opacità. Senza caricarlo."
 h1: "Filigrana su PDF"
 intro: "Segna un PDF come bozza o come riservato, scrivi su una copia a chi è destinata o mettici il tuo logo. Scrivi il testo o scegli l'immagine, guarda l'anteprima mentre la sistemi e salva una copia con la filigrana. Il PDF resta sul tuo dispositivo."
 howTo:

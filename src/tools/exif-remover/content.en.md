@@ -1,6 +1,6 @@
 ---
 title: "Remove EXIF data from photos, location included | Eolietech"
-description: "See what your photos reveal, like the GPS location where they were taken, then remove it without touching the picture. JPG, PNG and WebP, all in your browser."
+description: "Free: see what your photos reveal, like GPS location, then remove it without touching the picture. JPG, PNG and WebP, in your browser, nothing uploaded."
 h1: "Remove EXIF data"
 intro: "Photos carry hidden details: often the exact spot where they were taken, the phone that took them and the time. Drop yours here to see what each one says, then remove it. The picture itself is not touched, and nothing is uploaded."
 howTo:

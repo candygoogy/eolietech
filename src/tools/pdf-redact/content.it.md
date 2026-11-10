@@ -1,6 +1,6 @@
 ---
 title: "Oscurare PDF: copri il testo per davvero, nel browser | Eolietech"
-description: "Oscura nomi, indirizzi, IBAN e numeri di telefono in un PDF. Il testo sotto i riquadri viene tolto dal file, non solo coperto. Funziona nel browser, non carichi niente."
+description: "Gratis: oscura nomi, IBAN e numeri di telefono in un PDF per davvero. Il testo sotto i riquadri viene tolto dal file, non solo coperto. Non carichi niente."
 h1: "Oscurare PDF"
 intro: "Prima di mandare un PDF a qualcuno, nascondi un nome, un numero di conto o un paragrafo intero. Disegna i riquadri neri o fai cercare allo strumento quello che va tolto, controlla, e salva una copia in cui quel testo non c'è più, invece di essere solo coperto. Il PDF non lascia mai il tuo dispositivo."
 howTo:
@@ -9,6 +9,8 @@ howTo:
   - "Controlla ogni riquadro. Trascinalo per spostarlo, trascina i bordi per cambiarne la misura e premi la piccola × per toglierlo."
   - "Premi Oscura e salva, poi scarica il nuovo PDF. Il file originale resta com'era."
 faq:
+  - q: "Come si annerisce il testo in un PDF?"
+    a: "Apri il PDF qui, poi trascina un riquadro sopra il testo da nascondere, oppure scrivi una parola nel campo di ricerca per annerire ogni punto in cui compare. Premi Oscura e salva. Nel nuovo PDF il testo annerito non c'è più nel file, quindi non si può copiare né cercare, e durante il lavoro non viene caricato niente."
   - q: "Il testo sotto i riquadri sparisce davvero?"
     a: "Sì. Ogni pagina con un riquadro viene ridisegnata come immagine, con i riquadri dipinti di nero pieno, e nel nuovo PDF quella pagina contiene solo l'immagine. Testo, caratteri e disegni originali della pagina non vengono copiati nel nuovo file, quindi sotto non resta niente da selezionare, copiare o cercare."
   - q: "Perché la pagina oscurata sembra un po' meno nitida?"

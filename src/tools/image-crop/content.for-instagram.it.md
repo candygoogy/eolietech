@@ -1,6 +1,6 @@
 ---
-title: "Ritagliare foto per Instagram: 4:5, 3:4 o quadrato | Eolietech"
-description: "Ritaglia le foto per i post del feed di Instagram in verticale 4:5, in 3:4 o in quadrato, a piena risoluzione. JPG, PNG, WebP e AVIF, nel browser, senza caricarle."
+title: "Ritagliare foto per Instagram: 4:5, 3:4 o quadrato, gratis | Eolietech"
+description: "Gratis: ritaglia le foto per Instagram in 4:5 (1080 x 1350 px), 3:4 o quadrato, a piena risoluzione. Nel browser, senza app e senza caricare le foto."
 h1: "Ritaglia per Instagram"
 intro: "Il riquadro si apre in 4:5, il formato verticale che Instagram usa da anni per i post del feed, 1080 × 1350 px a misura piena. Spostalo sulla parte che vuoi, oppure passa a 3:4 o a 1:1, e salva. La foto viene ritagliata nel browser e resta sul tuo dispositivo finché non la pubblichi."
 howTo:

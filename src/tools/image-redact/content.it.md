@@ -1,6 +1,6 @@
 ---
 title: "Oscurare parte di una foto o di uno screenshot | Eolietech"
-description: "Copri nomi, IBAN, numeri d'ordine, volti e targhe in uno screenshot o in una foto, con un riquadro nero, la sfocatura o i pixel. Funziona nel browser, non carichi niente."
+description: "Gratis: copri nomi, IBAN, numeri d'ordine, volti e targhe in uno screenshot o una foto, con riquadro nero, sfocatura o pixel. Non carichi niente."
 h1: "Oscurare parte di una foto"
 intro: "Prima di pubblicare uno screenshot o mandare una foto, nascondi quello che gli altri non devono vedere: un nome, un IBAN, un numero d'ordine, un volto, una targa. Disegna un riquadro su ognuno, scegli tra riquadro nero, sfocatura e pixel e salva una copia. L'immagine non lascia mai il tuo dispositivo."
 howTo:

@@ -1,6 +1,6 @@
 ---
 title: "Ridimensionare foto per email, gratis e senza caricarle | Eolietech"
-description: "Gratis: riduci le foto del telefono a JPG da 1600 px, così ne alleghi tante in una sola email. Fino a 50 alla volta, nel browser: le tue foto non vengono mai caricate."
+description: "Gratis: riduci le foto del telefono a JPG da 1600 px, così ne alleghi tante in una sola email. Fino a 50 alla volta, mai caricate."
 h1: "Ridimensiona per email"
 intro: "Le foto appena scattate con il telefono pesano spesso da 3 a 12 MB l'una, e ne bastano poche per superare il limite di un'email. Qui diventano JPG da 1600 px, ancora nitidi su qualsiasi schermo, senza caricarle da nessuna parte."
 howTo:

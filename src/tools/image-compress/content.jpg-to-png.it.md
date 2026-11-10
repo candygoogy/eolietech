@@ -1,6 +1,6 @@
 ---
 title: "Convertire JPG in PNG per modifiche senza perdita | Eolietech"
-description: "Converti le foto JPG in file PNG senza perdita, così le modifiche successive non aggiungono altri danni da compressione. Conversione in blocco nel browser, senza caricare nulla."
+description: "Gratis: converti le foto JPG in PNG senza perdita, così le modifiche successive non aggiungono altra compressione. In blocco, senza caricare nulla."
 h1: "Convertitore da JPG a PNG"
 intro: "Converti le immagini JPG in PNG quando ti serve un file senza perdita da modificare, annotare o passare a un programma che richiede il PNG. La conversione avviene nel browser e le tue foto restano sul tuo dispositivo."
 howTo:

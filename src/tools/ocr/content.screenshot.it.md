@@ -1,6 +1,6 @@
 ---
 title: "Estrarre testo da uno screenshot e copiarlo (OCR) | Eolietech"
-description: "Copia il testo di uno screenshot: una chat, un'app, un video, una pagina web. L'OCR gira nel tuo browser, in italiano o in inglese, e lo screenshot non viene mai caricato."
+description: "Gratis: copia il testo di uno screenshot: una chat, un'app, un video, una pagina web. L'OCR gira nel browser, in italiano o inglese, senza caricarlo."
 h1: "Estrarre testo da uno screenshot"
 intro: "Certi testi li vedi ma non li puoi selezionare: un messaggio dentro un'app, i sottotitoli di un video in pausa, una pagina che blocca la copia, una slide condivisa in videochiamata. Fai uno screenshot, aggiungilo qui e ottieni le parole come testo normale, da copiare, cercare o incollare dove ti serve. Lo screenshot viene letto sul tuo dispositivo e non viene mai caricato."
 howTo:

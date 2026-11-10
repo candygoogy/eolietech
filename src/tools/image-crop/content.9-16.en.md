@@ -1,6 +1,6 @@
 ---
 title: "Crop an image to 9:16 for Stories and Reels | Eolietech"
-description: "Crop photos to 9:16 for Instagram and Facebook Stories, Reels, TikTok, YouTube Shorts and phone wallpapers. Full resolution, in your browser, nothing uploaded."
+description: "Free: crop photos to 9:16 for Stories, Reels, TikTok, YouTube Shorts and phone wallpapers. Full resolution, in your browser, nothing uploaded."
 h1: "Crop to 9:16"
 intro: "9:16 is the tall, full-screen shape of Stories, Reels, TikTok and YouTube Shorts. The box opens at 9:16 and as tall as your image allows, so you only move it over the part you want and save. The crop runs in your browser, and the image stays on your device."
 howTo:

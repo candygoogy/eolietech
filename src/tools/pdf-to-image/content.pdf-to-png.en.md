@@ -1,6 +1,6 @@
 ---
 title: "PDF to PNG: free converter with sharp pages, no upload | Eolietech"
-description: "Free: save PDF pages as PNG images with sharp text and lines, at 72, 150 or 300 dpi. Pick all pages or a few. Runs in your browser; the PDF is never uploaded."
+description: "Free: save PDF pages as PNG images with sharp text and lines, at 72, 150 or 300 dpi. All pages or a few. In your browser; the PDF is never uploaded."
 h1: "PDF to PNG"
 intro: "Turn PDF pages into PNG images that keep text, lines and charts perfectly sharp, ready for slides, documentation or editing. The PDF stays on your device the whole time."
 howTo:

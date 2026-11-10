@@ -1,6 +1,6 @@
 ---
 title: "Compress an image to 20 KB | Eolietech"
-description: "Get a scanned signature or a passport-style photo under 20 KB for an online form. JPG or WebP, up to 50 at a time, compressed in your browser, never uploaded."
+description: "Free: get a scanned signature or a passport-style photo under 20 KB for an online form. JPG or WebP, up to 50 at a time, in your browser, never uploaded."
 h1: "Compress an image to 20 KB"
 intro: "Government, exam and application forms sometimes ask for a scanned signature or a passport-style photo of 20 KB or less. Add yours here and get a file under 20,000 bytes at the best quality that size allows, without sending your signature or your face to any server."
 howTo:

@@ -1,7 +1,7 @@
 {
   "site.name": "Eolietech",
   "site.tagline": "Free tools for images, PDFs and audio that run in your browser. Your files never leave your device.",
-  "site.description": "Free, privacy-first tools for images, PDFs and audio. Everything runs in your browser: your files never leave your device. No ads, no accounts.",
+  "site.description": "Free, privacy-first tools for images, PDFs, documents and audio. They run in your browser, so files never leave your device. No ads, no accounts.",
 
   "a11y.skipToContent": "Skip to content",
 
@@ -142,8 +142,8 @@
   "home.pro.body": "Some jobs are too heavy for a browser. Pro will add server and AI features and an API, as an optional paid plan. The free tools stay free.",
   "home.pro.link": "Join the waitlist",
 
-  "tools.title": "All tools | Eolietech",
-  "tools.description": "Every Eolietech tool for images, PDFs and audio. All of them run in your browser, so your files stay on your device.",
+  "tools.title": "All free tools: images, PDF, documents, no upload | Eolietech",
+  "tools.description": "Every free Eolietech tool for images, PDFs, documents and audio. All run in your browser, so your files stay on your device.",
   "tools.h1": "All tools",
   "tools.lede": "Every tool here runs in your browser. Your files stay on your device, and there are no accounts, no ads and no daily caps.",
   "tools.stamp": "no outgoing mail",
@@ -151,6 +151,7 @@
   "tools.open": "Open",
   "tools.converters": "Format converters",
   "tools.presets": "Presets",
+  "tools.jump": "Jump to",
   "tools.convert": "{from} to {to}",
   "tools.limits.many": "Up to {files} files at a time, {size} each.",
   "tools.limits.one": "One file at a time, up to {size}.",
@@ -287,8 +288,8 @@
   "waitlist.privacyLink": "Privacy policy",
   "waitlist.noscript": "The waitlist form needs JavaScript for its spam check.",
 
-  "about.title": "About | Eolietech",
-  "about.description": "Eolietech is a set of private file tools made by candygoogy, a developer from the Aeolian Islands. Why it runs in your browser, and why the code is open source.",
+  "about.title": "About Eolietech: free private file tools, open source | Eolietech",
+  "about.description": "Eolietech is a set of private file tools made by candygoogy, a developer from the Aeolian Islands. Why it runs in your browser, and why it is open source.",
   "about.h1": "About Eolietech",
   "about.lede": "A set of file tools that work without uploading your files, made by one developer from the Aeolian Islands.",
   "about.stamp": "one person",
@@ -314,10 +315,11 @@
   "about.money.h2": "How it pays for itself",
   "about.money.p1": "The free tools cost very little to run, because your device does the work. A paid plan, Pro, will come later for features that need servers, such as large AI models and an API. There are no ads.",
   "about.cta.security": "How to check the privacy claims",
+  "about.cta.guide": "How to check whether a website uploads your files",
   "about.cta.pricing": "Pricing and the Pro waitlist",
 
   "security.title": "Security: check that your files stay private | Eolietech",
-  "security.description": "How to confirm that Eolietech never uploads your files: the Content-Security-Policy header, the Network panel test, the offline test and the open source code.",
+  "security.description": "How to confirm Eolietech never uploads your files: the Content-Security-Policy header, the Network panel, an offline test and the open source code.",
   "security.h1": "Check it yourself",
   "security.lede": "Eolietech says your files never leave your device. This page shows how to confirm that with nothing but your browser.",
   "security.stamp": "open for inspection",
@@ -361,7 +363,7 @@
   "security.guide": "The same checks work on any other site that handles files.",
   "security.guide.link": "How to check any website for uploads",
   "guide.title": "How to check if a website uploads your files | Eolietech",
-  "guide.description": "A step-by-step way to tell whether an online converter or compressor uploads your files, using only your browser: the Network panel, an offline test and the Content-Security-Policy header.",
+  "guide.description": "Does an online converter or compressor upload your files? Find out with only your browser: the Network panel, an offline test and the CSP header.",
   "guide.h1": "Does this website upload your files?",
   "guide.lede": "Plenty of online converters promise to delete your files after an hour. Fewer can say they never receive them. With nothing but your browser, you can see which kind a site is.",
   "guide.stamp": "try it anywhere",
@@ -406,7 +408,7 @@
   "guide.ours.link": "Check Eolietech",
 
   "privacy.title": "Privacy policy: what Eolietech keeps, and why | Eolietech",
-  "privacy.description": "Your files never leave your device. The Eolietech privacy policy lists everything the site does handle: the Pro waitlist email, the spam check, hosting, and your rights under the GDPR.",
+  "privacy.description": "Your files never leave your device. What the Eolietech privacy policy covers: the Pro waitlist email, the spam check, hosting and your GDPR rights.",
   "privacy.h1": "Privacy policy",
   "privacy.lede": "Your files never leave your device, so this list is short. Here is everything the site does handle, who handles it, and how to have it deleted.",
   "privacy.stamp": "everything declared",

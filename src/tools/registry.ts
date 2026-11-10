@@ -32,7 +32,7 @@ export const tools: ToolDef[] = [
       convert("avif", "png"),
     ],
     related: ["image-resize", "image-crop", "exif-remover", "heic-to-jpg", "background-remover"],
-    updated: "2026-10-17",
+    updated: "2026-11-10",
   },
   {
     id: "image-target-size",
@@ -66,7 +66,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["image-compress", "image-resize", "image-to-pdf"],
-    updated: "2026-10-28",
+    updated: "2026-11-10",
   },
   {
     id: "heic-to-jpg",
@@ -79,7 +79,7 @@ export const tools: ToolDef[] = [
     limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
     variants: [convert("heic", "png")],
     related: ["image-compress"],
-    updated: "2026-10-25",
+    updated: "2026-11-10",
   },
   {
     id: "image-resize",
@@ -103,7 +103,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["image-crop", "image-compress"],
-    updated: "2026-10-18",
+    updated: "2026-11-10",
   },
   {
     id: "image-crop",
@@ -137,7 +137,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["image-fit", "image-resize", "image-compress"],
-    updated: "2026-10-25",
+    updated: "2026-11-10",
   },
   {
     id: "image-fit",
@@ -161,7 +161,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["image-crop", "image-resize", "image-compress"],
-    updated: "2026-10-27",
+    updated: "2026-11-10",
   },
   {
     id: "image-redact",
@@ -185,7 +185,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["exif-remover", "pdf-redact", "image-crop"],
-    updated: "2026-10-28",
+    updated: "2026-11-10",
   },
   {
     id: "exif-remover",
@@ -204,7 +204,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["image-compress", "image-resize", "heic-to-jpg"],
-    updated: "2026-10-19",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-merge",
@@ -216,7 +216,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 500 * MiB, maxFiles: 50 } },
     related: ["pdf-split", "pdf-organize", "pdf-compress", "image-to-pdf"],
-    updated: "2026-10-17",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-split",
@@ -228,7 +228,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 500 * MiB, maxFiles: 1 } },
     related: ["pdf-merge", "pdf-organize", "pdf-compress"],
-    updated: "2026-10-17",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-organize",
@@ -240,7 +240,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 500 * MiB, maxFiles: 1 } },
     related: ["pdf-merge", "pdf-split", "pdf-compress"],
-    updated: "2026-10-17",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-compress",
@@ -259,7 +259,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["pdf-merge", "pdf-split", "pdf-password", "image-compress"],
-    updated: "2026-10-25",
+    updated: "2026-11-10",
   },
   {
     id: "image-to-pdf",
@@ -272,7 +272,7 @@ export const tools: ToolDef[] = [
     limits: { free: { maxBytes: 100 * MiB, maxFiles: 50 } },
     variants: [convert("png", "pdf"), convert("heic", "pdf")],
     related: ["pdf-to-image", "pdf-merge", "pdf-compress"],
-    updated: "2026-10-19",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-to-image",
@@ -285,7 +285,7 @@ export const tools: ToolDef[] = [
     limits: { free: { maxBytes: 500 * MiB, maxFiles: 1 } },
     variants: [convert("pdf", "png")],
     related: ["image-to-pdf", "pdf-split", "image-compress"],
-    updated: "2026-10-19",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-redact",
@@ -297,7 +297,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 1 } },
     related: ["pdf-sign", "exif-remover", "pdf-compress"],
-    updated: "2026-10-19",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-password",
@@ -316,7 +316,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["pdf-redact", "pdf-compress", "pdf-sign"],
-    updated: "2026-10-27",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-page-numbers",
@@ -328,7 +328,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 1 } },
     related: ["pdf-watermark", "pdf-merge", "pdf-organize"],
-    updated: "2026-10-28",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-watermark",
@@ -340,7 +340,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 1 } },
     related: ["pdf-page-numbers", "pdf-password", "pdf-sign"],
-    updated: "2026-10-28",
+    updated: "2026-11-10",
   },
   {
     id: "pdf-sign",
@@ -352,7 +352,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 1 } },
     related: ["pdf-redact", "p7m-opener", "pdf-merge"],
-    updated: "2026-10-19",
+    updated: "2026-11-10",
   },
   {
     id: "ocr",
@@ -376,7 +376,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["pdf-to-image", "image-to-pdf", "fattura-viewer"],
-    updated: "2026-10-25",
+    updated: "2026-11-10",
   },
   {
     id: "p7m-opener",
@@ -389,7 +389,7 @@ export const tools: ToolDef[] = [
     limits: { free: { maxBytes: 100 * MiB, maxFiles: 20 } },
     variants: [convert("p7m", "pdf")],
     related: ["fattura-viewer", "pdf-merge", "pdf-compress"],
-    updated: "2026-10-19",
+    updated: "2026-11-10",
   },
   {
     id: "fattura-viewer",
@@ -408,7 +408,7 @@ export const tools: ToolDef[] = [
       },
     ],
     related: ["p7m-opener", "pdf-merge"],
-    updated: "2026-10-19",
+    updated: "2026-11-10",
   },
   {
     id: "background-remover",
@@ -420,7 +420,7 @@ export const tools: ToolDef[] = [
     locales: ["en", "it"],
     limits: { free: { maxBytes: 50 * MiB, maxFiles: 20 } },
     related: ["image-compress", "heic-to-jpg"],
-    updated: "2026-10-17",
+    updated: "2026-11-10",
   },
   {
     id: "audio-transcribe",
@@ -431,8 +431,8 @@ export const tools: ToolDef[] = [
     wave: 2,
     locales: ["en", "it"],
     limits: { free: { maxBytes: 200 * MiB, maxFiles: 1 } },
-    related: [],
-    updated: "2026-10-17",
+    related: ["ocr", "pdf-redact"],
+    updated: "2026-11-10",
   },
 ];
 

@@ -1,6 +1,6 @@
 ---
 title: "Comprimere una foto sotto i 100 KB | Eolietech"
-description: "Porta la foto del curriculum o la foto profilo sotto i 100 KB per un portale di lavoro o un modulo online. JPG o WebP, fino a 50 alla volta, nel tuo browser."
+description: "Gratis: porta la foto del curriculum o la foto profilo sotto i 100 KB per un portale di lavoro o un modulo. JPG o WebP, nel browser, senza caricarla."
 h1: "Comprimi foto a 100 KB"
 intro: "Portali di lavoro, iscrizioni universitarie e pagine profilo limitano spesso le immagini a circa 100 KB. Aggiungi qui le foto e ognuna torna sotto i 100.000 byte con la qualità migliore possibile, compressa nel browser, quindi non viene caricato niente."
 howTo:

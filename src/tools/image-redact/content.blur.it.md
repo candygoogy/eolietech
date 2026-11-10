@@ -1,6 +1,6 @@
 ---
 title: "Sfocare i volti in una foto, gratis e senza caricarla | Eolietech"
-description: "Gratis: sfoca i volti dei bambini, le persone sullo sfondo o chi non vuole comparire in una foto. Disegni un riquadro su ogni volto e salvi una copia. Non carichi niente."
+description: "Gratis: sfoca i volti dei bambini, le persone sullo sfondo o chi non vuole comparire in una foto. Disegna un riquadro e salva. Non carichi niente."
 h1: "Sfocare i volti in una foto"
 intro: "Disegna un riquadro su ogni volto da nascondere e nell'anteprima si sfoca subito. La sfocatura è già forte in partenza e cresce con il riquadro, così un volto in primo piano e uno in fondo alla foto diventano difficili da riconoscere più o meno allo stesso modo. La foto resta sul tuo dispositivo."
 howTo:

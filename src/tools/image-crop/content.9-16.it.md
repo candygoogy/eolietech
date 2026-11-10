@@ -1,6 +1,6 @@
 ---
 title: "Ritagliare un'immagine in 9:16 per storie e Reel | Eolietech"
-description: "Ritaglia foto in 9:16 per storie di Instagram e Facebook, Reel, TikTok, YouTube Shorts e sfondi del telefono. A piena risoluzione, nel browser, senza caricare nulla."
+description: "Gratis: ritaglia foto in 9:16 per storie, Reel, TikTok, YouTube Shorts e sfondi del telefono. A piena risoluzione, nel browser, senza caricare nulla."
 h1: "Ritaglia in 9:16"
 intro: "9:16 è il formato verticale a tutto schermo di storie, Reel, TikTok e YouTube Shorts. Il riquadro si apre già in 9:16 e alto quanto l'immagine consente, quindi basta spostarlo sulla parte che vuoi e salvare. Il ritaglio avviene nel browser e l'immagine resta sul tuo dispositivo."
 howTo:

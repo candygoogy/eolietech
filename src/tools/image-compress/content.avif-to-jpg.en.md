@@ -1,6 +1,6 @@
 ---
-title: "Convert AVIF to JPG that opens anywhere | Eolietech"
-description: "Convert AVIF images to JPG for apps and sites that do not support AVIF yet. Choose the quality and convert in batches, privately in your browser."
+title: "Convert AVIF to JPG, free and without uploading | Eolietech"
+description: "Free: convert AVIF images to JPG for the apps and sites that can't open AVIF yet. Choose the quality, convert in batches, all in your browser."
 h1: "AVIF to JPG converter"
 intro: "Got an .avif file that your editor, phone or upload form will not open? Convert it to a regular JPG here. You pick the quality, and the conversion happens on your own device."
 howTo:

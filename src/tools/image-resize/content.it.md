@@ -1,6 +1,6 @@
 ---
 title: "Ridimensionare immagini nel browser | Eolietech"
-description: "Ridimensiona immagini JPG, PNG, WebP e AVIF per larghezza, altezza o percentuale, fino a 50 alla volta. Tutto avviene nel browser: non viene caricato niente."
+description: "Gratis: ridimensiona immagini JPG, PNG, WebP e AVIF per larghezza, altezza o percentuale, fino a 50 alla volta. Nel browser, senza caricare niente."
 h1: "Ridimensiona le immagini"
 intro: "Porta le immagini a una larghezza, un'altezza o una percentuale precisa, una sola o 50 insieme. Il ridimensionamento avviene sul tuo dispositivo, quindi le immagini non vengono mai caricate."
 howTo:

@@ -1,6 +1,6 @@
 ---
 title: "Italian e-invoice viewer: open FatturaPA XML and .p7m | Eolietech"
-description: "Open Italian electronic invoices in XML, signed .xml.p7m files included, and read them as a clear page or save them as PDF. All in your browser; the invoice is never uploaded."
+description: "Free: open Italian e-invoices in XML, signed .xml.p7m files included, and read them as a clear page or save a PDF. In your browser, never uploaded."
 h1: "Italian e-invoice viewer"
 intro: "The .xml file of an Italian e-invoice is not meant for human eyes. Drop it here, even if it is a signed .p7m, and you get the supplier, lines, VAT and payment laid out like a paper invoice. Save it as a PDF if you need one. The file stays on your device."
 howTo:

@@ -1,6 +1,6 @@
 ---
 title: "Fit a photo to 9:16 for Stories without cropping | Eolietech"
-description: "Post a whole landscape or square photo to Instagram Stories, Reels or TikTok in a 9:16 frame, on a blurred or plain background. In your browser, never uploaded."
+description: "Free: put a whole landscape or square photo in a 9:16 frame for Stories, Reels or TikTok, on a blurred or plain background. Never uploaded."
 h1: "Fit an image to 9:16"
 intro: "Stories, Reels, TikTok and YouTube Shorts fill an upright phone screen, so with a landscape or square photo the app either zooms in and cuts off the sides, or adds a background it picks for you. Here the whole photo goes into a 9:16 frame, with a blurred copy of it, black, white or a colour you choose above and below. Up to 50 photos at a time, and they stay on your device."
 howTo:

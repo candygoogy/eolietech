@@ -1,6 +1,6 @@
 ---
 title: "Da PDF a PNG: pagine nitide, senza caricare niente | Eolietech"
-description: "Salva le pagine di un PDF come immagini PNG con testo e linee nitidi, a 72, 150 o 300 dpi. Tutte le pagine o solo alcune. Funziona nel browser; il PDF non viene mai caricato."
+description: "Gratis: salva le pagine di un PDF come PNG con testo e linee nitidi, a 72, 150 o 300 dpi. Tutte o solo alcune. Nel browser, il PDF non viene caricato."
 h1: "Da PDF a PNG"
 intro: "Trasforma le pagine di un PDF in immagini PNG che tengono testo, linee e grafici perfettamente nitidi, pronte per slide, documentazione o ritocchi. Il PDF resta sempre sul tuo dispositivo."
 howTo:

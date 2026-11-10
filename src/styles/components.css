@@ -1133,7 +1133,8 @@ a.tool-index__row:focus-visible::after {
 
 .tool-index__converters ul {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(6.25rem, 1fr));
+  /* Preset links carry each page's full H1, so columns fit a short title. */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
   gap: 0 var(--space-3);
   padding: 0;
   list-style: none;

@@ -1,6 +1,6 @@
 ---
 title: "Reduce a photo to 50 KB | Eolietech"
-description: "Compress an application photo or an ID scan to under 50 KB for an online form. JPG or WebP, up to 50 at a time, done in your browser so nothing is uploaded."
+description: "Free: compress an application photo or an ID scan to under 50 KB for an online form. JPG or WebP, up to 50 at a time, in your browser, never uploaded."
 h1: "Compress an image to 50 KB"
 intro: "Many online applications cap the photo or the scan of your ID at 50 KB. Add your files here and each one comes back under 50,000 bytes at the best quality that fits, compressed on your device so your documents are never uploaded."
 howTo:

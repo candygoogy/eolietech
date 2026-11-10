@@ -5,13 +5,26 @@
  * Only pages that are built: published tools, in a locale the tool has, with a slug in that locale.
  */
 import { localePath, t } from "../i18n";
+import { contentFileName } from "../tools/content-files";
 import { publishedTools, toolPages } from "../tools/registry";
 import type { Locale, ToolDef, ToolVariant } from "../tools/types";
 
 export interface VariantLink {
   id: string;
   href: string;
+  /** Compact label, for chips next to the page they belong to ("Square", "20 KB"). */
   label: string;
+  /** The target page's H1: the link text wherever the link stands alone ("Crop to a square"). */
+  name: string;
+}
+
+const rawContent = import.meta.glob<string>("../tools/*/content*.md", { query: "?raw", import: "default", eager: true });
+
+/** The H1 of a tool page, read from the frontmatter of its content file. */
+export function pageH1(toolId: string, locale: Locale, variantId?: string): string | undefined {
+  const raw = rawContent[`../tools/${toolId}/${contentFileName(locale, variantId)}`];
+  const quoted = raw?.match(/^h1: (".*")s*$/m)?.[1];
+  return quoted ? (JSON.parse(quoted) as string) : undefined;
 }
 
 /** File format names as written (data, not copy). */
@@ -33,7 +46,8 @@ export function variantLinks(tool: ToolDef, locale: Locale): { converters: Varia
   if (!publishedTools().some((p) => p.id === tool.id)) return { converters, presets };
   for (const { slug, variant } of toolPages(tool, locale)) {
     if (!variant) continue;
-    const link = { id: variant.id, href: localePath(locale, slug), label: variantLabel(tool.id, variant, locale) };
+    const label = variantLabel(tool.id, variant, locale);
+    const link = { id: variant.id, href: localePath(locale, slug), label, name: pageH1(tool.id, locale, variant.id) ?? label };
     (isConverter(variant) ? converters : presets).push(link);
   }
   return { converters, presets };

@@ -1,6 +1,6 @@
 ---
 title: "Screenshot to text (OCR): copy the text, free | Eolietech"
-description: "Free: copy the text out of a screenshot of a chat, an app, a video or a web page. OCR runs in your browser in English or Italian, and the screenshot is never uploaded."
+description: "Free: copy the text out of a screenshot of a chat, an app, a video or a web page. OCR runs in your browser, in English or Italian. Never uploaded."
 h1: "Screenshot to text"
 intro: "Some text you can see but can't select: a message inside an app, a caption on a paused video, a page that blocks copying, a slide someone shared on a call. Take a screenshot, add it here and you get the words back as plain text you can copy, search or paste somewhere else. The screenshot is read on your device and never uploaded."
 howTo:

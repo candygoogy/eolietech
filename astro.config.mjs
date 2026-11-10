@@ -49,7 +49,6 @@ export default defineConfig({
   integrations: [
     localized404,
     sitemap({
-      i18n: { defaultLocale: "en", locales: { en: "en", it: "it" } },
       serialize(item) {
         const lastmod = toolLastmod.get(item.url);
         return lastmod ? { ...item, lastmod } : item;

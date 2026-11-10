@@ -1,6 +1,6 @@
 ---
 title: "Convertire JPG in PDF nel browser | Eolietech"
-description: "Metti foto, scansioni e screenshot in un unico PDF, un'immagine per pagina, nell'ordine che scegli tu. JPG e PNG entrano senza ricompressione. Non viene caricato niente."
+description: "Gratis: metti foto, scansioni e screenshot in un unico PDF, un'immagine per pagina, nell'ordine che scegli. JPG e PNG senza ricompressione, senza caricare."
 h1: "Da JPG a PDF"
 intro: "Trasforma foto, scansioni e screenshot in un unico PDF. Aggiungi le immagini, mettile in ordine, scegli il formato della pagina e scarica il file. Tutto avviene sul tuo dispositivo: le tue immagini non vengono mai caricate."
 howTo:

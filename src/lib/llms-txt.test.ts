@@ -17,6 +17,15 @@ describe("llms.txt", () => {
     }
   });
 
+  it("names preset links by their page heading, not a bare label", () => {
+    expect(text).toContain("[Crop to a square](https://eolietech.com/crop-image-square/)");
+    expect(text).not.toContain("[Square](");
+  });
+
+  it("mentions documents in the summary", () => {
+    expect(text.split("\n")[2]).toMatch(/documents/);
+  });
+
   it("has no unresolved dictionary keys", () => {
     expect(text).not.toMatch(/tools\.[a-z-]+\.(name|summary|variant)/);
   });

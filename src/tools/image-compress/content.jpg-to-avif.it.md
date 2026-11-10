@@ -1,6 +1,6 @@
 ---
 title: "Convertire JPG in AVIF per foto più leggere | Eolietech"
-description: "Converti le foto JPG in AVIF, spesso a metà del peso con qualità simile. Conversione in blocco, qualità e dimensioni a tua scelta, tutto nel browser senza caricare nulla."
+description: "Gratis: converti le foto JPG in AVIF, spesso a metà del peso con qualità simile. In blocco, nel tuo browser, senza caricare nulla."
 h1: "Convertitore da JPG a AVIF"
 intro: "Converti le foto JPG in AVIF per renderle molto più leggere per il web. Scegli una qualità, limita le dimensioni se vuoi, e converti un blocco di foto senza che lascino il tuo computer."
 howTo:

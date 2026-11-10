@@ -1,6 +1,6 @@
 ---
 title: "Aprire file P7M gratis e senza programmi | Eolietech"
-description: "Apri gratis i file .p7m senza installare programmi: salva il PDF o l'XML che contengono, vedi chi li ha firmati e controlla la firma. Non viene caricato niente."
+description: "Gratis: apri i file .p7m senza installare programmi, salva il PDF o l'XML che contengono e controlla chi li ha firmati. Non viene caricato niente."
 h1: "Aprire file P7M"
 intro: "Un file .p7m è un documento chiuso dentro una firma digitale, e quasi nessun computer sa aprirlo da solo. Trascinalo qui: riavrai il PDF, l'XML o il file originale, vedrai chi l'ha firmato e quando, e saprai se è cambiato da allora. Tutto avviene nel tuo browser."
 howTo:

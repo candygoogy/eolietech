@@ -1,6 +1,6 @@
 ---
 title: "Convert PNG to PDF without uploading | Eolietech"
-description: "Turn screenshots, scans and other PNG images into one PDF, one image per page. PNGs stay lossless, so text stays sharp. Made in your browser; nothing is uploaded."
+description: "Free: turn screenshots, scans and other PNG images into one PDF, one image per page. PNGs stay lossless, so text stays sharp. Nothing is uploaded."
 h1: "PNG to PDF"
 intro: "Put screenshots, scanned pages and diagrams into one PDF that is easy to send, print or attach to a form. PNGs go in lossless, so text stays crisp, and everything happens on your own device."
 howTo:

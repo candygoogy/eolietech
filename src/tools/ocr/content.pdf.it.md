@@ -1,6 +1,6 @@
 ---
-title: "OCR PDF: rendi ricercabile un PDF scansionato, senza caricarlo | Eolietech"
-description: "Trasforma un PDF scansionato in un PDF in cui puoi cercare e da cui puoi copiare. Tesseract legge ogni pagina nel tuo browser e aggiunge un livello di testo invisibile."
+title: "OCR PDF gratis: estrai il testo da un PDF scansionato | Eolietech"
+description: "Gratis: estrai il testo da un PDF scansionato e ottieni una copia in cui puoi cercare e copiare. Tesseract legge le pagine nel browser, senza caricarle."
 h1: "OCR PDF"
 intro: "Un PDF scansionato contiene solo le foto delle pagine: non puoi cercarci dentro né copiarne una frase. Questo strumento legge ogni pagina e ti restituisce lo stesso PDF con uno strato di testo nascosto sotto la scansione, più il testo da solo. Il file non esce mai dal tuo dispositivo."
 howTo:

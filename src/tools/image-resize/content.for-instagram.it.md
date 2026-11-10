@@ -1,6 +1,6 @@
 ---
 title: "Ridimensionare immagini per Instagram a 1080 px | Eolietech"
-description: "Porta le foto ai 1080 px di larghezza che Instagram usa per i post del feed, mantenendo le proporzioni. Fino a 50 alla volta, nel browser, senza caricare nulla."
+description: "Gratis: porta le foto ai 1080 px di larghezza dei post di Instagram, mantenendo le proporzioni. Fino a 50 alla volta, nel browser, senza caricare."
 h1: "Ridimensiona per Instagram"
 intro: "Instagram di solito salva le foto del feed larghe 1080 pixel. Questa pagina porta le tue foto a quella larghezza e ne mantiene le proporzioni, così sai la misura esatta di ogni file prima di pubblicarlo. Tutto avviene sul tuo dispositivo."
 howTo:

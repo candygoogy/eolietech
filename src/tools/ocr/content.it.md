@@ -1,6 +1,6 @@
 ---
 title: "Estrarre testo da immagine (OCR) senza caricarla | Eolietech"
-description: "Ricava il testo da screenshot, foto di documenti e pagine scansionate, in italiano o in inglese. Tesseract gira nel tuo browser: le immagini non vengono mai caricate."
+description: "Gratis: ricava il testo da screenshot, foto di documenti e pagine scansionate, in italiano o inglese. Tesseract gira nel tuo browser, senza caricare nulla."
 h1: "Estrarre testo da un'immagine"
 intro: "Trascina uno screenshot, la foto di una lettera o una pagina scansionata e ottieni le parole come testo da copiare, modificare e cercare. La lettura avviene sul tuo dispositivo, quindi l'immagine non esce mai da lì."
 howTo:

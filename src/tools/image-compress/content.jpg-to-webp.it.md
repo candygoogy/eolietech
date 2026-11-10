@@ -1,6 +1,6 @@
 ---
 title: "Convertire JPG in WebP online, in privato | Eolietech"
-description: "Converti le foto JPG in WebP per renderle più leggere a qualità simile. Conversione in blocco, qualità e dimensioni a tua scelta, tutto nel browser senza caricare nulla."
+description: "Gratis: converti le foto JPG in WebP per renderle più leggere a qualità simile. Qualità a scelta, in blocco, nel browser, senza caricare nulla."
 h1: "Convertitore da JPG a WebP"
 intro: "Alleggerisci le foto JPG del tuo sito o blog convertendole in WebP. Scegli una qualità, limita le dimensioni se vuoi, e converti un'intera cartella senza che le foto lascino il tuo computer."
 howTo:

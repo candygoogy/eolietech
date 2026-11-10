@@ -1,6 +1,6 @@
 ---
 title: "Resize images in your browser | Eolietech"
-description: "Resize JPG, PNG, WebP and AVIF images by width, height or percentage, up to 50 at a time. It all happens in your browser, so your images are never uploaded."
+description: "Free: resize JPG, PNG, WebP and AVIF images by width, height or percentage, up to 50 at a time. In your browser, so images are never uploaded."
 h1: "Resize images"
 intro: "Give your images a set width, height or percentage of their size, one at a time or 50 at once. The resizing happens on your device, so your images are never uploaded."
 howTo:

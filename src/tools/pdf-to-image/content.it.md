@@ -1,6 +1,6 @@
 ---
 title: "Da PDF a JPG: salva le pagine di un PDF come immagini | Eolietech"
-description: "Trasforma tutte le pagine di un PDF, o solo quelle che scegli, in immagini JPG o PNG a 72, 150 o 300 dpi. Funziona nel browser, quindi il PDF non viene mai caricato."
+description: "Gratis: trasforma tutte le pagine di un PDF, o solo quelle che scegli, in JPG o PNG a 72, 150 o 300 dpi. Nel browser, il PDF non viene caricato."
 h1: "Da PDF a JPG"
 intro: "Salva le pagine di un PDF come immagini da incollare in una presentazione, mandare in chat o allegare dove sono accettate solo foto. Scegli le pagine e la nitidezza: il PDF resta sempre sul tuo dispositivo."
 howTo:

@@ -1,6 +1,6 @@
 ---
 title: "Comprimere e convertire immagini online | Eolietech"
-description: "Riduci il peso di immagini JPG, PNG, WebP e AVIF o convertile da un formato all'altro nel browser. Più file insieme, qualità e dimensioni a scelta. Nessun caricamento."
+description: "Gratis: riduci il peso di immagini JPG, PNG, WebP e AVIF o convertile in un altro formato. Più file insieme, nel browser, senza caricare nulla."
 h1: "Comprimere immagini"
 intro: "Rendi più leggeri i file JPG, PNG, WebP e AVIF, o convertili in un altro formato, senza caricare niente. Gli encoder girano dentro questa pagina, quindi le tue foto restano sul tuo dispositivo."
 howTo:

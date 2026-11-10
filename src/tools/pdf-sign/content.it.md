@@ -1,6 +1,6 @@
 ---
-title: "Firmare PDF: metti la tua firma su un PDF dal browser | Eolietech"
-description: "Disegna la tua firma o usane una foto, mettila su qualsiasi pagina di un PDF, aggiungi la data e salva la copia firmata. Il PDF non viene caricato e la firma non viene salvata da nessuna parte."
+title: "Firmare PDF gratis: metti la tua firma su un PDF | Eolietech"
+description: "Gratis: disegna la tua firma o usane una foto, mettila su un PDF, aggiungi la data e salva. Il PDF non viene caricato e la firma non viene salvata."
 h1: "Firmare PDF"
 intro: "Firma un PDF come firmeresti un foglio stampato, ma senza stampante. Disegna la tua firma o usane una foto, mettila al suo posto, aggiungi la data se il modulo la chiede e salva. Il file e la tua firma restano in questa pagina."
 howTo:

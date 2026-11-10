@@ -1,6 +1,6 @@
 ---
-title: "Watermark a PDF: add text or a logo, free and in your browser | Eolietech"
-description: "Put CONFIDENTIAL, DRAFT, a name or your logo on every page of a PDF, or only on some. Choose the size, colour, angle and opacity. Free, and the PDF is never uploaded."
+title: "Watermark a PDF: add text or a logo, free, no upload | Eolietech"
+description: "Free: put CONFIDENTIAL, DRAFT, a name or your logo on every page of a PDF, or only some. Choose size, colour, angle and opacity. The PDF is never uploaded."
 h1: "Add a watermark to a PDF"
 intro: "Mark a PDF as a draft or as confidential, write on a copy who it is meant for, or put your logo on it. Type the text or choose the image, watch the preview while you adjust it, and save a watermarked copy. The PDF stays on your device."
 howTo:

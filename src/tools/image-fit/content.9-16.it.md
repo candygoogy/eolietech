@@ -1,6 +1,6 @@
 ---
 title: "Foto intera in 9:16 per storie e Reel | Eolietech"
-description: "Metti una foto orizzontale intera in un riquadro 9:16 per storie di Instagram, Reel e TikTok, su sfondo sfocato, nero, bianco o colorato. Nel browser, senza caricarla."
+description: "Gratis: metti una foto orizzontale intera in un riquadro 9:16 per storie, Reel e TikTok, su sfondo sfocato o a tinta unita. Senza caricarla."
 h1: "Adatta un'immagine al 9:16"
 intro: "Storie, Reel, TikTok e YouTube Shorts riempiono lo schermo del telefono tenuto in verticale, quindi con una foto orizzontale o quadrata l'app la ingrandisce e ne taglia i lati, oppure aggiunge uno sfondo scelto da lei. Qui la foto entra intera in un riquadro 9:16, con sopra e sotto una sua copia sfocata, il nero, il bianco o un colore a scelta. Fino a 50 foto alla volta, e restano sul tuo dispositivo."
 howTo:

@@ -1,6 +1,6 @@
 ---
 title: "Convertire WebP in JPG nel browser | Eolietech"
-description: "Converti le immagini WebP in file JPG che si aprono in qualsiasi app o modulo di caricamento. Scegli la qualità, converti in blocco e tieni i file sul tuo dispositivo."
+description: "Gratis: converti le immagini WebP in JPG che si aprono in qualsiasi app o modulo. Scegli la qualità, converti in blocco, senza caricare nulla."
 h1: "Convertitore da WebP a JPG"
 intro: "Trasforma le immagini WebP in normali file JPG per email, documenti, copisterie e siti che rifiutano i WebP. La qualità la scegli tu, e la conversione avviene interamente nel tuo browser."
 howTo:

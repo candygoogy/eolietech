@@ -1,6 +1,6 @@
 ---
 title: "Dividere PDF per intervalli di pagine | Eolietech"
-description: "Dividi un PDF per intervalli di pagine come 1-3, 5, 8- oppure in pagine singole o blocchi di N pagine. Funziona nel browser, quindi il file non viene mai caricato."
+description: "Gratis: dividi un PDF per intervalli di pagine come 1-3, 5, 8-, in pagine singole o blocchi di N pagine. Nel browser, il file non viene caricato."
 h1: "Dividere un PDF"
 intro: "Estrai pagine da un PDF o taglialo in file più piccoli. Scrivi le pagine che ti servono, oppure separa ogni pagina o ogni gruppo di pagine in documenti a sé. Il PDF resta sempre sul tuo dispositivo."
 howTo:

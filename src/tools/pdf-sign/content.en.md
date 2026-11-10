@@ -1,6 +1,6 @@
 ---
 title: "Sign PDF: add your signature to a PDF in your browser | Eolietech"
-description: "Draw your signature or use a photo of it, place it on any page of a PDF, add the date and save a signed copy. The PDF is never uploaded and your signature is never stored."
+description: "Free: draw your signature or use a photo of it, place it on a PDF, add the date and save. The PDF is never uploaded, the signature never stored."
 h1: "Sign PDF"
 intro: "Sign a PDF the way you'd sign a printout, without the printer. Draw your signature or use a photo of it, put it where it goes, add the date if the form asks for one, and save. The file and your signature stay on this page."
 howTo:

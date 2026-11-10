@@ -1,6 +1,6 @@
 ---
-title: "Ritagliare un'immagine in 16:9 | Eolietech"
-description: "Ritaglia foto e screenshot in 16:9 per copertine dei video, slide, banner e sfondi panoramici. A piena risoluzione, nel browser, senza caricare nulla."
+title: "Ritagliare un'immagine in 16:9, gratis e senza caricarla | Eolietech"
+description: "Gratis: ritaglia foto e screenshot in 16:9 per miniature video, slide, banner e sfondi. A piena risoluzione, nel browser, senza caricare nulla."
 h1: "Ritaglia in 16:9"
 intro: "16:9 è il formato della maggior parte dei televisori, dei player video e delle slide. Il riquadro si apre già in 16:9 e largo quanto l'immagine consente: spostalo sulla parte che vuoi e salva. L'immagine non lascia mai il tuo dispositivo."
 howTo:
@@ -29,7 +29,7 @@ Un'immagine 16:9 riempie la copertina di un video YouTube, una slide panoramica,
 
 ## Scegliere cosa resta nell'inquadratura
 
-Quasi tutte le foto sono meno allungate del 16:9, quindi il ritaglio toglie qualcosa sopra e sotto. Un ritaglio 16:9 a tutta larghezza di una tipica foto orizzontale del telefono (4:3) perde un quarto dell'altezza. Da una foto verticale ne tiene meno della metà, quindi scegli la parte che conta e lascia fuori il resto. Trascina il riquadro in alto o in basso finché l'orizzonte, i visi o il testo non stanno dove vuoi.
+Quasi tutte le foto sono meno allungate del 16:9, quindi il ritaglio toglie qualcosa sopra e sotto. Un ritaglio 16:9 a tutta larghezza di una tipica foto orizzontale del telefono (4:3) perde un quarto dell'altezza. Da una foto verticale ne tiene meno della metà, quindi scegli la parte che conta e lascia fuori il resto. Trascina il riquadro in alto o in basso finché l'orizzonte, i visi o il testo non stanno dove vuoi. Se preferisci tenere la foto intera, [Adatta un'immagine al 16:9](/it/adattare-immagine-16-9/) la mette in un riquadro 16:9 su sfondo sfocato o a tinta unita, senza tagliare niente.
 
 Per una misura finale precisa, come 1280 × 720 o 1920 × 1080 px, ritaglia qui e poi usa [Ridimensiona le immagini](/it/ridimensionare-immagini/). Per altre forme, [Ritaglia un'immagine](/it/ritagliare-immagini/) ha tutte le proporzioni e il riquadro libero.
 

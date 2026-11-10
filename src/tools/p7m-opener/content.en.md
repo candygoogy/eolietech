@@ -1,5 +1,5 @@
 ---
-title: "Open P7M files: get the document out and check the signature | Eolietech"
+title: "Open P7M files: get the document out, check the signature | Eolietech"
 description: "Open signed .p7m files in your browser: save the PDF or XML inside, see who signed it and when, and check the signature. Nothing is uploaded."
 h1: "Open P7M files"
 intro: "A .p7m file is a document sealed inside a digital signature, and most computers can't open it. Drop it here to get the original PDF, XML or other file back, see who signed it and when, and check that it hasn't changed since. It all happens in your browser."

@@ -1,6 +1,6 @@
 ---
 title: "Convertire HEIC in PDF: le foto dell'iPhone in un PDF | Eolietech"
-description: "Trasforma le foto HEIC di iPhone e iPad in un unico PDF, una foto per pagina, nel verso giusto. Tutto nel browser, quindi le tue foto non vengono mai caricate."
+description: "Gratis: trasforma le foto HEIC di iPhone e iPad in un unico PDF, una foto per pagina, nel verso giusto. Nel browser, senza caricare le foto."
 h1: "Da HEIC a PDF"
 intro: "Metti le foto di iPhone e iPad direttamente in un PDF, senza convertirle prima in JPG. Aggiungi i file HEIC, scegli l'ordine e il formato della pagina e scarica un solo PDF. Le tue foto restano sempre sul tuo dispositivo."
 howTo:

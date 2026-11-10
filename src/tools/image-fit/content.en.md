@@ -1,6 +1,6 @@
 ---
-title: "Make an image square without cropping | Eolietech"
-description: "Make a photo square without cutting anything off: the whole picture sits on a white, black, coloured or blurred background. Up to 50 at once, never uploaded."
+title: "Make an image square without cropping, free | Eolietech"
+description: "Free: turn a rectangular photo into a square without cutting anything off, on a white, black, coloured or blurred background. Up to 50 at once, no upload."
 h1: "Make an image square"
 intro: "Put the whole photo in a square and fill the space left over with white, black, a colour you choose or a blurred copy of the photo. Nothing is cut off, so a tall or wide picture keeps every edge. The page also makes 4:5, 16:9 and 9:16 frames, works on up to 50 photos at a time, and never sends them anywhere."
 howTo:

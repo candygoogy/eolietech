@@ -50,6 +50,24 @@ const groups = categories
   .filter((group) => group.items.length > 0);
 ---
 
+{
+  detailed && groups.length > 1 && (
+    <nav class="tool-variants tool-index__jump" aria-labelledby="tool-index-jump">
+      <p class="tool-variants__label" id="tool-index-jump">
+        {t(locale, "tools.jump")}
+      </p>
+      <ul class="tool-variants__list">
+        {groups.map((group) => (
+          <li>
+            <a class="tool-variants__item" href={`#cat-${group.category}`}>
+              {t(locale, `tools.category.${group.category}`)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
 <div class:list={["tool-index", { "tool-index--detailed": detailed }]}>
   {
     groups.map((group) => (
@@ -92,7 +110,7 @@ const groups = categories
                   <ul>
                     {item.presets.map((c) => (
                       <li>
-                        <a href={c.href}>{c.label}</a>
+                        <a href={c.href}>{c.name}</a>
                       </li>
                     ))}
                   </ul>

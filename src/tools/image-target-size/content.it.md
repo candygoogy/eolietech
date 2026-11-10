@@ -1,6 +1,6 @@
 ---
 title: "Ridurre il peso di una foto in KB | Eolietech"
-description: "Porta una foto sotto il peso chiesto da un modulo online: 20, 50, 100 KB o qualsiasi altro. JPG o WebP, fino a 50 alla volta, nel browser: non si carica niente."
+description: "Gratis: porta una foto sotto il peso chiesto da un modulo online: 20, 50, 100 KB o altro. JPG o WebP, fino a 50 alla volta, senza caricare niente."
 h1: "Comprimi foto in KB"
 intro: "Capita spesso che un modulo online rifiuti una foto perché pesa qualche KB di troppo. Scrivi il limite indicato, aggiungi le foto e ognuna torna sotto quel peso con la qualità migliore possibile. Tutto avviene sul tuo dispositivo, quindi le foto non vengono mai caricate."
 howTo:

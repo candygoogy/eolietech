@@ -38,7 +38,7 @@ export function llmsTxt(site: URL): string {
     for (const tool of tools) {
       lines.push(`- [${t("en", `tools.${tool.id}.name`)}](${abs(localePath("en", tool.slug.en))}): ${t("en", `tools.${tool.id}.summary`)}`);
       const { converters, presets } = variantLinks(tool, "en");
-      for (const link of [...converters, ...presets]) lines.push(`  - [${link.label}](${abs(link.href)})`);
+      for (const link of [...converters, ...presets]) lines.push(`  - [${link.name}](${abs(link.href)})`);
     }
   }
 

@@ -1,6 +1,6 @@
 ---
 title: "Rimuovere lo sfondo da una foto in privato | Eolietech"
-description: "Scontorna persone, prodotti e animali con un modello di AI che gira nel tuo browser. Ottieni PNG trasparenti a piena risoluzione. Le tue foto non vengono mai caricate."
+description: "Gratis: scontorna persone, prodotti e animali con un modello di AI nel tuo browser. PNG trasparenti a piena risoluzione, foto mai caricate."
 h1: "Rimuovere lo sfondo da una foto"
 intro: "Ottieni un PNG trasparente del soggetto della tua foto: un prodotto per un annuncio, un ritratto per l'immagine del profilo, il tuo animale per un biglietto. Un modello di AI fa lo scontorno sul tuo dispositivo, quindi le tue foto non vengono mai caricate."
 howTo:

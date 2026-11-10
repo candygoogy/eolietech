@@ -1,6 +1,6 @@
 ---
 title: "Redact PDF: black out text for good, in your browser | Eolietech"
-description: "Black out names, addresses, IBANs and phone numbers in a PDF. The text under each box is removed from the file, not just covered. Runs in your browser, nothing is uploaded."
+description: "Free: black out text in a PDF for good. Names, IBANs and phone numbers are removed from the file, not just covered. In your browser, nothing uploaded."
 h1: "Redact PDF"
 intro: "Black out a name, an account number or a whole paragraph before you send a PDF to someone. Draw black boxes or search for what has to go, check them, and save a copy where that text is gone from the file, not just painted over. The PDF never leaves your device."
 howTo:

@@ -1,6 +1,6 @@
 ---
 title: "Convertire HEIC in PNG senza perdita di qualità | Eolietech"
-description: "Converti le foto HEIC dell'iPhone in PNG senza perdita, per ritoccarle o usarle nei programmi che non leggono l'HEIC. Tutto nel browser: le foto non vengono caricate."
+description: "Gratis: converti le foto HEIC dell'iPhone in PNG senza perdita, per ritoccarle o usarle dove l'HEIC non si apre. Nel browser, senza caricare le foto."
 h1: "Convertire HEIC in PNG"
 intro: "Converti le foto di iPhone e iPad da HEIC a PNG quando ti serve una copia senza perdita: per ritoccarle, per tenere nitido il testo o per usarle in un programma che non accetta l'HEIC. Tutto avviene sul tuo dispositivo, quindi le foto non vengono mai caricate."
 howTo:

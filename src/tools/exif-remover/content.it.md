@@ -1,6 +1,6 @@
 ---
 title: "Rimuovere i dati EXIF dalle foto, posizione compresa | Eolietech"
-description: "Guarda cosa rivelano le tue foto, come la posizione GPS in cui sono state scattate, poi cancellalo senza toccare l'immagine. JPG, PNG e WebP, tutto nel browser."
+description: "Gratis: guarda cosa rivelano le tue foto, come la posizione GPS, e cancellalo senza toccare l'immagine. JPG, PNG e WebP, nel browser, senza caricarle."
 h1: "Rimuovere i dati EXIF"
 intro: "Le foto contengono dettagli nascosti: spesso il punto esatto in cui sono state scattate, il telefono che le ha fatte e l'ora. Trascinale qui per vedere cosa dice ciascuna, poi cancellalo. L'immagine non viene toccata e non viene caricato niente."
 howTo:

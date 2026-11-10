@@ -1,6 +1,6 @@
 ---
 title: "Convertire PNG in PDF senza caricare niente | Eolietech"
-description: "Trasforma screenshot, scansioni e altre immagini PNG in un unico PDF, un'immagine per pagina. I PNG restano senza perdita, quindi il testo resta nitido. Tutto nel browser."
+description: "Gratis: trasforma screenshot, scansioni e altri PNG in un unico PDF, un'immagine per pagina. PNG senza perdita, testo nitido. Nel browser, senza caricare."
 h1: "Da PNG a PDF"
 intro: "Metti screenshot, pagine scansionate e schemi in un unico PDF, facile da inviare, stampare o allegare a un modulo. I PNG entrano senza perdita, quindi il testo resta nitido, e tutto avviene sul tuo dispositivo."
 howTo:

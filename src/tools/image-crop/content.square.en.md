@@ -1,6 +1,6 @@
 ---
-title: "Crop an image to a square | Eolietech"
-description: "Crop a photo to a square for a profile picture, an avatar, a product shot or a square post. JPG, PNG, WebP and AVIF, cropped in your browser, never uploaded."
+title: "Crop an image to a square (1:1), free, no upload | Eolietech"
+description: "Free square image cropper: crop a photo to 1:1 for a profile picture, avatar or product shot. JPG, PNG, WebP and AVIF, in your browser, never uploaded."
 h1: "Crop to a square"
 intro: "The box opens square and as big as your photo allows, so most of the time you only move it over the face or the product and save. The crop happens in your browser, and the photo stays on your device."
 howTo:

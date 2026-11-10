@@ -1,6 +1,6 @@
 ---
 title: "Convertire PNG in WebP per pagine più veloci | Eolietech"
-description: "Converti le immagini PNG in WebP per ridurne il peso mantenendo la trasparenza. Imposta la qualità, converti in blocco e tieni ogni file sul tuo dispositivo."
+description: "Gratis: converti le immagini PNG in WebP, più leggere e con la trasparenza mantenuta. Imposta la qualità e converti in blocco, senza caricare nulla."
 h1: "Convertitore da PNG a WebP"
 intro: "Alleggerisci le immagini PNG del tuo sito convertendole in WebP. La trasparenza resta, la qualità la decidi tu, e la conversione avviene nel browser senza caricare nulla."
 howTo:

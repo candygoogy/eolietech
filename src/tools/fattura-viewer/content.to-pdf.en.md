@@ -1,6 +1,6 @@
 ---
 title: "FatturaPA to PDF: turn an Italian e-invoice XML into a PDF | Eolietech"
-description: "Convert an Italian e-invoice in XML, signed .xml.p7m files included, into a readable PDF to print or file away. Works in your browser; the invoice is never uploaded."
+description: "Free: turn an Italian e-invoice in XML, signed .xml.p7m included, into a readable PDF to print or file. In your browser, the invoice is never uploaded."
 h1: "FatturaPA to PDF"
 intro: "Got the .xml or .xml.p7m file of an Italian invoice and need a PDF to print, forward or file? Drop it here: the PDF is made in your browser, with every line and the VAT summary. The invoice never leaves your device."
 howTo:

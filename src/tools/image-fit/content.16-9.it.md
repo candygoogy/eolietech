@@ -1,6 +1,6 @@
 ---
 title: "Adattare un'immagine al 16:9 senza tagliarla | Eolietech"
-description: "Metti la foto intera in un riquadro 16:9 per copertine YouTube, slide e TV, su sfondo sfocato, nero, bianco o colorato. Fino a 50 alla volta, senza caricarle."
+description: "Gratis: metti la foto intera in un riquadro 16:9 per copertine YouTube e slide, su sfondo sfocato, nero, bianco o colorato. Senza caricarle."
 h1: "Adatta un'immagine al 16:9"
 intro: "Una foto verticale del telefono o un'immagine quadrata non riempiono uno schermo 16:9. Qui la foto entra intera in un riquadro 16:9 e i lati vengono riempiti con una sua copia sfocata, con il nero, il bianco o un colore a scelta, senza tagliare niente. Puoi lavorare fino a 50 foto alla volta, sul tuo dispositivo."
 howTo:

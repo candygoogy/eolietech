@@ -1,6 +1,6 @@
 ---
 title: "Sbloccare PDF: togliere la password da un PDF | Eolietech"
-description: "Togli la password da un PDF quando la conosci, o rimuovi le restrizioni su stampa e copia. Funziona nel browser: il file e la password non vengono caricati."
+description: "Gratis: togli la password da un PDF quando la conosci, o rimuovi le restrizioni su stampa e copia. Nel browser: file e password non vengono caricati."
 h1: "Sbloccare PDF"
 intro: "Togli la password da un PDF di cui la conosci già, così il file si apre senza chiederla e funziona con gli altri strumenti PDF. Ai file che si aprono liberamente ma bloccano stampa, copia o modifiche vengono tolte le restrizioni, senza bisogno di password. Nessuna password viene indovinata o forzata, e il PDF e la password restano in questa scheda del browser."
 howTo:
