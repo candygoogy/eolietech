@@ -53,7 +53,7 @@ test("merge two PDFs into one, entirely in the browser", async ({ page, baseURL 
 
   const downloadButton = root.getByRole("button", { name: /Download merged PDF/ });
   const [download] = await Promise.all([page.waitForEvent("download"), downloadButton.click()]);
-  expect(download.suggestedFilename()).toBe("merged.pdf");
+  expect(download.suggestedFilename()).toBe("two-pages-merged.pdf");
   expect(await pageCount(download)).toBe(5);
 
   expect(offending).toEqual([]);
@@ -72,9 +72,9 @@ test("split selected page ranges of a PDF into one file", async ({ page, baseURL
   await root.getByLabel("Put all selected pages into one PDF").check();
   await root.getByRole("button", { name: "Split PDF" }).click();
 
-  const downloadButton = root.getByRole("button", { name: "Download five-pages_pages_1-2_4.pdf" }).first();
+  const downloadButton = root.getByRole("button", { name: "Download five-pages-pages-1-2_4.pdf" }).first();
   const [download] = await Promise.all([page.waitForEvent("download"), downloadButton.click()]);
-  expect(download.suggestedFilename()).toBe("five-pages_pages_1-2_4.pdf");
+  expect(download.suggestedFilename()).toBe("five-pages-pages-1-2_4.pdf");
   expect(await pageCount(download)).toBe(3);
 
   expect(offending).toEqual([]);

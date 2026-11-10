@@ -24,6 +24,8 @@ export function gsArgs(preset: Preset, input = INPUT_PATH, output = OUTPUT_PATH)
     "-dDetectDuplicateImages=true",
     "-dCompressFonts=true",
     "-dSAFER",
+    // Stop on the first PDF error instead of "repairing" it into blank or missing pages.
+    "-dPDFSTOPONERROR",
     "-dNOPAUSE",
     "-dBATCH",
     `-sOutputFile=${output}`,
@@ -38,4 +40,25 @@ export function parseProgress(line: string): { total?: number; page?: number } |
   const page = /^Page (\d+)\s*$/.exec(line.trim());
   if (page) return { page: Number(page[1]) };
   return null;
+}
+
+export type GsVerdict = "ok" | "encrypted" | "failed";
+
+/**
+ * Was a Ghostscript run a real success? This build can exit 0 after "This file requires a
+ * password" (output: one blank page) or after page errors (output: some pages missing), so the
+ * exit code alone is not enough: the log must be clean and the output must have every input page.
+ * `outputPages` is null when the output could not be read at all.
+ */
+export function judgeGsRun(run: { code: number; log: readonly string[]; inputPages: number; outputPages: number | null }): GsVerdict {
+  if (run.log.some((line) => /requires a password/i.test(line))) return "encrypted";
+  if (run.code !== 0 || run.log.some((line) => line.includes("**** Error"))) return "failed";
+  if (run.outputPages === null || run.inputPages < 1 || run.outputPages !== run.inputPages) return "failed";
+  return "ok";
+}
+
+/** Download progress in quarters (0 to 4), so a live region speaks at 25, 50, 75 and 100% only. */
+export function quarter(loaded: number, total: number): number {
+  if (!(total > 0)) return 0;
+  return Math.max(0, Math.min(4, Math.floor((loaded / total) * 4)));
 }

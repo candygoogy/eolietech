@@ -81,6 +81,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   let busy = false;
   let generation = 0;
   let result: { blob: Blob; name: string } | null = null;
+  /** The current result has been downloaded: leaving the page loses nothing. */
+  let downloaded = false;
   let announceTimer: ReturnType<typeof setTimeout> | undefined;
   const urls = new Set<string>();
   const stamps: Partial<Record<Kind, Stamp>> = {};
@@ -270,7 +272,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   const saveBtn = button(t("sign.save"), { variant: "primary", onClick: () => void save() });
   const downloadBtn = button(t("tool.download"), {
     variant: "primary",
-    onClick: () => result && downloadBlob(result.blob, result.name),
+    onClick: () => {
+      if (!result) return;
+      downloadBlob(result.blob, result.name);
+      downloaded = true;
+    },
   });
   downloadBtn.hidden = true;
   const resetBtn = button(t("tool.reset"), { variant: "ghost", onClick: startOver });
@@ -317,10 +323,38 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   }
 
   function setStamp(kind: Kind, s: Stamp) {
+    const old = stamps[kind];
     stamps[kind] = s;
     for (const item of items) if (item.kind === kind) item.rect = refit(item.rect, s.aspect, views[item.page]!);
     renderBoxes();
     invalidate();
+    release(old);
+  }
+
+  /** Revoke the object URLs of stamps nothing refers to any more (superseded drawings, photos, dates). */
+  function release(...old: (Stamp | null | undefined)[]) {
+    const inUse = new Set([drawn, uploaded, stamps.sig, stamps.date]);
+    for (const s of old) {
+      if (!s || inUse.has(s) || !urls.delete(s.url)) continue;
+      URL.revokeObjectURL(s.url);
+    }
+  }
+
+  /**
+   * The pad was emptied (Clear, or Undo of the last stroke) while its drawing is the signature: the
+   * placed signatures would still stamp the old drawing, so they are removed with it.
+   */
+  function dropDrawnSignature(old: Stamp | null): number {
+    if (!old || stamps.sig !== old) return 0;
+    delete stamps.sig;
+    const before = items.length;
+    items = items.filter((i) => i.kind !== "sig");
+    const removed = before - items.length;
+    renderBoxes();
+    syncNav();
+    invalidate();
+    release(old);
+    return removed;
   }
 
   function invalidate() {
@@ -467,23 +501,35 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   function undoStroke() {
     strokes.pop();
     paintPad();
-    void commitDrawing();
+    const removed = commitDrawing();
+    if (removed) announce(tPlural(ctx, "sign.pad.clearedPlaced", removed));
   }
 
   function clearPad() {
     strokes = [];
     paintPad();
-    void commitDrawing();
-    announce(t("sign.pad.cleared"));
+    const removed = commitDrawing();
+    announce(removed ? tPlural(ctx, "sign.pad.clearedPlaced", removed) : t("sign.pad.cleared"));
   }
 
-  /** Export the drawing at print size, trimmed to the ink, as the signature (when Draw is chosen). */
-  async function commitDrawing() {
+  /**
+   * Export the drawing at print size, trimmed to the ink, as the signature (when Draw is chosen).
+   * An empty pad clears the signature at once and returns how many placed signatures went with it.
+   */
+  function commitDrawing(): number {
     const seq = ++commitSeq;
     if (strokes.length === 0) {
+      const old = drawn;
       drawn = null;
-      return;
+      const removed = dropDrawnSignature(old);
+      release(old);
+      return removed;
     }
+    void exportDrawing(seq);
+    return 0;
+  }
+
+  async function exportDrawing(seq: number) {
     const c = document.createElement("canvas");
     c.width = EXPORT_W;
     // Tall enough for every stroke, even ones drawn before the pad changed shape.
@@ -494,9 +540,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     const trimmed = trimToInk({ data: g.getImageData(0, 0, c.width, c.height).data, width: c.width, height: c.height }, 8);
     if (!trimmed) return;
     const s = await stampFrom(canvasOf(trimmed));
-    if (seq !== commitSeq) return;
+    if (seq !== commitSeq) return release(s);
+    const old = drawn;
     drawn = s;
     if (mode === "draw") setStamp("sig", s);
+    release(old);
   }
 
   // ---------- photo of a signature ----------
@@ -559,9 +607,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     preview.getContext("2d")!.drawImage(c, 0, 0);
     previewWrap.hidden = false;
     const s = await stampFrom(c);
-    if (seq !== processSeq) return;
+    if (seq !== processSeq) return release(s);
+    const old = uploaded;
     uploaded = s;
     if (mode === "upload") setStamp("sig", s);
+    release(old);
   }
 
   strength.addEventListener("input", () => {
@@ -955,6 +1005,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       );
       if (gen !== generation) return;
       result = { blob: pdfBlob(out), name: t("sign.outputName", { name: baseName(f.name) }) };
+      downloaded = false;
       const pages = new Set(items.map((i) => i.page)).size;
       status.set(tPlural(ctx, "sign.done", pages, { pages, size: formatBytes(result.blob.size) }));
       downloadBtn.textContent = t("sign.download", { name: result.name });
@@ -1034,6 +1085,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   }
 
   paintPad();
+
+  // Placed signatures not yet saved and downloaded: ask before the page goes (link, reload, close).
+  // The mounter drops the cleanup function below, so the listener checks the tool is still there.
+  addEventListener("beforeunload", (e) => {
+    if (!tool.isConnected || items.length === 0 || (result && downloaded)) return;
+    e.preventDefault();
+  });
 
   return () => {
     clearDocument();

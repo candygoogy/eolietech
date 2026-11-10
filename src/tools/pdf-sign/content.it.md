@@ -38,6 +38,8 @@ ui:
   sign.pad.undo: "Annulla tratto"
   sign.pad.clear: "Cancella"
   sign.pad.cleared: "Il riquadro della firma è vuoto."
+  sign.pad.clearedPlaced.one: "Il riquadro della firma è vuoto. È stata tolta anche la firma che avevi posizionato."
+  sign.pad.clearedPlaced.other: "Il riquadro della firma è vuoto. Sono state tolte anche le {count} firme che avevi posizionato."
   sign.ink.legend: "Inchiostro"
   sign.ink.black: "Nero"
   sign.ink.blue: "Blu"

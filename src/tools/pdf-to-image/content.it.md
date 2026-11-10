@@ -54,6 +54,7 @@ ui:
   p2i.error.outOfRange.one: "“{part}” è fuori dal documento, che ha {pages} pagina."
   p2i.error.outOfRange.other: "“{part}” è fuori dal documento, che ha {pages} pagine."
   p2i.error.reversed: "“{part}” va all'indietro. Scrivi prima il numero di pagina più basso."
+  p2i.error.zip: "Non è stato possibile creare il file .zip. Ricarica la pagina e riprova, oppure converti meno pagine alla volta."
 ---
 
 ## Cosa vuol dire dpi per le tue immagini

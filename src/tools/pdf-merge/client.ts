@@ -6,7 +6,8 @@ import type { PDFDocument } from "pdf-lib";
 import { createDropzone, downloadBlob, formatBytes } from "../../lib/tool-ui";
 import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
-import { button, enableDragSort, entryTracker, setDisabled, errorMessage, errorRegion, h, moveItem, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
+import { baseName, button, enableDragSort, entryTracker, setDisabled, errorMessage, errorRegion, h, moveItem, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
+import { isChunkLoadError } from "./load-error";
 
 const ACCEPT = "application/pdf,.pdf";
 
@@ -81,23 +82,50 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     const fresh = files.map((file): Entry => ({ id: nextId++, file, loading: true }));
     entries = entries.concat(fresh);
     render();
-    status.set(tPlural(ctx, "merge.added", fresh.length));
     void (async () => {
-      const { loadPdf } = await ops();
       const failed: string[] = [];
-      for (const entry of fresh) {
-        try {
-          entry.doc = await loadPdf(await readFile(entry.file));
-          entry.pages = entry.doc.getPageCount();
-        } catch (err) {
-          entry.error = errorMessage(err, ctx, entry.file.name);
-          failed.push(entry.error);
+      let loadPdf: Awaited<ReturnType<typeof ops>>["loadPdf"] | null = null;
+      try {
+        ({ loadPdf } = await ops());
+      } catch (err) {
+        // The PDF library could not be loaded: every new row fails with the same message.
+        console.error(err);
+        const message = loadFailure(err);
+        for (const entry of fresh) {
+          entry.error = message;
+          entry.loading = false;
         }
-        entry.loading = false;
-        render();
+        failed.push(message);
       }
-      if (failed.length) loadAlert.textContent = failed.join(" ");
+      if (loadPdf) {
+        for (const entry of fresh) {
+          try {
+            entry.doc = await loadPdf(await readFile(entry.file));
+            entry.pages = entry.doc.getPageCount();
+          } catch (err) {
+            entry.error = isChunkLoadError(err) ? t("merge.error.updated") : errorMessage(err, ctx, entry.file.name);
+            failed.push(entry.error);
+          }
+          entry.loading = false;
+          render();
+        }
+      }
+      render();
+      // Start over (or removing every new file) while reading: nothing to report.
+      if (!fresh.some((e) => entries.includes(e))) return;
+      const ok = fresh.filter((e) => !e.error).length;
+      const bad = fresh.length - ok;
+      const parts: string[] = [];
+      if (ok > 0) parts.push(tPlural(ctx, "merge.added", ok));
+      if (bad > 0) parts.push(tPlural(ctx, "merge.notRead", bad));
+      status.set(parts.join(" "));
+      if (failed.length) loadAlert.textContent = [...new Set(failed)].join(" ");
     })();
+  }
+
+  /** A failed chunk load says "reload"; anything else is the generic failure. */
+  function loadFailure(err: unknown): string {
+    return isChunkLoadError(err) ? t("merge.error.updated") : t("tool.error.generic");
   }
 
   function move(from: number, to: number, announce = true) {
@@ -194,8 +222,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   }
 
   async function merge() {
-    const docs = entries.filter((e) => e.doc && !e.error).map((e) => e.doc!);
+    const ready = entries.filter((e) => e.doc && !e.error);
+    const docs = ready.map((e) => e.doc!);
     if (docs.length < 2) return;
+    // Named after the first file in the list: report.pdf -> report-merged.pdf.
+    const name = t("merge.outputName", { name: baseName(ready[0]!.file.name) });
     busy = true;
     clearResult();
     errors.clear();
@@ -206,7 +237,6 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       const bytes = await mergeDocuments(docs);
       const pages = docs.reduce((n, d) => n + d.getPageCount(), 0);
       result = { blob: pdfBlob(bytes), pages };
-      const name = t("merge.outputName");
       const dl = button(tPlural(ctx, "merge.download", pages, { pages, size: formatBytes(result.blob.size) }), {
         variant: "primary",
         onClick: () => result && downloadBlob(result.blob, name),
@@ -216,7 +246,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       status.set(tPlural(ctx, "merge.done", pages, { pages, size: formatBytes(result.blob.size) }));
       dl.focus();
     } catch (err) {
-      errors.show(errorMessage(err, ctx, t("merge.outputName")));
+      errors.show(isChunkLoadError(err) ? t("merge.error.updated") : errorMessage(err, ctx, name));
       status.set("");
     } finally {
       busy = false;

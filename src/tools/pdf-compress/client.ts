@@ -8,9 +8,9 @@ import { createDropzone, downloadBlob, downloadZip, formatBytes, renameExtension
 import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { baseName, button, entryTracker, errorRegion, h, readFile, statusRegion } from "../pdf-shared/dom";
-import { looksLikePdf } from "../pdf-shared/pdf-errors";
+import { looksLikePdf, PdfToolError } from "../pdf-shared/pdf-errors";
 import type { GsRequest, GsResponse } from "./gs.worker";
-import { DEFAULT_PRESET, GS_WASM_BYTES, gsArgs, initialPreset, isPreset, PRESETS, type Preset } from "./presets";
+import { DEFAULT_PRESET, GS_WASM_BYTES, gsArgs, initialPreset, isPreset, judgeGsRun, PRESETS, quarter, type Preset } from "./presets";
 
 const ACCEPT = "application/pdf,.pdf";
 let uid = 0;
@@ -23,12 +23,20 @@ interface Entry {
   /** True when the output was not smaller and the original is offered instead. */
   keptOriginal?: boolean;
   message?: string;
+  /** The file needs a password: the row links to Unlock PDF. */
+  encrypted?: boolean;
 }
 
 // ---------- engine (one worker per page, created on first use) ----------
 
+interface GsRun {
+  code: number;
+  log: string[];
+  output?: ArrayBuffer;
+}
+
 interface Engine {
-  run(input: ArrayBuffer, args: string[], onProgress: (p: { total?: number; page?: number }) => void): Promise<ArrayBuffer>;
+  run(input: ArrayBuffer, args: string[], onProgress: (p: { total?: number; page?: number }) => void): Promise<GsRun>;
 }
 
 class GsRunError extends Error {
@@ -40,10 +48,21 @@ class GsRunError extends Error {
   }
 }
 
-let enginePromise: Promise<Engine> | null = null;
+/** The user pressed Stop: the download was aborted or the worker terminated. */
+class Stopped extends Error {}
 
-async function fetchWithProgress(url: string, onProgress: (loaded: number, total: number) => void): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+let enginePromise: Promise<Engine> | null = null;
+let engineAbort: AbortController | null = null;
+
+/** Abort the engine download, or terminate the worker mid-file. The next run starts a fresh engine. */
+function stopEngine(): void {
+  engineAbort?.abort();
+  engineAbort = null;
+  enginePromise = null;
+}
+
+async function fetchWithProgress(url: string, onProgress: (loaded: number, total: number) => void, signal: AbortSignal): Promise<ArrayBuffer> {
+  const res = await fetch(url, { signal });
   if (!res.ok || !res.body) throw new Error(`gs.wasm: HTTP ${res.status}`);
   const total = Number(res.headers.get("content-length")) || GS_WASM_BYTES;
   const reader = res.body.getReader();
@@ -66,18 +85,33 @@ async function fetchWithProgress(url: string, onProgress: (loaded: number, total
 }
 
 function loadEngine(onDownload: (loaded: number, total: number) => void): Promise<Engine> {
-  enginePromise ??= (async () => {
-    const wasm = await fetchWithProgress(gsWasmUrl, onDownload);
+  if (enginePromise) return enginePromise;
+  const abort = new AbortController();
+  engineAbort = abort;
+  const promise: Promise<Engine> = (async () => {
+    const wasm = await fetchWithProgress(gsWasmUrl, onDownload, abort.signal);
+    if (abort.signal.aborted) throw new Stopped();
     const worker = new Worker(new URL("./gs.worker.ts", import.meta.url), { type: "module", name: "ghostscript" });
-    const jobs = new Map<number, { resolve: (b: ArrayBuffer) => void; reject: (e: Error) => void; progress: (p: { total?: number; page?: number }) => void }>();
+    const jobs = new Map<number, { resolve: (r: GsRun) => void; reject: (e: Error) => void; progress: (p: { total?: number; page?: number }) => void }>();
     let nextJob = 1;
+    let failInit: ((err: Error) => void) | null = null;
+    /** Fail everything, kill the worker and allow a fresh engine next time. */
+    const shutDown = (err: Error) => {
+      failInit?.(err);
+      for (const job of jobs.values()) job.reject(err);
+      jobs.clear();
+      worker.terminate();
+      if (enginePromise === promise) enginePromise = null;
+    };
+    abort.signal.addEventListener("abort", () => shutDown(new Stopped()), { once: true });
     await new Promise<void>((resolve, reject) => {
+      failInit = reject;
       worker.addEventListener("message", (e: MessageEvent<GsResponse>) => {
         const msg = e.data;
         if (msg.type === "ready") resolve();
         else if (msg.type === "progress") jobs.get(msg.id)?.progress(msg);
         else if (msg.type === "result") {
-          jobs.get(msg.id)?.resolve(msg.output);
+          jobs.get(msg.id)?.resolve(msg);
           jobs.delete(msg.id);
         } else if (msg.type === "error") {
           if (msg.id === null) reject(new Error(msg.message));
@@ -87,29 +121,37 @@ function loadEngine(onDownload: (loaded: number, total: number) => void): Promis
           }
         }
       });
-      worker.addEventListener("error", (e) => {
-        // A crash (e.g. out of memory) kills the worker: fail everything and allow a fresh engine next time.
-        const err = new Error(e.message || "worker error");
-        reject(err);
-        for (const job of jobs.values()) job.reject(err);
-        jobs.clear();
-        worker.terminate();
-        enginePromise = null;
-      });
+      // A crash (e.g. out of memory) kills the worker.
+      worker.addEventListener("error", (e) => shutDown(new Error(e.message || "worker error")));
       worker.postMessage({ type: "init", wasm } satisfies GsRequest, [wasm]);
     });
+    failInit = null;
     return {
       run(input, args, progress) {
         const id = nextJob++;
-        return new Promise<ArrayBuffer>((resolve, reject) => {
+        return new Promise<GsRun>((resolve, reject) => {
+          if (abort.signal.aborted) return reject(new Stopped());
           jobs.set(id, { resolve, reject, progress });
           worker.postMessage({ type: "run", id, input, args } satisfies GsRequest, [input]);
         });
       },
     };
   })();
-  enginePromise.catch(() => (enginePromise = null));
-  return enginePromise;
+  enginePromise = promise;
+  promise.catch(() => {
+    if (enginePromise === promise) enginePromise = null;
+  });
+  return promise;
+}
+
+/** Page count as PDF.js sees it; PdfToolError("encrypted" | "invalid") when it cannot open the file. */
+async function countPages(bytes: Uint8Array): Promise<number> {
+  const { openForRender } = await import("../pdf-shared/pdfjs");
+  // PDF.js transfers the buffer it gets to its worker: give it a copy.
+  const doc = await openForRender(bytes.slice());
+  const pages = doc.numPages;
+  void doc.loadingTask.destroy();
+  return pages;
 }
 
 // ---------- UI ----------
@@ -121,6 +163,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   let nextId = 1;
   let busy = false;
   let engineReady = false;
+  /** Bumped by Stop: a run whose token no longer matches has been stopped. */
+  let runToken = 0;
   // render() rebuilds the list: only rows shown for the first time play the entry.
   const enterRow = entryTracker();
 
@@ -174,9 +218,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   const list = h("ul", { className: "tool-list", "aria-label": t("compress.listLabel"), hidden: true });
   const progress = h("progress", { className: "tool-progress", hidden: true, max: 1, value: 0 });
   const compressBtn = button(t("compress.action"), { variant: "primary", onClick: () => void compressAll() });
+  const stopBtn = button(t("compress.stop"), { onClick: stop });
+  stopBtn.hidden = true;
   const zipBtn = button(t("tool.downloadAll"), { onClick: () => void downloadAllZip() });
   const resetBtn = button(t("tool.reset"), { variant: "ghost", onClick: reset });
-  const actions = h("div", { className: "tool-actions", hidden: true }, compressBtn, zipBtn, resetBtn);
+  const actions = h("div", { className: "tool-actions", hidden: true }, compressBtn, stopBtn, zipBtn, resetBtn);
   // A file that fails keeps its message in its own row; this off-screen alert only reads it out,
   // so sighted users do not see it twice. Last in the panel: out of flow, no grid gap.
   const rowAlert = h("p", { className: "visually-hidden", role: "alert" });
@@ -209,8 +255,26 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       e.output = undefined;
       e.keptOriginal = undefined;
       e.message = undefined;
+      e.encrypted = undefined;
     }
     render();
+  }
+
+  /** Stop the running job: the file being compressed goes back to waiting, finished files stay. */
+  function stop() {
+    if (!busy) return;
+    runToken++;
+    stopEngine();
+    for (const e of entries) {
+      if (e.state !== "working") continue;
+      e.state = "pending";
+      e.message = undefined;
+    }
+    busy = false;
+    progress.hidden = true;
+    status.set(t("compress.stopped"));
+    render();
+    compressBtn.focus();
   }
 
   function reset() {
@@ -272,7 +336,14 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
             "data-outcome": e.state === "done" && e.keptOriginal ? "kept-original" : undefined,
           },
           h("span", { className: "tool-item__name", text: e.file.name }),
-          h("span", { className: "tool-item__meta", text: meta }),
+          h(
+            "span",
+            { className: "tool-item__meta" },
+            meta,
+            e.state === "error" && e.encrypted && " ",
+            e.state === "error" && e.encrypted && h("a", { href: t("compress.error.encryptedHref"), text: t("compress.error.encryptedLink") }),
+            e.state === "error" && e.encrypted && ".",
+          ),
           h("span", { className: "tool-actions" }, ...controls),
         );
         enterRow(e.id, li);
@@ -280,6 +351,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       }),
     );
     const done = entries.filter((e) => e.state === "done" && e.output);
+    stopBtn.hidden = !busy;
     compressBtn.disabled = busy || !entries.some((e) => e.state === "pending");
     zipBtn.hidden = done.length < 2;
     zipBtn.disabled = busy;
@@ -290,22 +362,34 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   async function compressAll() {
     const todo = entries.filter((e) => e.state === "pending");
     if (todo.length === 0 || busy) return;
+    const token = ++runToken;
+    const stopped = () => token !== runToken;
     busy = true;
     errors.clear();
     rowAlert.textContent = "";
     render();
+    stopBtn.focus();
     let engine: Engine;
     try {
       progress.hidden = false;
       progress.removeAttribute("value");
       status.set(t("compress.loadingEngine", { size: formatBytes(GS_WASM_BYTES) }));
+      // The bar follows every chunk; the live region speaks at 25, 50, 75 and 100% only.
+      let spoken = 0;
       engine = await loadEngine((loaded, total) => {
+        if (stopped()) return;
         progress.max = total;
         progress.value = loaded;
-        status.set(t("compress.downloading", { loaded: formatBytes(loaded), total: formatBytes(total) }));
+        const q = quarter(loaded, total);
+        if (q > spoken) {
+          spoken = q;
+          status.set(t("compress.downloading", { loaded: formatBytes(loaded), total: formatBytes(total) }));
+        }
       });
+      if (stopped()) return;
       engineReady = true;
     } catch (err) {
+      if (stopped()) return;
       console.error(err);
       errors.show(t("compress.error.engine"));
       status.set("");
@@ -318,6 +402,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     const preset = selectedPreset();
     const failures: string[] = [];
     for (const [n, e] of todo.entries()) {
+      if (stopped()) return;
       e.state = "working";
       e.message = t("compress.working");
       render();
@@ -326,11 +411,14 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       status.set(t("compress.fileStatus", { current: n + 1, total: todo.length, name: e.file.name }));
       try {
         const bytes = await readFile(e.file);
-        if (!looksLikePdf(bytes)) throw new GsRunError("not a pdf", "");
+        if (!looksLikePdf(bytes)) throw new PdfToolError("invalid");
+        // Unreadable or locked input fails here, before Ghostscript can turn it into a blank page.
+        const inputPages = await countPages(bytes);
+        if (stopped()) return;
         let pages = 0;
-        const out = await engine.run(bytes.buffer as ArrayBuffer, gsArgs(preset), (p) => {
+        const run = await engine.run(bytes.buffer as ArrayBuffer, gsArgs(preset), (p) => {
           if (p.total) pages = p.total;
-          if (p.page && pages) {
+          if (p.page && pages && !stopped()) {
             progress.max = pages;
             progress.value = p.page;
             e.message = t("compress.page", { page: p.page, pages });
@@ -338,8 +426,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
             if (meta) meta.textContent = e.message;
           }
         });
-        const outBytes = new Uint8Array(out);
-        if (!looksLikePdf(outBytes)) throw new GsRunError("bad output", "");
+        if (stopped()) return;
+        const outBytes = run.output ? new Uint8Array(run.output) : null;
+        const outputPages = outBytes && looksLikePdf(outBytes) ? await countPages(outBytes).catch(() => null) : null;
+        if (stopped()) return;
+        const verdict = judgeGsRun({ code: run.code, log: run.log, inputPages, outputPages });
+        if (verdict === "encrypted") throw new PdfToolError("encrypted");
+        if (verdict !== "ok" || !outBytes) throw new GsRunError(`ghostscript: exit ${run.code}, pages ${inputPages} -> ${outputPages}`, run.log.slice(-40).join("\n"));
         const before = e.file.size;
         const after = outBytes.byteLength;
         if (after < before) {
@@ -357,15 +450,21 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
         }
         e.state = "done";
       } catch (err) {
-        const log = err instanceof GsRunError ? `${err.message}\n${err.log}` : String(err);
-        if (!(err instanceof GsRunError)) console.error(err);
+        if (stopped() || err instanceof Stopped) return;
+        if (err instanceof GsRunError) console.warn(err.message, err.log);
+        else if (!(err instanceof PdfToolError)) console.error(err);
         e.state = "error";
-        e.message = /password|encrypt/i.test(log)
-          ? t("tool.pdf.error.encrypted", { name: e.file.name })
-          : /not a pdf/.test(log)
-            ? t("tool.pdf.error.invalid", { name: e.file.name })
-            : t("compress.error.failed", { name: e.file.name });
-        failures.push(e.message);
+        if (err instanceof PdfToolError && err.code === "encrypted") {
+          e.encrypted = true;
+          e.message = t("compress.error.encrypted", { name: e.file.name });
+          failures.push(`${e.message} ${t("compress.error.encryptedLink")}.`);
+        } else {
+          e.message =
+            err instanceof PdfToolError
+              ? t("tool.pdf.error.invalid", { name: e.file.name })
+              : t("compress.error.failed", { name: e.file.name });
+          failures.push(e.message);
+        }
       }
       render();
     }
@@ -375,7 +474,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     status.set(tPlural(ctx, "compress.done", done.length));
     if (failures.length) rowAlert.textContent = failures.join(" ");
     render();
-    list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .tool-actions .btn:not(.btn--ghost)")?.focus();
+    (list.querySelector<HTMLButtonElement>(".tool-item[data-state='done'] .tool-actions .btn:not(.btn--ghost)") ?? compressBtn).focus();
   }
 
   async function downloadAllZip() {
@@ -387,6 +486,12 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       used.add(name);
       return { name, blob: e.output! };
     });
-    await downloadZip(files, t("compress.zipName"));
+    errors.clear();
+    try {
+      await downloadZip(files, t("compress.zipName"));
+    } catch (err) {
+      console.error(err);
+      errors.show(t("compress.error.zip"));
+    }
   }
 }

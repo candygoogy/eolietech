@@ -32,8 +32,6 @@ interface PageState {
   index: number;
   /** Extra clockwise rotation chosen by the user. */
   rotate: number;
-  /** Rendered at the page's own rotation; null until rendered. */
-  thumb: HTMLCanvasElement | null;
 }
 
 export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
@@ -45,6 +43,19 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   let generation = 0;
   let busy = false;
   const ops = () => import("../pdf-shared/pdf-ops");
+  /**
+   * Thumbnails, keyed by source page index: each page is drawn by PDF.js once, when its slot first
+   * comes near the viewport, and kept (also across delete and Undo all). `turned` holds the copy
+   * shown with the user's extra rotation, redrawn only when that page's angle changes.
+   */
+  const thumbs = new Map<number, HTMLCanvasElement>();
+  const turned = new Map<number, { angle: number; el: HTMLCanvasElement }>();
+  const queue: number[] = [];
+  let pumping = false;
+  const observer =
+    typeof IntersectionObserver === "function"
+      ? new IntersectionObserver(onVisible, { rootMargin: "400px 0px" })
+      : null;
 
   const errors = errorRegion();
   const status = statusRegion();
@@ -53,6 +64,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     multiple: false,
     ctx,
     onFiles: ({ ok, rejected }) => {
+      // A new file while saving would mix up the two documents: ignore it until the save is done.
+      if (busy) return;
       if (rejected.length) errors.show(rejected.map((r) => r.reason));
       else errors.clear();
       if (ok[0]) void open(ok[0]);
@@ -101,13 +114,12 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       file = f;
       doc = loaded;
       viewer = proxy;
-      pages = loaded.getPageIndices().map((index) => ({ index, rotate: 0, thumb: null }));
+      pages = loaded.getPageIndices().map((index) => ({ index, rotate: 0 }));
       fileInfo.textContent = tPlural(ctx, "organize.fileInfo", pages.length, { name: f.name, pages: pages.length, size: formatBytes(f.size) });
       hint.hidden = false;
       actions.hidden = false;
       render();
       status.set(tPlural(ctx, "organize.ready", pages.length, { pages: pages.length }));
-      void renderThumbs(gen);
     } catch (err) {
       if (gen !== generation) return;
       errors.show(errorMessage(err, ctx, f.name));
@@ -115,26 +127,50 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     }
   }
 
-  /** Render thumbnails one by one, in source order, and patch them into the list as they arrive. */
-  async function renderThumbs(gen: number) {
-    const { renderThumbnail } = await import("../pdf-shared/pdfjs");
-    const total = viewer?.numPages ?? 0;
-    for (let i = 0; i < total; i++) {
-      if (gen !== generation || !viewer) return;
-      try {
-        const page = await viewer.getPage(i + 1);
-        const canvas = await renderThumbnail(page, THUMB_CSS_PX);
-        page.cleanup();
-        if (gen !== generation) return;
-        const state = pages.find((p) => p.index === i);
-        if (!state) continue;
-        state.thumb = canvas;
-        const slot = list.querySelector<HTMLElement>(`[data-page="${i}"] .tool-item__thumb`);
-        if (slot) slot.replaceChildren(arrived(thumbFor(state)));
-      } catch (err) {
-        // A page that fails to render keeps its placeholder; it can still be moved and saved.
-        console.warn(err);
+  /** Slots that came near the viewport join the queue (in the order they appear). */
+  function onVisible(seen: IntersectionObserverEntry[]) {
+    for (const entry of seen) {
+      if (!entry.isIntersecting) continue;
+      observer?.unobserve(entry.target);
+      want(Number((entry.target as HTMLElement).dataset.thumb));
+    }
+    void pump();
+  }
+
+  function want(index: number) {
+    if (!thumbs.has(index) && !queue.includes(index)) queue.push(index);
+  }
+
+  /** Draw queued thumbnails one at a time and patch each into the list as it arrives. */
+  async function pump() {
+    if (pumping) return;
+    pumping = true;
+    const gen = generation;
+    try {
+      const { renderThumbnail } = await import("../pdf-shared/pdfjs");
+      while (queue.length > 0 && gen === generation && viewer) {
+        const i = queue.shift()!;
+        if (thumbs.has(i)) continue;
+        try {
+          const page = await viewer.getPage(i + 1);
+          const canvas = await renderThumbnail(page, THUMB_CSS_PX);
+          page.cleanup();
+          if (gen !== generation) return;
+          thumbs.set(i, canvas);
+          const state = pages.find((p) => p.index === i);
+          const slot = list.querySelector<HTMLElement>(`[data-page="${i}"] .tool-item__thumb`);
+          if (state && slot) slot.replaceChildren(arrived(thumbFor(state)));
+        } catch (err) {
+          // A page that fails to render keeps its placeholder; it can still be moved and saved.
+          console.warn(err);
+        }
       }
+    } catch (err) {
+      console.warn(err);
+    } finally {
+      pumping = false;
+      // A new file arrived while the old one was drawing: start on its queue.
+      if (gen !== generation && queue.length > 0 && viewer) void pump();
     }
   }
 
@@ -144,12 +180,15 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     return thumb;
   }
 
-  /** A canvas showing the thumbnail with the user's extra rotation applied. */
+  /** A canvas showing the thumbnail with the user's extra rotation applied (cached per angle). */
   function thumbFor(p: PageState): HTMLElement {
     const label = t("organize.thumbAlt", { page: p.index + 1 });
-    if (!p.thumb) return h("span", { className: "tool-note", text: t("organize.thumbLoading") });
+    const src = thumbs.get(p.index);
+    if (!src) return h("span", { className: "tool-note", text: t("organize.thumbLoading") });
     const angle = normaliseAngle(p.rotate);
-    const src = p.thumb;
+    const cached = turned.get(p.index);
+    if (cached?.angle === angle) return cached.el;
+    if (cached) cached.el.width = cached.el.height = 0;
     const swap = angle === 90 || angle === 270;
     const c = h("canvas", { role: "img", "aria-label": label });
     c.width = swap ? src.height : src.width;
@@ -160,10 +199,14 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       g.rotate((angle * Math.PI) / 180);
       g.drawImage(src, -src.width / 2, -src.height / 2);
     }
+    turned.set(p.index, { angle, el: c });
     return c;
   }
 
   function render() {
+    // The list is rebuilt: watch only the new slots of pages not drawn yet.
+    observer?.disconnect();
+    const slots: HTMLElement[] = [];
     list.replaceChildren(
       ...pages.map((p, i) => {
         const n = p.index + 1;
@@ -174,6 +217,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           return b;
         };
         const angle = normaliseAngle(p.rotate);
+        const slot = h("div", { className: "tool-item__thumb", "data-thumb": p.index }, thumbFor(p));
+        if (!thumbs.has(p.index)) slots.push(slot);
         return h(
           "li",
           {
@@ -183,7 +228,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
             "data-page": p.index,
             "data-state": "pending",
           },
-          h("div", { className: "tool-item__thumb" }, thumbFor(p)),
+          slot,
           h("span", { className: "tool-item__name", text: t("organize.pageName", { page: n }) }),
           h("span", {
             className: "tool-item__meta",
@@ -202,6 +247,12 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       }),
     );
     list.hidden = pages.length === 0;
+    if (observer) for (const slot of slots) observer.observe(slot);
+    else {
+      // No IntersectionObserver: draw every page, in list order.
+      for (const p of pages) want(p.index);
+      if (slots.length) void pump();
+    }
     saveBtn.disabled = busy || pages.length === 0;
     // While a saved PDF is offered (any edit hides it again), its Download is the one primary button.
     saveBtn.classList.toggle("btn--primary", resultBox.hidden === true);
@@ -256,56 +307,46 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   function undoAll() {
     if (!doc) return;
-    const thumbs = new Map(pages.map((p) => [p.index, p.thumb]));
-    // Deleted pages lost their thumbnail; missing ones are re-rendered below.
-    pages = doc.getPageIndices().map((index) => ({ index, rotate: 0, thumb: thumbs.get(index) ?? null }));
+    // Thumbnails are cached by source page, so deleted pages come back already drawn.
+    pages = doc.getPageIndices().map((index) => ({ index, rotate: 0 }));
     edited();
     status.set(t("organize.undone"));
-    if (viewer && pages.some((p) => !p.thumb)) void rerenderMissing(generation);
     saveBtn.focus();
   }
 
-  async function rerenderMissing(gen: number) {
-    const { renderThumbnail } = await import("../pdf-shared/pdfjs");
-    for (const p of pages) {
-      if (p.thumb || gen !== generation || !viewer) continue;
-      try {
-        const page = await viewer.getPage(p.index + 1);
-        p.thumb = await renderThumbnail(page, THUMB_CSS_PX);
-        const slot = list.querySelector<HTMLElement>(`[data-page="${p.index}"] .tool-item__thumb`);
-        if (slot) slot.replaceChildren(arrived(thumbFor(p)));
-      } catch (err) {
-        console.warn(err);
-      }
-    }
-  }
-
   async function save() {
-    if (!doc || !file || pages.length === 0) return;
+    if (!doc || !file || pages.length === 0 || busy) return;
+    // Everything the save needs, taken now: a new file or Start over during the save bumps the
+    // generation, and this save then drops its result instead of labelling it with the new name.
+    const gen = generation;
+    const src = doc;
+    const f = file;
+    const layout = pages.map((p) => ({ index: p.index, rotate: p.rotate }));
     busy = true;
     render();
     errors.clear();
     status.set(t("organize.working"));
     try {
       const { rearrangePages } = await ops();
-      const bytes = await rearrangePages(
-        doc,
-        pages.map((p) => ({ index: p.index, rotate: p.rotate })),
-      );
+      if (gen !== generation) return;
+      const bytes = await rearrangePages(src, layout);
+      if (gen !== generation) return;
       const blob = pdfBlob(bytes);
-      const name = t("organize.outputName", { name: baseName(file.name) });
-      const dl = button(tPlural(ctx, "organize.download", pages.length, { pages: pages.length, size: formatBytes(blob.size) }), {
+      const name = t("organize.outputName", { name: baseName(f.name) });
+      const count = layout.length;
+      const dl = button(tPlural(ctx, "organize.download", count, { pages: count, size: formatBytes(blob.size) }), {
         variant: "primary",
         onClick: () => downloadBlob(blob, name),
       });
       resultBox.replaceChildren(dl);
       resultBox.hidden = false;
-      status.set(tPlural(ctx, "organize.done", pages.length, { pages: pages.length }));
+      status.set(tPlural(ctx, "organize.done", count, { pages: count }));
       busy = false;
       render();
       dl.focus();
     } catch (err) {
-      errors.show(errorMessage(err, ctx, file.name));
+      if (gen !== generation) return;
+      errors.show(errorMessage(err, ctx, f.name));
       status.set("");
       busy = false;
       render();
@@ -314,11 +355,19 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   function reset() {
     generation++;
+    busy = false;
     void viewer?.loadingTask.destroy();
     viewer = null;
     doc = null;
     file = null;
     pages = [];
+    observer?.disconnect();
+    queue.length = 0;
+    // Free the bitmaps now rather than whenever the canvases are collected.
+    for (const c of thumbs.values()) c.width = c.height = 0;
+    for (const { el } of turned.values()) el.width = el.height = 0;
+    thumbs.clear();
+    turned.clear();
     fileInfo.textContent = "";
     hint.hidden = true;
     actions.hidden = true;

@@ -7,7 +7,7 @@ import { createDropzone, downloadBlob, downloadZip, formatBytes, markEnter } fro
 import { tPlural } from "../../i18n/plural";
 import type { ToolCtx } from "../types";
 import { baseName, button, errorMessage, errorRegion, h, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
-import { planSplit, type SplitMode, type SplitPlan } from "./plan";
+import { planSplit, uniqueNames, type SplitMode, type SplitPlan } from "./plan";
 
 const ACCEPT = "application/pdf,.pdf";
 let uid = 0;
@@ -17,6 +17,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   const id = `pdf-split-${++uid}`;
   let source: { file: File; doc: PDFDocument } | null = null;
   let outputs: { name: string; blob: Blob; pages: number }[] = [];
+  /** True while a split runs: a second Enter (or click) must not start another one. */
+  let running = false;
+  /** Bumped by Start over and by a new file, so a split still running drops its results. */
+  let generation = 0;
   const ops = () => import("../pdf-shared/pdf-ops");
 
   const errors = errorRegion();
@@ -132,6 +136,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   }
 
   function reset() {
+    generation++;
+    running = false;
+    splitBtn.disabled = resetBtn.disabled = false;
     source = null;
     fileInfo.textContent = "";
     options.hidden = true;
@@ -173,7 +180,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
   }
 
   async function split() {
-    if (!source) return;
+    if (!source || running) return;
     const { file, doc } = source;
     const pages = doc.getPageCount();
     clearOutputs();
@@ -184,6 +191,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
       (rEvery.input.checked ? everyInput : rangesInput).focus();
       return;
     }
+    running = true;
+    const gen = generation;
     splitBtn.disabled = resetBtn.disabled = true;
     const progress = h("progress", { className: "tool-progress", max: plan.parts.length, value: 0 });
     resultActions.replaceChildren(progress);
@@ -191,23 +200,39 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     try {
       const { extractPages } = await ops();
       const base = baseName(file.name);
+      // "1, 1" asks for the same pages twice: both parts are made, under different names.
+      const names = uniqueNames(plan.parts.map((part) => t("split.outputName", { name: base, pages: part.label })));
+      const made: typeof outputs = [];
       for (const [i, part] of plan.parts.entries()) {
+        if (gen !== generation) return;
         status.set(t("split.working", { current: i + 1, total: plan.parts.length }));
         const bytes = await extractPages(doc, part.indices);
-        outputs.push({
-          name: t("split.outputName", { name: base, pages: part.label }),
-          blob: pdfBlob(bytes),
-          pages: part.indices.length,
-        });
+        made.push({ name: names[i]!, blob: pdfBlob(bytes), pages: part.indices.length });
         progress.value = i + 1;
       }
+      if (gen !== generation) return;
+      outputs = made;
       showOutputs(base);
     } catch (err) {
+      if (gen !== generation) return;
       errors.show(errorMessage(err, ctx, file.name));
       status.set("");
       resultActions.hidden = true;
     } finally {
-      splitBtn.disabled = resetBtn.disabled = false;
+      if (gen === generation) {
+        running = false;
+        splitBtn.disabled = resetBtn.disabled = false;
+      }
+    }
+  }
+
+  async function downloadAll(base: string) {
+    errors.clear();
+    try {
+      await downloadZip(outputs, t("split.zipName", { name: base }));
+    } catch (err) {
+      console.error(err);
+      errors.show(t("split.error.zip"));
     }
   }
 
@@ -245,7 +270,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): void {
     } else {
       main = button(t("tool.downloadAll"), {
         variant: "primary",
-        onClick: () => void downloadZip(outputs, t("split.zipName", { name: base })),
+        onClick: () => void downloadAll(base),
       });
     }
     resultActions.replaceChildren(main);

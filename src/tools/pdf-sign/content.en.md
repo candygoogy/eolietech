@@ -38,6 +38,8 @@ ui:
   sign.pad.undo: "Undo stroke"
   sign.pad.clear: "Clear"
   sign.pad.cleared: "The signing box is empty."
+  sign.pad.clearedPlaced.one: "The signing box is empty. The signature you placed was removed too."
+  sign.pad.clearedPlaced.other: "The signing box is empty. The {count} signatures you placed were removed too."
   sign.ink.legend: "Ink"
   sign.ink.black: "Black"
   sign.ink.blue: "Blue"

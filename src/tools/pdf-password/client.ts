@@ -215,7 +215,24 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     if (changed) render();
   }
 
+  /** Empty the password fields and hide what was typed. */
+  function clearPasswords() {
+    for (const input of passwordInputs) {
+      input.value = "";
+      input.type = "password";
+      input.removeAttribute("aria-invalid");
+    }
+    showInput.checked = false;
+  }
+
+  // Leaving the page (or putting it in the back/forward cache) forgets the password. The mounter
+  // drops the cleanup function returned below, so this cannot rely on it.
+  addEventListener("pagehide", () => {
+    if (tool.isConnected) clearPasswords();
+  });
+
   function reset() {
+    clearPasswords();
     entries = [];
     errors.clear();
     rowAlert.textContent = "";
@@ -393,7 +410,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       used.add(name);
       return { name, blob: e.output! };
     });
-    await downloadZip(files, t(k("zipName")));
+    errors.clear();
+    try {
+      await downloadZip(files, t(k("zipName")));
+    } catch (err) {
+      console.error(err);
+      errors.show(t("password.error.zip"));
+    }
   }
 
   return () => {

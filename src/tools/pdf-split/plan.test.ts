@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { planSplit } from "./plan";
+import { planSplit, uniqueNames } from "./plan";
 
 describe("planSplit", () => {
   it("plans one part per range, or one combined part", () => {
@@ -22,5 +22,15 @@ describe("planSplit", () => {
     expect(planSplit({ kind: "every", size: 0 }, 3)).toEqual({ ok: false, error: { code: "size" } });
     expect(planSplit({ kind: "every", size: 1.5 }, 3)).toEqual({ ok: false, error: { code: "size" } });
     expect(planSplit({ kind: "ranges", input: "9", combine: false }, 3)).toMatchObject({ ok: false, error: { code: "outOfRange" } });
+  });
+
+  it("gives repeated ranges unique file names", () => {
+    expect(uniqueNames(["a-pages-1.pdf", "a-pages-1.pdf", "a-pages-2.pdf", "a-pages-1.pdf"])).toEqual([
+      "a-pages-1.pdf",
+      "a-pages-1 (2).pdf",
+      "a-pages-2.pdf",
+      "a-pages-1 (3).pdf",
+    ]);
+    expect(uniqueNames(["x", "X"])).toEqual(["x", "X (2)"]);
   });
 });

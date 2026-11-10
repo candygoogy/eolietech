@@ -26,6 +26,9 @@ ui:
   merge.action: "Merge PDFs"
   merge.added.one: "Added {count} file."
   merge.added.other: "Added {count} files."
+  merge.notRead.one: "{count} file could not be read."
+  merge.notRead.other: "{count} files could not be read."
+  merge.error.updated: "This page was updated. Reload to continue."
   merge.reading: "Reading…"
   merge.pages: "Pages: {count}"
   merge.moveUp: "Move up"
@@ -40,7 +43,7 @@ ui:
   merge.done.other: "Done: one PDF with {pages} pages ({size})."
   merge.download.one: "Download merged PDF ({pages} page, {size})"
   merge.download.other: "Download merged PDF ({pages} pages, {size})"
-  merge.outputName: "merged.pdf"
+  merge.outputName: "{name}-merged.pdf"
 ---
 
 ## Why merge PDFs in the browser

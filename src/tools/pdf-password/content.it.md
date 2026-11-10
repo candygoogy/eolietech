@@ -36,6 +36,7 @@ ui:
   password.done.other: "Finito. {count} file pronti."
   password.error.engine: "Non è stato possibile caricare il motore PDF. Controlla la connessione e riprova."
   password.error.failed: "Qualcosa è andato storto con {name}. Il file potrebbe essere danneggiato."
+  password.error.zip: "Non è stato possibile creare il file .zip. Scarica i file uno alla volta, oppure ricarica la pagina e riprova."
   password.protect.label: "Password"
   password.protect.confirm: "Conferma la password"
   password.protect.note: "Tutti i file ricevono questa password. Conservala con cura: se la dimentichi, non si può recuperare."

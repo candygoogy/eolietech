@@ -26,6 +26,9 @@ ui:
   merge.action: "Unisci PDF"
   merge.added.one: "Aggiunto {count} file."
   merge.added.other: "Aggiunti {count} file."
+  merge.notRead.one: "Non è stato possibile leggere {count} file."
+  merge.notRead.other: "Non è stato possibile leggere {count} file."
+  merge.error.updated: "Questa pagina è stata aggiornata. Ricaricala per continuare."
   merge.reading: "Lettura…"
   merge.pages: "Pagine: {count}"
   merge.moveUp: "Sposta su"
@@ -40,7 +43,7 @@ ui:
   merge.done.other: "Fatto: un PDF di {pages} pagine ({size})."
   merge.download.one: "Scarica il PDF unito ({pages} pagina, {size})"
   merge.download.other: "Scarica il PDF unito ({pages} pagine, {size})"
-  merge.outputName: "unito.pdf"
+  merge.outputName: "{name}-unito.pdf"
 ---
 
 ## Perché unire i PDF nel browser

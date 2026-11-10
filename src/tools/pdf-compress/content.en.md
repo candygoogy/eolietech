@@ -38,6 +38,8 @@ ui:
   compress.downloading: "Downloading the compression engine: {loaded} of {total}"
   compress.fileStatus: "Compressing file {current} of {total}: {name}"
   compress.working: "Compressing…"
+  compress.stop: "Stop"
+  compress.stopped: "Stopped. Press Compress to continue with the files that are left."
   compress.page: "Page {page} of {pages}"
   compress.result: "{before} → {after} ({percent}% smaller)"
   compress.notSmaller: "Could not make this file smaller ({before} → {after}). It is probably already well compressed, so keep the original."
@@ -46,10 +48,14 @@ ui:
   compress.downloadOriginal: "Download original"
   compress.downloadLabel: "Download {name}"
   compress.downloadOriginalLabel: "Download the original file {name}"
-  compress.outputName: "{name}_compressed.pdf"
-  compress.zipName: "compressed_pdfs.zip"
+  compress.outputName: "{name}-compressed.pdf"
+  compress.zipName: "compressed-pdfs.zip"
   compress.error.engine: "The compression engine could not be loaded. Check your connection and try again."
   compress.error.failed: "{name} could not be compressed. The file may be damaged or use features the engine does not support."
+  compress.error.encrypted: "{name} needs a password to open, so it cannot be compressed. Remove the password first with"
+  compress.error.encryptedLink: "Unlock PDF"
+  compress.error.encryptedHref: "/unlock-pdf/"
+  compress.error.zip: "The .zip file could not be made. Download the files one by one, or reload the page and try again."
 ---
 
 ## How it works

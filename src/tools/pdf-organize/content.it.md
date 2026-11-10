@@ -54,7 +54,7 @@ ui:
   organize.done.other: "Fatto: nuovo PDF con {pages} pagine."
   organize.download.one: "Scarica il PDF ({pages} pagina, {size})"
   organize.download.other: "Scarica il PDF ({pages} pagine, {size})"
-  organize.outputName: "{name}_organizzato.pdf"
+  organize.outputName: "{name}-organizzato.pdf"
 ---
 
 ## Un ordinatore di pagine che resta sul tuo computer

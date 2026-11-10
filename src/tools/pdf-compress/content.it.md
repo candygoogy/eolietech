@@ -38,6 +38,8 @@ ui:
   compress.downloading: "Download del motore di compressione: {loaded} di {total}"
   compress.fileStatus: "Compressione del file {current} di {total}: {name}"
   compress.working: "Compressione…"
+  compress.stop: "Ferma"
+  compress.stopped: "Fermato. Premi Comprimi per continuare con i file rimasti."
   compress.page: "Pagina {page} di {pages}"
   compress.result: "{before} → {after} ({percent}% in meno)"
   compress.notSmaller: "Non è stato possibile ridurre questo file ({before} → {after}). Probabilmente è già ben compresso, quindi tieni l'originale."
@@ -46,10 +48,14 @@ ui:
   compress.downloadOriginal: "Scarica l'originale"
   compress.downloadLabel: "Scarica {name}"
   compress.downloadOriginalLabel: "Scarica il file originale {name}"
-  compress.outputName: "{name}_compresso.pdf"
-  compress.zipName: "pdf_compressi.zip"
+  compress.outputName: "{name}-compresso.pdf"
+  compress.zipName: "pdf-compressi.zip"
   compress.error.engine: "Non è stato possibile caricare il motore di compressione. Controlla la connessione e riprova."
   compress.error.failed: "Non è stato possibile comprimere {name}. Il file potrebbe essere danneggiato o usare funzioni che il motore non supporta."
+  compress.error.encrypted: "{name} chiede una password per aprirsi, quindi non si può comprimere. Togli prima la password con"
+  compress.error.encryptedLink: "Sbloccare PDF"
+  compress.error.encryptedHref: "/it/sbloccare-pdf/"
+  compress.error.zip: "Non è stato possibile creare il file .zip. Scarica i file uno alla volta, oppure ricarica la pagina e riprova."
 ---
 
 ## Come funziona

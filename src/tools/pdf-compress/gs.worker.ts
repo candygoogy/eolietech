@@ -15,7 +15,8 @@ export type GsRequest =
 export type GsResponse =
   | { type: "ready" }
   | { type: "progress"; id: number; total?: number; page?: number }
-  | { type: "result"; id: number; output: ArrayBuffer }
+  /** The page judges the run (presets.ts judgeGsRun): exit code, log and output page count together. */
+  | { type: "result"; id: number; code: number; log: string[]; output?: ArrayBuffer }
   | { type: "error"; id: number | null; message: string; log: string };
 
 const scope = self as unknown as DedicatedWorkerGlobalScope;
@@ -69,10 +70,15 @@ async function run(id: number, input: ArrayBuffer, args: string[]) {
       if (typeof status !== "number") throw err;
       code = status;
     }
-    if (code !== 0) throw new Error(`ghostscript exited with ${code}`);
-    const out = gs.FS.readFile(OUTPUT_PATH);
-    const copy = out.slice().buffer;
-    post({ type: "result", id, output: copy }, [copy]);
+    let copy: ArrayBuffer | undefined;
+    if (code === 0) {
+      try {
+        copy = gs.FS.readFile(OUTPUT_PATH).slice().buffer;
+      } catch {
+        // No output file: judged as a failure on the page.
+      }
+    }
+    post({ type: "result", id, code, log, output: copy }, copy ? [copy] : []);
   } catch (err) {
     post({ type: "error", id, message: err instanceof Error ? err.message : String(err), log: log.slice(-40).join("\n") });
   }

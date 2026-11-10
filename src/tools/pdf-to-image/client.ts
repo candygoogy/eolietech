@@ -321,7 +321,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     } else {
       main = button(t("tool.downloadAll"), {
         variant: "primary",
-        onClick: () => void downloadZip(outputs, t("p2i.zipName", { name: base, ext: fmt })),
+        onClick: () => {
+          errors.clear();
+          downloadZip(outputs, t("p2i.zipName", { name: base, ext: fmt })).catch((err: unknown) => {
+            console.error(err);
+            errors.show(t("p2i.error.zip"));
+          });
+        },
       });
     }
     const total = outputs.reduce((sum, o) => sum + o.blob.size, 0);

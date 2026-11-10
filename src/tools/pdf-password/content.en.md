@@ -36,6 +36,7 @@ ui:
   password.done.other: "Finished. {count} files ready."
   password.error.engine: "The PDF engine could not be loaded. Check your connection and try again."
   password.error.failed: "Something went wrong while processing {name}. The file may be damaged."
+  password.error.zip: "The .zip file could not be made. Download the files one by one, or reload the page and try again."
   password.protect.label: "Password"
   password.protect.confirm: "Confirm password"
   password.protect.note: "Every file gets this password. Keep it somewhere safe: a forgotten password cannot be recovered."

@@ -42,14 +42,15 @@ ui:
   split.pages: "Pagine: {count}"
   split.downloadLabel: "Scarica {name}"
   split.downloadOne: "Scarica {name}"
-  split.outputName: "{name}_pagine_{pages}.pdf"
-  split.zipName: "{name}_diviso.zip"
+  split.outputName: "{name}-pagine-{pages}.pdf"
+  split.zipName: "{name}-diviso.zip"
   split.error.empty: "Scrivi le pagine che ti servono, per esempio 1-3, 5, 8-."
   split.error.syntax: "“{part}” non è una pagina né un intervallo. Usa numeri come 5 o 1-3."
   split.error.outOfRange.one: "“{part}” è fuori dal documento, che ha {pages} pagina."
   split.error.outOfRange.other: "“{part}” è fuori dal documento, che ha {pages} pagine."
   split.error.reversed: "“{part}” va all'indietro. Scrivi prima il numero di pagina più basso."
   split.error.size: "Le pagine per file devono essere un numero intero da 1 a {pages}."
+  split.error.zip: "Non è stato possibile creare il file .zip. Scarica i file uno alla volta, oppure ricarica la pagina e riprova."
 ---
 
 ## Tre modi per dividere

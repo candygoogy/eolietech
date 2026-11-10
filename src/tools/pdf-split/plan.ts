@@ -35,3 +35,19 @@ export function planSplit(mode: SplitMode, pageCount: number): SplitPlan {
   }
   return { ok: true, parts };
 }
+
+/**
+ * Make file names unique, as a zip needs: ranges like "1, 1" give the same name twice, so later
+ * copies get " (2)", " (3)" before the extension (never "-2", which would read as a page range).
+ */
+export function uniqueNames(names: readonly string[]): string[] {
+  const used = new Set<string>();
+  return names.map((name) => {
+    let out = name;
+    const dot = name.lastIndexOf(".");
+    const [stem, ext] = dot > 0 ? [name.slice(0, dot), name.slice(dot)] : [name, ""];
+    for (let i = 2; used.has(out.toLowerCase()); i++) out = `${stem} (${i})${ext}`;
+    used.add(out.toLowerCase());
+    return out;
+  });
+}

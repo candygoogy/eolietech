@@ -54,7 +54,7 @@ ui:
   organize.done.other: "Done: new PDF with {pages} pages."
   organize.download.one: "Download PDF ({pages} page, {size})"
   organize.download.other: "Download PDF ({pages} pages, {size})"
-  organize.outputName: "{name}_organized.pdf"
+  organize.outputName: "{name}-organized.pdf"
 ---
 
 ## A page sorter that stays on your computer

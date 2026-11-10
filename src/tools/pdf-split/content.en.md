@@ -42,14 +42,15 @@ ui:
   split.pages: "Pages: {count}"
   split.downloadLabel: "Download {name}"
   split.downloadOne: "Download {name}"
-  split.outputName: "{name}_pages_{pages}.pdf"
-  split.zipName: "{name}_split.zip"
+  split.outputName: "{name}-pages-{pages}.pdf"
+  split.zipName: "{name}-split.zip"
   split.error.empty: "Type the pages you want, for example 1-3, 5, 8-."
   split.error.syntax: "“{part}” is not a page or range. Use numbers like 5 or 1-3."
   split.error.outOfRange.one: "“{part}” is outside the document, which has {pages} page."
   split.error.outOfRange.other: "“{part}” is outside the document, which has {pages} pages."
   split.error.reversed: "“{part}” goes backwards. Write the lower page number first."
   split.error.size: "Pages per file must be a whole number from 1 to {pages}."
+  split.error.zip: "The .zip file could not be made. Download the files one by one, or reload the page and try again."
 ---
 
 ## Three ways to split
