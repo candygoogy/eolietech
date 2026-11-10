@@ -1,0 +1,23 @@
+name: Tool idea
+description: A tool or a preset you would like to see, or something an existing tool should do.
+labels: [idea]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: What do you need to do?
+      description: The job, in your own words, e.g. "rotate a few pages of a scanned PDF" or "make a passport photo 35 x 45 mm".
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: How do you do it today?
+      description: Optional. The site or app you use now, and what you dislike about it.
+  - type: checkboxes
+    id: local
+    attributes:
+      label: In the browser
+      options:
+        - label: I understand Eolietech tools run entirely in the browser, so ideas that need a server or an account are out of scope.
+          required: true

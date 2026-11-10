@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem
+    url: https://github.com/candygoogy/eolietech/security/advisories/new
+    about: Privately, please. See SECURITY.md.
+  - name: Check what a site uploads
+    url: https://eolietech.com/check-file-uploads/
+    about: The guide to verifying that a tool keeps your files on your device.

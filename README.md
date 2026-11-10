@@ -6,6 +6,9 @@ device, and you can check that yourself.**
 [eolietech.com](https://eolietech.com) · [all tools](https://eolietech.com/tools/) ·
 [how to verify](https://eolietech.com/security/) · in English and [Italian](https://eolietech.com/it/)
 
+[![CI](https://github.com/candygoogy/eolietech/actions/workflows/ci.yml/badge.svg)](https://github.com/candygoogy/eolietech/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+
 [![The Eolietech home page: "Your files never leave your device." A postcard of Stromboli stamped "not sent" and a PDF clipped beside it.](.github/readme/home.png)](https://eolietech.com)
 
 - **Images:** compress (also to an exact size in KB), convert between HEIC, JPG, PNG, WebP and AVIF,
@@ -16,7 +19,8 @@ device, and you can check that yourself.**
 - **Documents:** open signed `.p7m` files and read Italian e-invoices (FatturaPA).
 - **Audio:** transcribe a recording with Whisper, running on your device.
 
-No account, no ads, no daily limits, no watermarks. Once a tool has loaded, it keeps working offline.
+No account, no ads, no daily limits, no watermarks. After a tool has handled its first file, it keeps
+working offline.
 
 ### Check it in 30 seconds
 
@@ -124,7 +128,7 @@ credits and licences are in [NOTICE](NOTICE).
 
 ## Development
 
-Requires Node 22.12+.
+Requires Node 22.12+; builds and CI use the version in `.node-version` (24.16.0).
 
 ```sh
 npm install
@@ -135,7 +139,8 @@ npm run dev:api      # wrangler dev (Worker + local D1); run `npm run build` fir
 npm run preview      # production-shaped: astro build + wrangler dev on :8787
 npm run typecheck    # astro check + Worker tsc
 npm test             # vitest: unit (registry contract) + worker (workerd)
-npm run test:e2e     # Playwright smoke tests (chromium + firefox) against `npm run preview`
+npm run test:e2e     # Playwright tests (chromium, firefox, webkit) against `npm run preview`
+npm run build:ci     # typecheck + unit tests + build, as CI runs it
 npm run og           # render the Open Graph images in public/og/*.png (scripts/og.mjs, Playwright Chromium)
 ```
 
@@ -148,9 +153,13 @@ Tools marked `status: "planned"` in the registry get no page. To build every too
   in happy-dom) and `worker` (the waitlist API inside workerd, with the D1 migrations applied and
   Turnstile's always-pass test secret).
 - `npm run typecheck` runs `astro check` and `tsc` on the Worker.
-- `npm run test:e2e` runs Playwright in Chromium and Firefox against `npm run preview` on port
-  8787. Playwright starts the preview itself, or reuses one that is already running (outside CI).
-  There is no WebKit project, so Safari is not covered.
+- `npm run test:e2e` runs Playwright in Chromium, Firefox and WebKit against `npm run preview` on
+  port 8787. Playwright starts the preview itself, or reuses one that is already running (outside
+  CI). Playwright's WebKit on Windows lacks `OffscreenCanvas` in workers and `SharedArrayBuffer`, so
+  the few specs that need them skip in WebKit; it is a stand-in for Safari, not a replacement for a
+  real iPhone or Mac.
+- GitHub Actions (`.github/workflows/ci.yml`) runs typecheck, unit tests and a build on every push
+  and pull request to `main`.
 
 Check tools on the production build (`npm run preview`), not only in `astro dev`. The dev server
 sends none of the headers in `public/_headers`, and the tool pages depend on them: COOP and COEP
@@ -160,7 +169,9 @@ in the production build.
 
 ## Contributing
 
-Issues are welcome: bug reports, files a tool handles badly, ideas for new tools.
+Issues are welcome: bug reports, files a tool handles badly, ideas for new tools. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the rules a change has to keep, and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 Code contributions from outside need a signed [Contributor License Agreement](CLA.md) before they
 can be merged. You keep the copyright in your work, and your code stays available under the AGPL;
