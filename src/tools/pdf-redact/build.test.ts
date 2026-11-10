@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { deflateRawSync } from "node:zlib";
 import {
   decodePDFRawStream,
   PDFArray,
@@ -12,7 +13,7 @@ import {
   type PDFObject,
 } from "pdf-lib";
 import { describe, expect, it } from "vitest";
-import { holds, png, xobjects } from "../pdf-shared/test-fixtures";
+import { holds, png, sharedResourcesPdf, xobjects } from "../pdf-shared/test-fixtures";
 import { buildRedactedPdf } from "./build";
 
 const SECRET = "ZEBRAQUOKKA";
@@ -170,5 +171,26 @@ describe("buildRedactedPdf with resources shared between pages", () => {
     // The redacted page's picture (1x1), and page 2's logo and form; no 37x11 image, no IBAN form.
     expect(await xobjects(out)).toEqual(["Form", "Image 1x1", "Image 5x3"]);
     expect(await pageTexts(out)).toEqual(["", "KEPTFORMPage two, nothing sensitive"]);
+  });
+});
+
+describe("buildRedactedPdf with forms and soft masks that hold the shared resources", () => {
+  const redactPage2 = (source: Uint8Array) => buildRedactedPdf(source, [{ index: 1, jpeg: JPEG, width: 100, height: 100 }]);
+
+  it.each(["soft mask", "shading pattern", "type 3 font"] as const)("keeps none of the redacted page's images when the kept page reaches them through a %s", async (route) => {
+    const out = await redactPage2(await sharedResourcesPdf(route));
+    // Page 1's own image and the one its route draws, the redacted page's picture (1x1), and no 22x1.
+    expect((await xobjects(out)).filter((x) => x.startsWith("Image"))).toEqual(["Image 11x1", "Image 1x1", "Image 33x1"]);
+  });
+
+  it("copies a kept page whose content is empty but filtered, or deflated without a zlib header, and refuses one it cannot read", async () => {
+    const empty = await redactPage2(await sharedResourcesPdf("none", { data: new Uint8Array(0), filter: "FlateDecode" }));
+    expect(await xobjects(empty)).toEqual(["Image 1x1"]);
+    const raw = new Uint8Array(deflateRawSync(Buffer.from("q 10 0 0 10 0 0 cm /Im1 Do Q")));
+    const deflated = await redactPage2(await sharedResourcesPdf("none", { data: raw, filter: "FlateDecode" }));
+    expect(await xobjects(deflated)).toEqual(["Image 11x1", "Image 1x1"]);
+    // A zlib header, then a block type that does not exist: the page's resources could not be cut down.
+    const damaged = await sharedResourcesPdf("none", { data: Uint8Array.of(0x78, 0x9c, 0xff, 0xff, 0xff), filter: "FlateDecode" });
+    await expect(redactPage2(damaged)).rejects.toMatchObject({ code: "invalid" });
   });
 });

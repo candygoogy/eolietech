@@ -1,8 +1,9 @@
 // @vitest-environment node
+import { deflateRawSync } from "node:zlib";
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRef, PDFString, StandardFonts, type PDFPage } from "pdf-lib";
 import { describe, expect, it } from "vitest";
 import { extractPages, loadPdf, mergeDocuments, PdfToolError, rearrangePages, scanContent } from "./pdf-ops";
-import { holds, pageTexts, xobjects } from "./test-fixtures";
+import { holds, pageTexts, sharedResourcesPdf, xobjects } from "./test-fixtures";
 
 /** A PDF whose pages have distinct widths (100, 101, ...) so order can be checked after saving. */
 async function makePdf(pages: number, firstWidth = 100): Promise<Uint8Array> {
@@ -351,5 +352,45 @@ describe("forms", () => {
     const fields = loaded.catalog.lookup(PDFName.of("AcroForm"), PDFDict).lookup(PDFName.of("Fields"), PDFArray);
     const rootNames = fields.asArray().map((_, i) => fields.lookup(i, PDFDict).lookup(PDFName.of("T"), PDFString).asString());
     expect(new Set(rootNames).size).toBe(2);
+  });
+});
+
+describe("content that reaches a resources dictionary shared with removed pages", () => {
+  it.each(["soft mask", "shading pattern", "type 3 font"] as const)("is cut down by its own content when reached through a %s", async (route) => {
+    const source = await sharedResourcesPdf(route);
+    // Page 1 draws Im1, and Im3 through the route; Im2 is page 2's alone.
+    const first = await extractPages(await loadPdf(source), [0]);
+    expect((await xobjects(first)).filter((x) => x.startsWith("Image"))).toEqual(["Image 11x1", "Image 33x1"]);
+    const second = await extractPages(await loadPdf(source), [1]);
+    expect(await xobjects(second)).toEqual(["Image 22x1"]);
+  });
+
+  it("reads a page whose content is empty but filtered, or deflated without a zlib header", async () => {
+    const images = async (bytes: Uint8Array) => xobjects(await extractPages(await loadPdf(bytes), [0]));
+    expect(await images(await sharedResourcesPdf("none", { data: new Uint8Array(0), filter: "FlateDecode" }))).toEqual([]);
+    const raw = new Uint8Array(deflateRawSync(Buffer.from("q 10 0 0 10 0 0 cm /Im1 Do Q")));
+    expect(await images(await sharedResourcesPdf("none", { data: raw, filter: "FlateDecode" }))).toEqual(["Image 11x1"]);
+    // Damaged data (a zlib header, then a block type that does not exist) cannot be read: the page keeps all its resources.
+    const damaged = Uint8Array.of(0x78, 0x9c, 0xff, 0xff, 0xff);
+    expect((await images(await sharedResourcesPdf("none", { data: damaged, filter: "FlateDecode" }))).filter((x) => x.startsWith("Image"))).toEqual(["Image 11x1", "Image 22x1", "Image 33x1"]);
+  });
+
+  it("drops the private application data (/PieceInfo) of a kept page and of the forms it draws", async () => {
+    const doc = await PDFDocument.create();
+    const ctx = doc.context;
+    const piece = (secret: string) => ctx.obj({ Illustrator: { LastModified: PDFString.of("D:20260101"), Private: ctx.register(ctx.stream(secret)) } });
+    const borrowing = ctx.register(ctx.stream("0 0 1 1 re f", { Type: "XObject", Subtype: "Form", BBox: [0, 0, 9, 9], PieceInfo: piece("BORROWINGFORMPIECE") }));
+    const owning = ctx.register(ctx.stream("0 0 1 1 re f", { Type: "XObject", Subtype: "Form", BBox: [0, 0, 9, 9], Resources: {}, PieceInfo: piece("OWNINGFORMPIECE") }));
+    const page = doc.addPage([100, 100]);
+    page.node.set(PDFName.of("Resources"), ctx.obj({ XObject: { Fm1: borrowing, Fm2: owning } }));
+    page.node.set(PDFName.of("Contents"), ctx.register(ctx.stream("/Fm1 Do /Fm2 Do")));
+    page.node.set(PDFName.of("PieceInfo"), piece("PAGEPIECESECRET"));
+    const source = await doc.save({ useObjectStreams: false });
+    expect(await holds(source, "PAGEPIECESECRET")).toBe(true);
+
+    for (const out of [await extractPages(await loadPdf(source), [0]), await mergeDocuments([await loadPdf(source)])]) {
+      for (const secret of ["PAGEPIECESECRET", "BORROWINGFORMPIECE", "OWNINGFORMPIECE"]) expect(await holds(out, secret), secret).toBe(false);
+      expect(await xobjects(out)).toEqual(["Form", "Form"]);
+    }
   });
 });

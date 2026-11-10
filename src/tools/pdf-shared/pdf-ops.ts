@@ -173,13 +173,36 @@ export function scanContent(bytes: Uint8Array, used: UsedNames): void {
   }
 }
 
-/** Decoded bytes of a content stream, or null when it cannot be read here. */
+/** Do these two bytes open a zlib stream (deflate method, valid check bits, no preset dictionary)? */
+const isZlibHeader = (cmf: number | undefined, flg: number | undefined): boolean =>
+  cmf !== undefined && flg !== undefined && (cmf & 0x0f) === 8 && ((cmf << 8) + flg) % 31 === 0 && (flg & 0x20) === 0;
+
+/**
+ * Decoded bytes of a content stream, or null when it cannot be read here. An empty stream draws
+ * nothing, whatever filter it names. Flate data written without its zlib header (raw deflate, which
+ * viewers read) goes through pdf-lib's own inflater with a header put in front. Anything else that
+ * does not decode stays unreadable, and callers then refuse the file (strict) or keep the
+ * resources whole: guessing at content that cannot be read could drop something it draws.
+ */
 function contentBytes(stream: PDFObject | undefined): Uint8Array | null {
   if (!(stream instanceof PDFRawStream)) return null;
+  const data = stream.contents;
+  if (data.length === 0) return new Uint8Array(0);
   try {
     return decodePDFRawStream(stream).decode();
   } catch {
-    return null;
+    // Only raw deflate is retried: data that has a zlib header and still fails is damaged.
+    const filter = stream.dict.lookup(N("Filter"));
+    const first = filter instanceof PDFArray ? filter.lookup(0) : filter;
+    if (nameOf(first) !== "FlateDecode" || isZlibHeader(data[0], data[1])) return null;
+    const framed = new Uint8Array(data.length + 2);
+    framed.set([0x78, 0x9c]);
+    framed.set(data, 2);
+    try {
+      return decodePDFRawStream(PDFRawStream.of(stream.dict, framed)).decode();
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -208,26 +231,33 @@ function pageContent(ctx: PDFContext, page: PDFDict): Uint8Array | null {
 interface Trimmer {
   /** A resources dictionary for one page holding only what the page and the given annotations draw with; null when some of that content cannot be read, undefined when the page has no resources. */
   page(page: PDFPageLeaf, annots: readonly PDFDict[]): PDFDict | null | undefined;
-  /** Some content (of a nested form, pattern or glyph) could not be read, so its resources were kept whole. */
+  /** Some content (of a nested form, pattern, soft mask or glyph) could not be read, so its resources were kept whole. */
   readonly incomplete: boolean;
 }
 
 /**
- * Resources cut down to what is drawn with them. A stream that has no resources of its own borrows
- * those of whatever draws it (annotation appearances, Form XObjects, tiling patterns, Type 3
- * glyphs), so its content counts there. One that has its own (a used Form XObject, say) keeps them,
- * cut down the same way: pages that share one dictionary often hand it to their forms as well.
- * `replace` receives the edited copy of each such stream or Type 3 font, for the reference it replaces.
+ * Resources cut down to what is drawn with them. Content is drawn from a page, and from there by
+ * every content stream it reaches: Form XObjects (Do), tiling patterns, the soft-mask groups of
+ * graphics states (gs, or the /ExtGState of a shading pattern), Type 3 glyphs and annotation
+ * appearances. A stream that has no resources of its own borrows those of whatever draws it, so its
+ * content counts there. One that has its own (or a Type 3 font that has) gets a copy with them cut
+ * down by its own content, the same way and recursively: pages that share one dictionary often hand
+ * it to their forms and soft masks too, and kept whole it would bring along the images of every page.
+ * Each object is cut down once (its own content decides what it keeps), which also ends cycles.
+ * `replace` receives the edited copy of each such stream or font, for the reference it replaces or,
+ * for a font written straight into its Font dictionary, for that dictionary itself.
  */
-function resourceTrimmer(ctx: PDFContext, replace: (ref: PDFRef, copy: PDFDict | PDFStream) => void): Trimmer {
-  const handled = new Set<PDFRef>();
+function resourceTrimmer(ctx: PDFContext, replace: (original: PDFRef | PDFDict, copy: PDFDict | PDFStream) => void): Trimmer {
+  const handled = new Set<PDFObject>();
   let incomplete = false;
 
   /** Give a stream or Type 3 font that has resources of its own a copy with them cut down. */
   const own = (raw: PDFObject | undefined): void => {
-    if (!(raw instanceof PDFRef) || handled.has(raw)) return;
-    handled.add(raw);
-    const owner = ctx.lookup(raw);
+    const owner = deref(ctx, raw);
+    if (!raw || !owner || handled.has(owner)) return;
+    // Streams are always indirect; a font dictionary can be written in place.
+    if (!(raw instanceof PDFRef) && !(owner instanceof PDFDict)) return;
+    handled.add(owner);
     const dict = owner instanceof PDFStream ? owner.dict : owner instanceof PDFDict ? owner : undefined;
     const resources = deref(ctx, dict?.get(N("Resources")));
     if (!dict || !(resources instanceof PDFDict)) return;
@@ -245,7 +275,7 @@ function resourceTrimmer(ctx: PDFContext, replace: (ref: PDFRef, copy: PDFDict |
     }
     const copy = owner instanceof PDFRawStream ? owner.clone(ctx) : (owner as PDFDict).clone(ctx);
     (copy instanceof PDFStream ? copy.dict : copy).set(N("Resources"), trimmed);
-    replace(raw, copy);
+    replace(raw instanceof PDFRef ? raw : (owner as PDFDict), copy);
   };
 
   /** `resources` with only the names `contents` (and the streams in `drawn`) call; null when some of it cannot be read. */
@@ -253,11 +283,33 @@ function resourceTrimmer(ctx: PDFContext, replace: (ref: PDFRef, copy: PDFDict |
     const used = emptyUse();
     const borrowers: PDFStream[] = [];
     const seen = new Set<PDFStream>();
+    /** A content stream drawn from here: cut down by its own content, or counted here when it borrows these resources. */
     const draws = (raw: PDFObject | undefined): void => {
       const stream = deref(ctx, raw);
       if (!(stream instanceof PDFStream)) return;
-      if (stream.dict.has(N("Resources"))) own(raw);
+      if (deref(ctx, stream.dict.get(N("Resources"))) instanceof PDFDict) own(raw);
       else borrowers.push(stream);
+    };
+    const font = (raw: PDFObject | undefined): void => {
+      const target = deref(ctx, raw);
+      if (!(target instanceof PDFDict) || nameOf(target.get(N("Subtype"))) !== "Type3") return;
+      if (deref(ctx, target.get(N("Resources"))) instanceof PDFDict) own(raw);
+      else for (const [, glyph] of dictAt(target, "CharProcs")?.entries() ?? []) draws(glyph);
+    };
+    /** A graphics state draws its soft mask's group, and its /Font when that is a Type 3 font. */
+    const graphicsState = (raw: PDFObject | undefined): void => {
+      const state = deref(ctx, raw);
+      if (!(state instanceof PDFDict)) return;
+      const mask = deref(ctx, state.get(N("SMask")));
+      if (mask instanceof PDFDict) draws(mask.get(N("G")));
+      const fontAndSize = deref(ctx, state.get(N("Font")));
+      if (fontAndSize instanceof PDFArray && fontAndSize.size()) font(fontAndSize.get(0));
+    };
+    /** A tiling pattern is a content stream; a shading pattern can carry a graphics state. */
+    const pattern = (raw: PDFObject | undefined): void => {
+      const target = deref(ctx, raw);
+      if (target instanceof PDFStream) draws(raw);
+      else if (target instanceof PDFDict) graphicsState(target.get(N("ExtGState")));
     };
     const scan = (bytes: Uint8Array | null): boolean => {
       if (!bytes) return false;
@@ -270,11 +322,9 @@ function resourceTrimmer(ctx: PDFContext, replace: (ref: PDFRef, copy: PDFDict |
           const raw = dictAt(resources, kind)?.get(N(name));
           const target = deref(ctx, raw);
           if (kind === "XObject" && target instanceof PDFStream && nameOf(target.dict.get(N("Subtype"))) === "Form") draws(raw);
-          else if (kind === "Pattern") draws(raw);
-          else if (kind === "Font" && target instanceof PDFDict && nameOf(target.get(N("Subtype"))) === "Type3") {
-            if (target.has(N("Resources"))) own(raw);
-            else for (const [, glyph] of dictAt(target, "CharProcs")?.entries() ?? []) draws(glyph);
-          }
+          else if (kind === "Pattern") pattern(raw);
+          else if (kind === "ExtGState") graphicsState(raw);
+          else if (kind === "Font") font(raw);
         }
       }
       return true;
@@ -379,8 +429,10 @@ export interface CopyOptions {
  * - the form-field tree above a copied widget is cut down to the fields shown on copied pages, and
  *   those are listed in `out`'s /AcroForm (with /NeedAppearances, so filled values without an
  *   appearance stream still show);
- * - article beads (/B) go, and each page gets its own resources dictionary with only the entries
- *   it uses, since a dictionary shared between pages holds the images of all of them;
+ * - article beads (/B) and private application data (/PieceInfo, of pages and of the forms they
+ *   draw) go, and each page gets its own resources dictionary with only the entries it uses, since
+ *   a dictionary shared between pages holds the images of all of them (so do the forms, patterns
+ *   and soft masks that reach it: each is cut down by its own content);
  * - the layers (/OCProperties) the copied content uses keep their on/off state and order.
  *
  * `src` is left as it was, so it can be copied from again. Call once per source document; layers
@@ -418,7 +470,9 @@ export async function copyPagesDetached(out: PDFDocument, src: PDFDocument, indi
     }
     return copy;
   };
-  const trimmer = resourceTrimmer(ctx, (ref, copy) => replacements.set(ref, copy));
+  /** Edited copies of objects written in place (a Type 3 font with trimmed resources), keyed by the original. */
+  const inPlace = new Map<PDFDict, PDFDict>();
+  const trimmer = resourceTrimmer(ctx, (original, copy) => (original instanceof PDFRef ? replacements.set(original, copy) : inPlace.set(original, copy as PDFDict)));
 
   // --- destinations and actions ---
   const named = namedDestinations(src);
@@ -483,6 +537,8 @@ export async function copyPagesDetached(out: PDFDocument, src: PDFDocument, indi
   for (const i of kept) {
     const page = srcPages[i]!.node.clone(ctx);
     page.delete(N("B"));
+    // Private application data: Illustrator and others keep a copy of the whole document there.
+    page.delete(N("PieceInfo"));
     const annots: PDFObject[] = [];
     const annotDicts: PDFDict[] = [];
     for (const raw of arrayAt(page, "Annots")) {
@@ -586,6 +642,8 @@ export async function copyPagesDetached(out: PDFDocument, src: PDFDocument, indi
     replacementRefs.set(ref, to);
     mapped.set(ref, to);
   }
+  // The copier finds an object written in place by identity: its edited copy stands in for it.
+  for (const [original, copy] of inPlace) mapped.set(original, copier.copy(copy));
   const done = new Set<number>();
   const pages = indices.map((i) => {
     // A page asked for twice gets a second dictionary over the same content, as with pdf-lib.
@@ -676,6 +734,13 @@ export async function copyPagesDetached(out: PDFDocument, src: PDFDocument, indi
       auto.push(copy);
     }
     append(targetConfig, "AS", auto);
+  }
+
+  // A Form XObject can carry /PieceInfo as a page does. It goes from every form this call copied;
+  // what it pointed at is left unreferenced, for the pruneUnreachable that every caller runs.
+  for (const copy of mapped.values()) {
+    const stream = copy instanceof PDFRef ? outCtx.lookup(copy) : undefined;
+    if (stream instanceof PDFStream && nameOf(stream.dict.get(N("Subtype"))) === "Form") stream.dict.delete(N("PieceInfo"));
   }
 
   return pages;

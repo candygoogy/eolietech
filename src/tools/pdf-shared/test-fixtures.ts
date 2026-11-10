@@ -85,3 +85,47 @@ export function png(width: number, height: number, rgb: [number, number, number]
   for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) raw.set(rgb, y * (width * 3 + 1) + 1 + x * 3);
   return new Uint8Array(Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]));
 }
+
+/** How page 1 of `sharedResourcesPdf` reaches a content stream that was given the shared dictionary as its own resources. */
+export type SharedRoute = "none" | "soft mask" | "shading pattern" | "type 3 font";
+
+/**
+ * Two pages with one resources dictionary, which holds three images: Im1 (11x1), Im2 (22x1) and
+ * Im3 (33x1). Page 2 draws Im2 only. Page 1 draws Im1, and by `route` a stream that has the shared
+ * dictionary as its own resources and draws Im3: the group of a soft mask set by `gs`, the same
+ * soft mask carried by a shading pattern, or the glyph of a Type 3 font written in place. Image 22x1
+ * belongs to page 2 alone. `page1` replaces page 1's content stream (its raw bytes and filter).
+ */
+export async function sharedResourcesPdf(route: SharedRoute, page1?: { data: Uint8Array; filter?: string }): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const ctx = doc.context;
+  const image = (width: number) => ctx.register(ctx.stream(new Uint8Array(width), { Type: "XObject", Subtype: "Image", Width: width, Height: 1, ColorSpace: "DeviceGray", BitsPerComponent: 8 }));
+  const shared = ctx.nextRef();
+  const draw3 = "q 10 0 0 10 0 0 cm /Im3 Do Q";
+  const group = ctx.register(ctx.stream(draw3, { Type: "XObject", Subtype: "Form", BBox: [0, 0, 10, 10], Group: { S: "Transparency", CS: "DeviceGray" }, Resources: shared }));
+  const mask = { SMask: { S: "Luminosity", G: group } };
+  const shading = { ShadingType: 2, ColorSpace: "DeviceGray", Coords: [0, 0, 10, 0], Function: { FunctionType: 2, Domain: [0, 1], C0: [0], C1: [1], N: 1 } };
+  const glyph = ctx.register(ctx.stream(`1 0 0 0 1 1 d1 ${draw3}`));
+  const type3 = { Type: "Font", Subtype: "Type3", FontBBox: [0, 0, 1, 1], FontMatrix: [1, 0, 0, 1, 0, 0], CharProcs: { a: glyph }, Encoding: { Type: "Encoding", Differences: [97, "a"] }, FirstChar: 97, LastChar: 97, Widths: [1], Resources: shared };
+  ctx.assign(
+    shared,
+    ctx.obj({
+      XObject: { Im1: image(11), Im2: image(22), Im3: image(33) },
+      ExtGState: { GS1: mask },
+      Pattern: { P1: ctx.register(ctx.obj({ PatternType: 2, Shading: shading, ExtGState: mask })) },
+      Font: { F3: type3 },
+    }),
+  );
+  const via = { none: "", "soft mask": "/GS1 gs", "shading pattern": "q /Pattern cs /P1 scn 0 0 50 50 re f Q", "type 3 font": "BT /F3 1 Tf (a) Tj ET" }[route];
+  const content = (text: string) => ctx.register(ctx.stream(text));
+  const p1 = doc.addPage([100, 100]);
+  p1.node.set(PDFName.of("Resources"), shared);
+  p1.node.set(
+    PDFName.of("Contents"),
+    page1 ? ctx.register(PDFRawStream.of(ctx.obj(page1.filter ? { Filter: page1.filter } : {}), page1.data)) : content(`q ${via} 10 0 0 10 0 0 cm /Im1 Do Q`),
+  );
+  const p2 = doc.addPage([100, 100]);
+  p2.node.set(PDFName.of("Resources"), shared);
+  p2.node.set(PDFName.of("Contents"), content("q 10 0 0 10 0 0 cm /Im2 Do Q"));
+  return doc.save({ useObjectStreams: false });
+}
