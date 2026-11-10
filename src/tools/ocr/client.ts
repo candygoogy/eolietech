@@ -5,6 +5,13 @@
  * 300 dpi (pixel-capped) and, for PDFs, the result is also a searchable copy: the original pages
  * plus an invisible text layer (./text-layer.ts). Pages that already have text are kept as they are
  * unless the user asks to read them too. Recognised text is only ever set with textContent.
+ *
+ * Checks around the work: each PDF is opened when it is added, so one that needs a password, or is
+ * locked against changes (its text can be read, but pdf-lib cannot write a searchable copy), is
+ * flagged before anything is read; the code chunks needed later are fetched as soon as files are
+ * added, so a deploy in the meantime cannot strand a long run; if the searchable copy cannot be
+ * made, or does not have the pages of the original, the text is kept and offered on its own; and
+ * leaving the page with text not yet downloaded or copied asks first.
  */
 import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist/legacy/build/pdf.mjs";
 import type { Page } from "tesseract.js";
@@ -12,7 +19,7 @@ import { tPlural } from "../../i18n/plural";
 import { createDropzone, downloadBlob, downloadZip, formatBytes, markEnter, renameExtension, type FileIntake } from "../../lib/tool-ui";
 import { acceptFor, sniffFormat, uniqueNames } from "../image-shared/formats";
 import { baseName, button, errorMessage, errorRegion, h, pdfBlob, readFile, statusRegion } from "../pdf-shared/dom";
-import { looksLikePdf } from "../pdf-shared/pdf-errors";
+import { PdfToolError, looksLikePdf } from "../pdf-shared/pdf-errors";
 import { pageSize } from "../pdf-to-image/plan";
 import type { ToolCtx } from "../types";
 import type { OcrEngine } from "./engine";
@@ -44,6 +51,12 @@ interface Item {
   skipped: number[];
   confidence?: number;
   error?: string;
+  /** A PDF that opens without a password but is encrypted (an owner password): no searchable copy. */
+  restricted?: boolean;
+  /** The text was read but the searchable PDF could not be made. */
+  pdfFailed?: boolean;
+  /** The result has been downloaded or copied. */
+  saved?: boolean;
   li: HTMLLIElement;
   meta: HTMLParagraphElement;
   progress: HTMLProgressElement;
@@ -53,6 +66,16 @@ interface Item {
 
 class Stopped extends Error {}
 class EngineLoadError extends Error {}
+/** One of this site's code chunks did not load: gone after a deploy, or the connection is down. */
+class ChunkError extends Error {}
+
+/** A dynamic import, with its failure told apart from a failure of the work itself. */
+function chunk<T>(load: () => Promise<T>): Promise<T> {
+  return load().catch((err: unknown) => {
+    console.error(err);
+    throw new ChunkError();
+  });
+}
 
 const kindOf = (file: File): Kind => {
   const name = file.name.toLowerCase();
@@ -79,6 +102,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   let destroyed = false;
   /** Aborted by Stop: cancels a first-run engine download that has not finished yet. */
   let abort = new AbortController();
+  /** PDFs are opened one at a time when added (see probe), so twenty big files do not fill memory at once. */
+  let probes: Promise<void> = Promise.resolve();
+  /** The beforeunload warning is on. */
+  let guarding = false;
   const variant = coreVariant();
 
   const tool = h("div", { className: "tool tool--ocr" });
@@ -134,6 +161,80 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   el.append(tool);
   render();
 
+  // ---------- errors, leaving the page ----------
+
+  /** A chunk did not load. Offline, a reload would lose the page itself: only say "reload" when the connection is there. */
+  function showChunkError() {
+    errors.show(t(navigator.onLine === false ? "ocr.error.offline" : "ocr.error.updated"));
+  }
+
+  const warnUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault();
+    // Older Chrome and Safari only ask when this is set.
+    e.returnValue = true;
+  };
+
+  /** Ask before leaving while files are being read or there is text not yet downloaded or copied. */
+  function syncGuard() {
+    const unsaved = !destroyed && (running || items.some((i) => i.state === "done" && (i.text || i.pdf) && !i.saved));
+    if (unsaved === guarding) return;
+    guarding = unsaved;
+    if (unsaved) window.addEventListener("beforeunload", warnUnload);
+    else window.removeEventListener("beforeunload", warnUnload);
+  }
+
+  function markSaved(...done: Item[]) {
+    for (const item of done) item.saved = true;
+    syncGuard();
+  }
+
+  // ---------- early checks ----------
+
+  /**
+   * Fetch the code needed later (the reading engine's module and, for PDFs, PDF.js, pdf-lib and the
+   * text layer) as soon as files are added. Once loaded it stays in memory, so a deploy during a
+   * long run cannot take it away; if it is already gone, the user hears it before waiting for anything.
+   * The engine's language data is not fetched here: that download waits for Read.
+   */
+  function preload(pdf: boolean) {
+    const loads: Promise<unknown>[] = [import("./engine")];
+    if (pdf) loads.push(import("../pdf-shared/pdfjs"), import("./text-layer"));
+    Promise.all(loads).catch((err: unknown) => {
+      console.error(err);
+      if (!destroyed && items.length) showChunkError();
+    });
+  }
+
+  /**
+   * Open a PDF as soon as it is added: one that needs a password is marked as failed at once, and
+   * one locked against changes says up front that it will give text but no searchable PDF.
+   */
+  function probe(item: Item) {
+    probes = probes.then(async () => {
+      if (destroyed || !items.includes(item) || item.state !== "pending") return;
+      try {
+        const bytes = await readFile(item.file);
+        if (!looksLikePdf(bytes)) return; // Read says so, with the usual message
+        const { openForRender } = await import("../pdf-shared/pdfjs");
+        const doc = await openForRender(bytes);
+        try {
+          // PDF.js reports permissions only for an encrypted file, and this one opened without a password.
+          item.restricted = (await doc.getPermissions()) !== null;
+        } finally {
+          void doc.loadingTask.destroy();
+        }
+      } catch (err) {
+        if (!(err instanceof PdfToolError && err.code === "encrypted") || item.state !== "pending") return;
+        item.state = "error";
+        item.error = errorMessage(err, ctx, item.file.name);
+      }
+      // Read may have started on it while this check was waiting; the run then draws it.
+      if (!items.includes(item) || (item.state as State) === "working") return;
+      renderItem(item);
+      if (!running) render();
+    });
+  }
+
   function chosenLangs() {
     return langsFor(langSelect.value as LangChoice, locale);
   }
@@ -176,7 +277,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       items.push(item);
       list.append(item.li);
       renderItem(item);
+      if (kind === "pdf") probe(item);
     }
+    if (files.length) preload(files.some((f) => kindOf(f) === "pdf"));
     render();
     if (files.length && !running) startBtn.focus();
   }
@@ -193,7 +296,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     loadProgress.removeAttribute("value");
     status.set(t("ocr.engine.starting"));
     try {
-      const { startEngine } = await import("./engine");
+      const { startEngine } = await chunk(() => import("./engine"));
       const next = await startEngine(langs, abort.signal, (e) => {
         if (gen !== generation) return;
         if (e.kind === "download") {
@@ -215,6 +318,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       return next;
     } catch (err) {
       if (err instanceof Stopped || gen !== generation) throw new Stopped();
+      if (err instanceof ChunkError) throw err;
       console.error(err);
       throw new EngineLoadError();
     } finally {
@@ -234,7 +338,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     stopBtn.focus();
     let stoppedEarly = false;
     for (const [n, item] of queue.entries()) {
-      if (gen !== generation || !items.includes(item)) {
+      // Removed meanwhile, or turned away by its check on adding (it needs a password).
+      if (gen !== generation || !items.includes(item) || item.state !== "pending") {
         stoppedEarly = gen !== generation;
         if (stoppedEarly) break;
         continue;
@@ -255,10 +360,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           stoppedEarly = true;
           break;
         }
-        if (err instanceof EngineLoadError) {
+        if (err instanceof EngineLoadError || err instanceof ChunkError) {
           resetItem(item);
           renderItem(item);
-          errors.show(t("ocr.error.load"));
+          if (err instanceof ChunkError) showChunkError();
+          else errors.show(t("ocr.error.load"));
           stoppedEarly = true;
           break;
         }
@@ -283,6 +389,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     item.pages = undefined;
     item.skipped = [];
     item.confidence = undefined;
+    item.pdfFailed = undefined;
+    item.saved = undefined;
   }
 
   /** The running loop notices (its engine call rejects or its next check throws), puts the current file back and ends. */
@@ -343,12 +451,16 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   async function readPdf(item: Item, eng: OcrEngine, gen: number) {
     const bytes = await readFile(item.file);
-    if (!looksLikePdf(bytes)) {
-      const { PdfToolError } = await import("../pdf-shared/pdf-errors");
-      throw new PdfToolError("invalid");
-    }
-    const { openForRender } = await import("../pdf-shared/pdfjs");
+    if (!looksLikePdf(bytes)) throw new PdfToolError("invalid");
+    const { openForRender } = await chunk(() => import("../pdf-shared/pdfjs"));
     const doc: PDFDocumentProxy = await openForRender(bytes.slice());
+    // Also checked on adding; asked again in case Read was pressed before that check finished.
+    try {
+      if ((await doc.getPermissions()) !== null) item.restricted = true;
+    } catch (err) {
+      void doc.loadingTask.destroy();
+      throw err;
+    }
     const readAll = allPages.checked;
     const texts: string[] = [];
     const layers: (PageLayer | null)[] = [];
@@ -416,11 +528,38 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         ? texts[0]!
         : texts.map((text, i) => `${t("ocr.pageHeading", { page: i + 1 })}\n${text}`).join("\n\n").trim();
     item.confidence = read > 0 ? confidenceSum / read : undefined;
-    if (read > 0) {
-      const { buildSearchablePdf } = await import("./text-layer");
-      const out = await buildSearchablePdf(bytes, layers);
-      check(gen);
-      item.pdf = pdfBlob(out);
+    // A PDF locked against changes gives its text only: pdf-lib cannot write it (said up front).
+    if (read > 0 && !item.restricted) {
+      try {
+        const { buildSearchablePdf } = await chunk(() => import("./text-layer"));
+        const out = await buildSearchablePdf(bytes, layers);
+        check(gen);
+        // Offer the copy only if it opens and has every page of the original.
+        if ((await countPages(out)) !== item.pages) throw new Error("searchable PDF: page count differs from the original");
+        check(gen);
+        item.pdf = pdfBlob(out);
+      } catch (err) {
+        if (err instanceof Stopped) throw err;
+        // The text took the work: keep it, and say the searchable copy is missing.
+        console.error(err);
+        if (err instanceof ChunkError) showChunkError();
+        if (err instanceof PdfToolError && err.code === "encrypted") item.restricted = true;
+        else item.pdfFailed = true;
+      }
+    }
+  }
+
+  /** Page count of a PDF as a reader sees it (PDF.js, not the library that wrote it); -1 when it does not open. */
+  async function countPages(pdfBytes: Uint8Array): Promise<number> {
+    const { openForRender } = await chunk(() => import("../pdf-shared/pdfjs"));
+    try {
+      const opened = await openForRender(pdfBytes.slice());
+      const count = opened.numPages;
+      void opened.loadingTask.destroy();
+      return count;
+    } catch (err) {
+      console.error(err);
+      return -1;
     }
   }
 
@@ -442,6 +581,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     try {
       await navigator.clipboard.writeText(item.text);
       status.set(t("ocr.copied", { name: item.file.name }));
+      markSaved(item);
     } catch {
       status.set(t("ocr.copyFailed"));
     }
@@ -462,6 +602,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         files.map((f, i) => ({ name: names[i]!, blob: f.blob })),
         t("ocr.zipName"),
       );
+      markSaved(...done);
     } catch {
       errors.show(t("tool.error.generic"));
     } finally {
@@ -513,6 +654,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
             : tPlural(ctx, "ocr.skipped", item.skipped.length, { pages: item.skipped.join(", ") }),
         );
       }
+      if (item.pdfFailed && item.text) notes.push(t("ocr.pdfFailed"));
       if (!item.text) notes.push(t("ocr.empty"));
       else if (item.confidence !== undefined && item.confidence < LOW_CONFIDENCE) notes.push(t("ocr.lowConfidence"));
       for (const note of notes) result.append(h("p", { className: "tool-note", text: note }));
@@ -525,7 +667,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           button(t("ocr.downloadTxt"), {
             variant: item.pdf ? undefined : "primary",
             ariaLabel: t("ocr.downloadTxtNamed", { name: file.name }),
-            onClick: () => downloadBlob(txtBlob(item), txtName(item)),
+            onClick: () => {
+              downloadBlob(txtBlob(item), txtName(item));
+              markSaved(item);
+            },
           }),
           button(t("ocr.copy"), { ariaLabel: t("ocr.copyNamed", { name: file.name }), onClick: () => void copy(item) }),
         );
@@ -535,13 +680,24 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
             button(t("ocr.downloadPdf"), {
               variant: "primary",
               ariaLabel: t("ocr.downloadPdfNamed", { name: file.name }),
-              onClick: () => downloadBlob(pdf, pdfName(item)),
+              onClick: () => {
+                downloadBlob(pdf, pdfName(item));
+                markSaved(item);
+              },
             }),
           );
         }
         result.append(textEl, actionsRow);
       }
       result.hidden = result.childElementCount === 0;
+    }
+
+    // Said up front, and again with the result when pages were read but no searchable PDF came of it.
+    const lockShown = item.state === "pending" || (item.state === "done" && !item.pdf && item.skipped.length !== item.pages);
+    if (item.kind === "pdf" && item.restricted && lockShown) {
+      const link = h("a", { href: t("ocr.restricted.href"), text: t("ocr.restricted.link") });
+      result.prepend(h("p", { className: "tool-note" }, t("ocr.restricted"), " ", link, "."));
+      result.hidden = false;
     }
 
     if (item.state !== "working") {
@@ -584,6 +740,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     drop.toggleAttribute("inert", running);
     for (const item of items) item.row.querySelectorAll("button").forEach((b) => (b.disabled = running));
     syncFirstRun();
+    syncGuard();
 
     if (running) return;
     if (total === 0) return status.set("");
@@ -597,6 +754,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   return () => {
     destroyed = true;
+    syncGuard();
     generation++;
     abort.abort();
     renderTask?.cancel();

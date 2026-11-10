@@ -14,6 +14,7 @@ import {
   toPixels,
   type TextPiece,
 } from "./geometry";
+import { findPattern, noteBoxes, readNotes } from "./match";
 
 /** One 300 x 400 pt page with "Hello SECRET world" at (40, 340), size 18, as PDF.js sees it. */
 async function pageFor(edit: (page: import("pdf-lib").PDFPage) => void) {
@@ -75,6 +76,49 @@ describe("glyph widths", () => {
     expect(b).toBe(1);
     expect(spanOf("città", 0, 5)).toEqual([0, 1]);
     expect(spanOf("ab", 1, 2)[0]).toBe(0.5);
+  });
+
+  it("shares a Courier line out evenly, so the box covers the start of the match", async () => {
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Courier);
+    // Wide capitals before the match, narrow letters in it: where Helvetica's widths mislead most.
+    const line = "EMAIL:lilli.gilli@tin.it";
+    doc.addPage([400, 400]).drawText(line, { x: 40, y: 340, size: 12, font });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const page = await (await pdfjs.getDocument({ data: await doc.save(), verbosity: 0 }).promise).getPage(1);
+    const content = await page.getTextContent();
+    const item = content.items.flatMap((i) => ("str" in i ? [i] : []))[0]!;
+    expect(item.str).toBe(line);
+    // What client.ts reads to set `mono`.
+    expect(content.styles[item.fontName]?.fontFamily).toBe("monospace");
+    const from = line.indexOf("lilli");
+    const start = 40 + font.widthOfTextAtSize(line.slice(0, from), 12);
+    const transform = page.getViewport({ scale: 1 }).transform;
+    const b = textBox({ ...item, mono: true }, from, line.length, transform);
+    close(b.x, start - 12 * 0.2);
+    close(b.x + b.w, 40 + font.widthOfTextAtSize(line, 12) + 12 * 0.2);
+    // Helvetica's widths would start the box more than a letter (7.2 pt) inside the match, padding included.
+    expect(textBox(item, from, line.length, transform).x).toBeGreaterThan(start + 7.2);
+  });
+});
+
+describe("form fields", () => {
+  it("finds a filled-in field as PDF.js reports it and boxes its rectangle", async () => {
+    const doc = await PDFDocument.create();
+    const page = doc.addPage([300, 400]);
+    const field = doc.getForm().createTextField("cf");
+    field.setText("RSSMRA85T10A562S");
+    field.addToPage(page, { x: 40, y: 200, width: 200, height: 20, borderWidth: 0 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const p = await (await pdfjs.getDocument({ data: await doc.save(), verbosity: 0 }).promise).getPage(1);
+    // The page's own text does not hold the field's value: only the annotation does.
+    expect((await p.getTextContent()).items).toHaveLength(0);
+    const { notes, unread } = readNotes(await p.getAnnotations());
+    expect(unread).toBe(0);
+    expect(notes).toHaveLength(1);
+    const boxes = noteBoxes(notes, (text) => findPattern(text, "cf"), p.getViewport({ scale: 1 }).transform, 300, 400);
+    // 200 pt from the bottom of a 400 pt page, 20 pt tall: 180 to 200 pt from the top.
+    expect(boxes).toEqual([[{ x: 40, y: 180, w: 200, h: 20 }]]);
   });
 });
 

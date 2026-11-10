@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TextPiece } from "./geometry";
-import { findPattern, findQuery, ibanValid, joinText, rangeBoxes, type PatternId } from "./match";
+import { findPattern, findQuery, ibanValid, joinText, noteBoxes, rangeBoxes, readNotes, type PatternId } from "./match";
 
 const found = (text: string, id: PatternId) => findPattern(text, id).map((r) => text.slice(r.start, r.end));
 
@@ -10,6 +10,15 @@ describe("typed search", () => {
     expect(findQuery(text, "  mario rossi ").map((r) => text.slice(r.start, r.end))).toEqual(["Mario ROSSI", "mario\nrossi", "MarioRossi"]);
     expect(findQuery(text, "a.b(c")).toEqual([]);
     expect(findQuery(text, "   ")).toEqual([]);
+  });
+
+  it("finds a word split over two lines, with or without a hyphen", () => {
+    const text = "the Berlus-\nconi case, Berlusconi again, Berlus\nconi once more";
+    expect(findQuery(text, "berlusconi").map((r) => text.slice(r.start, r.end))).toEqual(["Berlus-\nconi", "Berlusconi", "Berlus\nconi"]);
+    // A short word breaks only at a hyphen: "to" is not the end of "not" plus the start of "over".
+    const short = "not\nover, to-\nday";
+    expect(findQuery(short, "to").map((r) => short.slice(r.start, r.end))).toEqual(["to"]);
+    expect(findQuery(short, "today").map((r) => short.slice(r.start, r.end))).toEqual(["to-\nday"]);
   });
 });
 
@@ -49,6 +58,14 @@ describe("personal data patterns", () => {
     expect(found("IT61 X054 2811 1010 0000 0123 456 BIC", "iban")).toEqual(["IT61 X054 2811 1010 0000 0123 456"]);
   });
 
+  it("finds an IBAN that wraps onto the next line", () => {
+    expect(found("IBAN: IT60 X054 2811 1010\n0000 0123 456\nBIC BPMOIT22", "iban")).toEqual(["IT60 X054 2811 1010\n0000 0123 456"]);
+    // A line that only looks like the start of an IBAN does not swallow the real one below it.
+    expect(found("Rif. AB12 CDEF GHIJ\nIT60 X054 2811 1010 0000 0123 456", "iban")).toEqual(["IT60 X054 2811 1010 0000 0123 456"]);
+    // Typed in one piece, printed over two lines.
+    expect(findQuery("IT60X05428111\n01000000123456", "IT60X0542811101000000123456")).toEqual([{ start: 0, end: 28 }]);
+  });
+
   it("finds codici fiscali, omocodia included, but not inside longer words", () => {
     expect(found("CF: RSSMRA85T10A562S, rssmra85t10a562s, RSSMRA85T10A56NS; XRSSMRA85T10A562S", "cf")).toEqual([
       "RSSMRA85T10A562S",
@@ -82,5 +99,66 @@ describe("matches to boxes", () => {
     const [boxes] = rangeBoxes(one, page, findPattern(page.text, "iban"), flip, 300, 400);
     // "IBAN " is 2612 of 17512 thousandths of an em: the IBAN starts at 47.7 pt; the end is clipped to the page.
     expect(boxes).toEqual([{ x: 45.7, y: 90.5, w: 254.3, h: 12.5 }]);
+  });
+
+  it("draws one box per line when a match wraps", () => {
+    const wrapped: TextPiece[] = [
+      { str: "IBAN IT60 X054 2811 1010", transform: [10, 0, 0, 10, 40, 300], width: 150, height: 10, hasEOL: true },
+      { str: "0000 0123 456 BIC", transform: [10, 0, 0, 10, 40, 285], width: 100, height: 10 },
+    ];
+    const page = joinText(wrapped);
+    const [boxes] = rangeBoxes(wrapped, page, findPattern(page.text, "iban"), flip, 300, 400);
+    expect(boxes).toHaveLength(2);
+    // Line one from the IBAN's first letter to the end of the line, line two from its start; both padded by 2 pt.
+    expect(boxes![0]!.x).toBeGreaterThan(40);
+    expect(boxes![0]!.x + boxes![0]!.w).toBe(192);
+    expect(boxes![1]!.x).toBe(38);
+    expect(boxes![1]!.x + boxes![1]!.w).toBeLessThan(140);
+    expect(boxes![1]!.y - boxes![0]!.y).toBe(15);
+  });
+});
+
+describe("form fields and notes", () => {
+  const flip = [1, 0, 0, -1, 0, 400];
+  const rect = [40, 200, 240, 220];
+
+  it("reads filled-in fields and text notes, and counts what search cannot read", () => {
+    const { notes, unread } = readNotes([
+      { subtype: "Widget", fieldType: "Tx", fieldValue: "RSSMRA85T10A562S", textContent: ["RSSMRA85T10A562S"], hasAppearance: true, rect },
+      { subtype: "Widget", fieldType: "Tx", fieldValue: "not shown", hasAppearance: true, hidden: true, rect },
+      { subtype: "Widget", fieldType: "Tx", fieldValue: "", hasAppearance: true, rect },
+      {
+        subtype: "Widget",
+        fieldType: "Ch",
+        combo: true,
+        fieldValue: ["rm"],
+        options: [
+          { exportValue: "rm", displayValue: "Roma" },
+          { exportValue: "mi", displayValue: "Milano" },
+        ],
+        hasAppearance: true,
+        rect,
+      },
+      { subtype: "FreeText", textContent: ["Call Mario", "333 1234567"], contentsObj: { str: "Call Mario 333 1234567" }, rect },
+      { subtype: "Widget", fieldType: "Sig", hasAppearance: true, rect },
+      { subtype: "Stamp", hasAppearance: true, rect },
+      { subtype: "Highlight", hasAppearance: true, rect },
+      { subtype: "Link", rect },
+    ]);
+    expect(notes.map((n) => n.texts)).toEqual([["RSSMRA85T10A562S"], ["rm", "Roma"], ["Call Mario\n333 1234567", "Call Mario 333 1234567"]]);
+    // The signature and the stamp may show words; the highlight and the link do not.
+    expect(unread).toBe(2);
+  });
+
+  it("covers the whole field or note for a match inside it", () => {
+    const { notes } = readNotes([
+      { subtype: "Widget", fieldType: "Tx", fieldValue: "CF RSSMRA85T10A562S", hasAppearance: true, rect },
+      { subtype: "FreeText", contentsObj: { str: "Mario Rossi, then Mario again" }, rect: [10, 10, 110, 60] },
+    ]);
+    expect(noteBoxes(notes, (text) => findPattern(text, "cf"), flip, 300, 400)).toEqual([[{ x: 40, y: 180, w: 200, h: 20 }]]);
+    // Two matches in one note: the same box twice, so the count matches what was found.
+    const note = { x: 10, y: 340, w: 100, h: 50 };
+    expect(noteBoxes(notes, (text) => findQuery(text, "mario"), flip, 300, 400)).toEqual([[note], [note]]);
+    expect(noteBoxes(notes, (text) => findQuery(text, "bianchi"), flip, 300, 400)).toEqual([]);
   });
 });

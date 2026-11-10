@@ -20,7 +20,7 @@ faq:
   - q: "Is anything lost in the searchable copy?"
     a: "Every page is kept as it is. Document-wide extras are not carried over: bookmarks, fillable form fields and attached files. If you need those, keep the original next to the searchable copy."
   - q: "Can it handle a password-protected PDF?"
-    a: "No. If you know the password, remove it with Unlock PDF on this site and use the unlocked copy."
+    a: "No. If you know the password, remove it with Unlock PDF on this site and use the unlocked copy. A PDF that opens freely but is locked against changes can be read, but no searchable copy can be saved from it: the tool tells you as soon as you add the file, and Unlock PDF removes that lock without a password."
 ---
 
 ## A searchable copy of your scan

@@ -100,11 +100,28 @@
 }
 
 /* ---------- pages ---------- */
+/* The pages come after the actions (Redact and save is reached without a Tab through every page),
+ * set off from them by a rule so the long list reads as its own part. */
 .redact-pages {
   display: grid;
   gap: var(--space-5);
-  padding: 0;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+  border-top: 1px solid var(--color-border);
   list-style: none;
+}
+
+[data-settled] .redact-pages {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    translate var(--duration-base) var(--ease-out);
+}
+
+@starting-style {
+  [data-settled] .redact-pages {
+    opacity: 0;
+    translate: 0 var(--enter-rise);
+  }
 }
 
 .redact-page__head {
@@ -139,6 +156,11 @@
   margin-inline-start: auto;
   padding-inline: var(--space-3);
   font-size: var(--text-sm);
+}
+
+/* Stamps, signatures and the like on this page: search cannot read them. */
+.redact-page__unread {
+  margin-bottom: var(--space-2);
 }
 
 .redact-stage {

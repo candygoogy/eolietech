@@ -18,11 +18,11 @@ faq:
   - q: "Why is the redacted file bigger than the original?"
     a: "A page stored as text takes very little space; the same page as a picture takes more. Each redacted page adds about as much as a good photo of that page would, more for pages full of small print or pictures. Pages without boxes are copied as they were and add almost nothing."
   - q: "Search did not find a word I can see on the page. Why?"
-    a: "Search reads the text stored in the PDF. If the page is a scan or a photo, the words are part of a picture and there is no text to read, so search finds nothing there. Draw those boxes by hand. The same goes for text inside images placed in an otherwise normal PDF."
+    a: "Search reads the text stored in the PDF, filled-in form fields and text notes. If the page is a scan or a photo, the words are part of a picture and there is no text to read, so search finds nothing there. Draw those boxes by hand. The same goes for text inside images placed in an otherwise normal PDF, and for most stamps and signatures: when a page has those, the tool says so on that page."
   - q: "Is my PDF uploaded?"
     a: "No. PDF.js, the open-source PDF engine Firefox uses, draws and reads the pages inside this page, and the new PDF is assembled in your browser's memory. Nothing is sent to a server, which is the whole reason to redact here and not on a website that asks you to upload the file first."
   - q: "Can I redact a password-protected PDF?"
-    a: "No. If you know the password, remove it with Unlock PDF on this site and redact the unlocked copy."
+    a: "No, and the same goes for a PDF that opens freely but is locked against changes. The tool tells you as soon as you open the file, before you draw anything. Unlock PDF on this site removes a password you know, and removes those restrictions without one. Then redact the unlocked copy."
 ui:
   redact.drop.label: "Choose a PDF or drop it here"
   redact.drop.replace: "Choose another PDF"
@@ -39,7 +39,7 @@ ui:
   redact.pattern.phone: "Phone numbers"
   redact.pattern.iban: "IBANs"
   redact.pattern.cf: "Codici fiscali"
-  redact.search.note: "Search reads the real text in the PDF. Words on a scanned page are part of a picture, so search can't see them: draw those boxes by hand."
+  redact.search.note: "Search reads the real text in the PDF, filled-in form fields and text notes. Words on a scanned page are part of a picture, so search can't see them: draw those boxes by hand."
   redact.searching: "Searching page {current} of {total}…"
   redact.searchStopped: "Search stopped. Boxes it had already placed are still on their pages."
   redact.found.one: "Found {count} match: {pages}. It now has a box; check it before you save."
@@ -50,6 +50,7 @@ ui:
   redact.found.none.phone: "No phone numbers found."
   redact.found.none.iban: "No IBANs found."
   redact.found.none.cf: "No codici fiscali found."
+  redact.found.unread: "Search cannot read stamps, signatures or similar marks, and there are some on these pages: {pages}. Check them yourself."
   redact.found.noText: "This PDF has no text that search can read, so it is probably a scan. Draw the boxes by hand."
   redact.error.emptyQuery: "Type a word or a number to look for."
   redact.hint: "Drag across a page to draw a box, or press Add a box. Drag a box to move it, drag its edges to resize it."
@@ -63,6 +64,7 @@ ui:
   redact.page.boxes.other: "{count} boxes"
   redact.page.found.one: "{count} match"
   redact.page.found.other: "{count} matches"
+  redact.page.unread: "This page has stamps, signatures or other marks that search cannot read. Check them and draw boxes by hand if needed."
   redact.page.add: "Add a box"
   redact.page.addLabel: "Add a box to page {page}"
   redact.box.label: "Black box {box} on page {page}"
@@ -80,6 +82,12 @@ ui:
   redact.stopped: "Stopped. Nothing was saved, and your boxes are still here."
   redact.working: "Redacting page {current} of {total}…"
   redact.saving: "Putting the new PDF together…"
+  redact.error.restricted: "{name} is locked against changes (it has a permissions password), so it cannot be redacted here. Remove the lock first with"
+  redact.error.unlockLink: "Unlock PDF"
+  redact.error.unlockHref: "/unlock-pdf/"
+  redact.error.updated: "This page was updated. Reload to continue."
+  redact.error.offline: "Part of this tool did not load. Check your connection, then try again."
+  redact.error.output: "The new PDF did not come out right (it does not open, or pages are missing), so it is not offered for download. Your boxes are still here: try Redact and save again."
   redact.error.noBoxes: "There is nothing to redact yet. Draw a box on a page or search for a word first."
   redact.done.one: "Done. {count} page redacted, {size} in total."
   redact.done.other: "Done. {count} pages redacted, {size} in total."
@@ -104,9 +112,9 @@ This tool does it the other way round. Each page with a box is drawn as a pictur
 
 ## Search, and what it can't see
 
-The search field finds every place a word or number appears, ignoring capitals, and puts a box over each one. The four buttons look for common personal data: email addresses, phone numbers (Italian and international formats), IBANs (checked with their control digits, so the box stops where the IBAN ends) and Italian codici fiscali.
+The search field looks for a word or number in the PDF's text, in filled-in form fields and in text notes, ignoring capitals, and puts a box over each match. It also finds a word split over two lines, with or without a hyphen, and an IBAN that wraps onto the next line. In a form field or a note the box covers the whole field or note. The four buttons look for common personal data: email addresses, phone numbers (Italian and international formats), IBANs (checked with their control digits, so the box stops where the IBAN ends) and Italian codici fiscali.
 
-Search only works on real text. A scanned contract or a photo of a document has no text inside, only a picture of it, so search finds nothing there. In that case, draw the boxes yourself. Search can also be slightly off on unusual fonts, because a PDF tells it where a line of text is, not where each letter is. Look at every box before you save, and make one bigger by dragging its edge if a letter peeks out.
+Search only works on real text. A scanned contract or a photo of a document has no text inside, only a picture of it, so search finds nothing there. In that case, draw the boxes yourself. Stamps and signatures are usually pictures too: when a page has some, the tool says so on that page so you can check it. Search can also be slightly off on unusual fonts, because a PDF tells it where a line of text is, not where each letter is. Look at every box before you save, and make one bigger by dragging its edge if a letter peeks out.
 
 ## Your PDF stays on your device
 

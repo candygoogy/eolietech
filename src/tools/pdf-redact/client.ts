@@ -4,6 +4,11 @@
  * the page with the boxes painted in, so the covered text is gone, not hidden. Pages without boxes
  * are copied as they are. PDF.js draws and reads the pages, pdf-lib writes the file (build.ts).
  * Nothing leaves the browser.
+ *
+ * Checks around the work: a PDF that pdf-lib could not rewrite (locked against changes) is turned
+ * away when it is opened, not at the last step; the build chunk is fetched as soon as a file is
+ * open, so a deploy in the meantime cannot strand a marked-up document; the new file is reopened
+ * and its pages counted before it is offered; and leaving the page with boxes not yet saved asks first.
  */
 import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { createDropzone, downloadBlob, formatBytes, markEnter } from "../../lib/tool-ui";
@@ -29,7 +34,20 @@ import {
   type Handle,
   type TextPiece,
 } from "./geometry";
-import { PATTERNS, findPattern, findQuery, joinText, rangeBoxes, type PageText, type PatternId, type Range } from "./match";
+import {
+  PATTERNS,
+  findPattern,
+  findQuery,
+  joinText,
+  noteBoxes,
+  rangeBoxes,
+  readNotes,
+  type AnnotationData,
+  type Note,
+  type PageText,
+  type PatternId,
+  type Range,
+} from "./match";
 import type { RedactedPage } from "./build";
 // Loaded by mountTools before mount (src/lib/tool-mount.ts), so only this tool's page fetches it.
 export { default as styles } from "./redact.css?url";
@@ -47,10 +65,26 @@ const MIN_DRAG_CSS = 6;
 const ANNOUNCE_MS = 700;
 /** A search box this much inside an existing box is already covered. */
 const SAME_BOX = 0.85;
+/** The search summary names at most this many pages with things it could not read. */
+const UNREAD_LISTED = 8;
 
 let uid = 0;
 
 class Cancelled extends Error {}
+/** The PDF opens without a password but is encrypted (an owner password): pdf-lib cannot rewrite it. */
+class Restricted extends Error {}
+/** One of this site's code chunks did not load: gone after a deploy, or the connection is down. */
+class ChunkError extends Error {}
+/** The new PDF does not open, or does not have the pages of the original. */
+class BadOutput extends Error {}
+
+/** A dynamic import, with its failure told apart from a failure of the work itself. */
+function chunk<T>(load: () => Promise<T>): Promise<T> {
+  return load().catch((err: unknown) => {
+    console.error(err);
+    throw new ChunkError();
+  });
+}
 
 interface BoxState {
   id: number;
@@ -70,11 +104,14 @@ interface PageState {
   boxes: BoxState[];
   /** Matches that added boxes here. */
   found: number;
-  text: { items: TextPiece[]; page: PageText; transform: number[] } | null;
+  /** What search reads on this page: its text, plus filled-in form fields and text notes. */
+  text: { items: TextPiece[]; page: PageText; transform: number[]; notes: Note[]; unread: number } | null;
   li: HTMLLIElement;
   frame: HTMLDivElement;
   meta: HTMLSpanElement;
   badge: HTMLSpanElement;
+  /** Shown when the page has stamps, signatures or the like that search cannot read. */
+  unread: HTMLParagraphElement;
   canvas: HTMLCanvasElement | null;
   visible: boolean;
   failed: boolean;
@@ -97,6 +134,10 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   let boxSeq = 0;
   let announceTimer: ReturnType<typeof setTimeout> | undefined;
   let observer: IntersectionObserver | null = null;
+  /** The result for the boxes as they are now has been downloaded. */
+  let saved = false;
+  /** The beforeunload warning is on: there are boxes that are not in a downloaded file. */
+  let guarding = false;
 
   // ---------- DOM ----------
   const errors = errorRegion();
@@ -150,8 +191,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   const boxHintId = `${id}-box-hint`;
   const boxHint = h("span", { id: boxHintId, hidden: true, text: t("redact.box.hint") });
   const seeThrough = h("p", { className: "tool-note", text: t("redact.seeThrough") });
-  const list = h("ol", { className: "redact-pages", "aria-label": t("redact.listLabel") });
-  const editor = h("div", { className: "redact-editor", hidden: true }, searchBox, hint, seeThrough, boxHint, list);
+  const list = h("ol", { className: "redact-pages", "aria-label": t("redact.listLabel"), hidden: true });
+  const editor = h("div", { className: "redact-editor", hidden: true }, searchBox, hint, seeThrough, boxHint);
 
   const applyBtn = button(t("redact.action"), { variant: "primary", onClick: () => void apply() });
   const stopBtn = button(t("redact.stop"), { variant: "ghost", onClick: stop });
@@ -170,14 +211,48 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     errors.el,
     fileInfo,
     editor,
+    // Above the pages: reaching Redact and save must not take a Tab through every page first.
     actions,
     progress,
     status.el,
     resultBox,
     note,
+    list,
     live,
   );
   el.append(tool);
+
+  // ---------- errors, leaving the page ----------
+  function showError(err: unknown, name: string) {
+    if (err instanceof Restricted) {
+      // The sentence ends in a link to the tool that removes the lock.
+      const link = h("a", { href: t("redact.error.unlockHref"), text: t("redact.error.unlockLink") });
+      errors.el.replaceChildren(h("p", {}, t("redact.error.restricted", { name }), " ", link, "."));
+      errors.el.hidden = false;
+    } else if (err instanceof ChunkError) {
+      // Offline, a reload would lose the page itself: only say "reload" when the connection is there.
+      errors.show(t(navigator.onLine === false ? "redact.error.offline" : "redact.error.updated"));
+    } else if (err instanceof BadOutput) {
+      errors.show(t("redact.error.output"));
+    } else {
+      errors.show(errorMessage(err, ctx, name));
+    }
+  }
+
+  const warnUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault();
+    // Older Chrome and Safari only ask when this is set.
+    e.returnValue = true;
+  };
+
+  /** Ask before leaving while there are boxes that are not in a downloaded file; stop asking once there are none. */
+  function syncGuard() {
+    const unsaved = !saved && pages.some((p) => p.boxes.length > 0);
+    if (unsaved === guarding) return;
+    guarding = unsaved;
+    if (unsaved) window.addEventListener("beforeunload", warnUnload);
+    else window.removeEventListener("beforeunload", warnUnload);
+  }
 
   // ---------- open ----------
   async function open(f: File) {
@@ -186,7 +261,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     status.set(t("redact.reading", { name: f.name }));
     try {
       const data = await readFile(f);
-      const { openForRender } = await import("../pdf-shared/pdfjs");
+      const { openForRender } = await chunk(() => import("../pdf-shared/pdfjs"));
       // PDF.js takes the buffer it is given; keep the original for building the result.
       const proxy = await openForRender(data.slice());
       if (gen !== generation) {
@@ -196,6 +271,17 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       if (proxy.numPages === 0) {
         void proxy.loadingTask.destroy();
         throw new PdfToolError("empty");
+      }
+      // PDF.js reports permissions only for an encrypted file. This one opened without a password,
+      // so it is locked against changes and nothing else; pdf-lib would refuse it at the very end.
+      const permissions = await proxy.getPermissions();
+      if (gen !== generation) {
+        void proxy.loadingTask.destroy();
+        return;
+      }
+      if (permissions !== null) {
+        void proxy.loadingTask.destroy();
+        throw new Restricted();
       }
       const first = await proxy.getPage(1);
       const vp = first.getViewport({ scale: 1 });
@@ -215,20 +301,35 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       editor.hidden = false;
       actions.hidden = false;
       note.hidden = false;
+      list.hidden = false;
       syncActions();
       status.set(tPlural(ctx, "redact.ready", pages.length, { pages: pages.length }));
       observe();
       void loadSizes(gen);
+      preload(gen);
     } catch (err) {
       if (gen !== generation) return;
-      errors.show(errorMessage(err, ctx, f.name));
+      showError(err, f.name);
       status.set("");
     }
+  }
+
+  /**
+   * Fetch the chunk that writes the new PDF (build.ts and pdf-lib) now. Once loaded it stays in
+   * memory, so a deploy while the boxes are being drawn cannot take it away; and if it is already
+   * gone, the user hears it before marking anything.
+   */
+  function preload(gen: number) {
+    import("./build").catch((err: unknown) => {
+      console.error(err);
+      if (gen === generation) showError(new ChunkError(), "");
+    });
   }
 
   function makePage(n: number, W: number, H: number): PageState {
     const meta = h("span", { className: "redact-page__meta" });
     const badge = h("span", { className: "redact-page__found", hidden: true });
+    const unread = h("p", { className: "tool-note redact-page__unread", hidden: true, text: t("redact.page.unread") });
     const frame = h("div", { className: "redact-frame", "data-page": n });
     const p: PageState = {
       n,
@@ -242,6 +343,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       frame,
       meta,
       badge,
+      unread,
       canvas: null,
       visible: false,
       failed: false,
@@ -257,6 +359,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         badge,
         add,
       ),
+      unread,
       h("div", { className: "redact-stage" }, frame),
     );
     frame.append(h("span", { className: "redact-frame__loading", text: t("redact.page.loading", { page: n }) }));
@@ -590,8 +693,20 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     const page = await doc!.getPage(p.n);
     setSize(p, page);
     const content = await page.getTextContent();
-    const items: TextPiece[] = content.items.flatMap((i) => ("str" in i ? [i] : []));
-    p.text = { items, page: joinText(items), transform: page.getViewport({ scale: 1 }).transform };
+    // PDF.js names an equal-width font "monospace"; a match is then placed by counting letters.
+    const items: TextPiece[] = content.items.flatMap((i) =>
+      "str" in i ? [{ ...i, mono: content.styles[i.fontName]?.fontFamily === "monospace" }] : [],
+    );
+    // Form fields and notes are drawn on the page (preview and result) but are not part of its text.
+    let found: ReturnType<typeof readNotes>;
+    try {
+      found = readNotes((await page.getAnnotations()) as AnnotationData[]);
+    } catch (err) {
+      console.warn(err);
+      found = { notes: [], unread: 1 };
+    }
+    p.text = { items, page: joinText(items), transform: page.getViewport({ scale: 1 }).transform, ...found };
+    p.unread.hidden = found.unread === 0;
     return p.text;
   }
 
@@ -611,18 +726,20 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     progress.max = pages.length;
     progress.value = 0;
     const perPage: { page: number; count: number }[] = [];
+    const find = (text: string): Range[] => ("query" in what ? findQuery(text, what.query) : findPattern(text, what.pattern));
     let anyText = false;
     try {
       for (const p of pages) {
         if (cancelled()) throw new Cancelled();
         status.set(t("redact.searching", { current: p.n, total: pages.length }));
-        const { items, page, transform } = await pageText(p);
+        const { items, page, transform, notes } = await pageText(p);
         if (cancelled()) throw new Cancelled();
-        if (!anyText && items.some((i) => i.str.trim())) anyText = true;
-        const ranges: Range[] = "query" in what ? findQuery(page.text, what.query) : findPattern(page.text, what.pattern);
-        if (ranges.length) {
+        if (!anyText && (notes.length > 0 || items.some((i) => i.str.trim()))) anyText = true;
+        // One group of boxes per match: in the text one box per line it touches, in a field or note the whole of it.
+        const matches = [...rangeBoxes(items, page, find(page.text), transform, p.W, p.H), ...noteBoxes(notes, find, transform, p.W, p.H)];
+        if (matches.length) {
           let added = 0;
-          for (const boxes of rangeBoxes(items, page, ranges, transform, p.W, p.H)) {
+          for (const boxes of matches) {
             let fresh = false;
             for (const box of boxes) {
               if (p.boxes.some((b) => coveredBy(box, b.box) >= SAME_BOX)) continue;
@@ -633,33 +750,43 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           }
           p.found += added;
           labelBoxes(p);
-          perPage.push({ page: p.n, count: ranges.length });
+          perPage.push({ page: p.n, count: matches.length });
         }
         progress.value = p.n;
       }
       setBusy(false);
       focusBack?.focus();
       const total = perPage.reduce((n, x) => n + x.count, 0);
+      let summary: string;
       if (total > 0) {
         changed();
         const where = perPage.map((x) => t("redact.found.page", { page: x.page, count: x.count })).join(", ");
-        status.set(tPlural(ctx, "redact.found", total, { pages: where }));
-        pages[perPage[0]!.page - 1]?.li.scrollIntoView({ block: "nearest" });
+        summary = tPlural(ctx, "redact.found", total, { pages: where });
       } else if (!anyText) {
-        status.set(t("redact.found.noText"));
+        summary = t("redact.found.noText");
       } else {
-        status.set("query" in what ? t("redact.found.noneQuery", { query: what.query.trim() }) : t(`redact.found.none.${what.pattern}`));
+        summary = "query" in what ? t("redact.found.noneQuery", { query: what.query.trim() }) : t(`redact.found.none.${what.pattern}`);
       }
+      // Stamps, signatures and the like: say where they are, so "no matches" is not taken for "nothing there".
+      const unread = pages.filter((p) => (p.text?.unread ?? 0) > 0).map((p) => p.n);
+      if (unread.length) {
+        const listed = unread.slice(0, UNREAD_LISTED).join(", ") + (unread.length > UNREAD_LISTED ? "…" : "");
+        summary += ` ${t("redact.found.unread", { pages: listed })}`;
+      }
+      status.set(summary);
+      if (total > 0) pages[perPage[0]!.page - 1]?.li.scrollIntoView({ block: "nearest" });
     } catch (err) {
       if (gen !== generation) return; // a new file or Start over took over
+      // Boxes already placed on the pages searched so far stay (they are listed on each page), so an
+      // earlier result no longer matches them.
+      if (perPage.length) changed();
       setBusy(false);
       focusBack?.focus();
       if (err instanceof Cancelled || cancelled()) {
-        // Boxes already placed on the pages searched so far stay; they are listed on each page.
         status.set(t("redact.searchStopped"));
         return;
       }
-      errors.show(errorMessage(err, ctx, file?.name ?? ""));
+      showError(err, file?.name ?? "");
       status.set("");
     }
   }
@@ -692,8 +819,11 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         progress.value = i + 1;
       }
       status.set(t("redact.saving"));
-      const { buildRedactedPdf } = await import("./build");
+      const { buildRedactedPdf } = await chunk(() => import("./build"));
       const out = await buildRedactedPdf(source, redacted);
+      if (cancelled()) throw new Cancelled();
+      // Offer the file only if it opens and has every page of the original.
+      if ((await countPages(out)) !== pdf.numPages) throw new BadOutput();
       if (cancelled()) throw new Cancelled();
       progress.value = marked.length + 1;
       result = { blob: pdfBlob(out), name: t("redact.outputName", { name: baseName(f.name) }) };
@@ -707,8 +837,23 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         applyBtn.focus();
         return;
       }
-      errors.show(errorMessage(err, ctx, f.name));
+      showError(err, f.name);
       status.set("");
+      applyBtn.focus();
+    }
+  }
+
+  /** Page count of a PDF as a reader sees it (PDF.js, not the library that wrote it); -1 when it does not open. */
+  async function countPages(pdfBytes: Uint8Array): Promise<number> {
+    const { openForRender } = await chunk(() => import("../pdf-shared/pdfjs"));
+    try {
+      const opened = await openForRender(pdfBytes.slice());
+      const count = opened.numPages;
+      void opened.loadingTask.destroy();
+      return count;
+    } catch (err) {
+      console.error(err);
+      return -1;
     }
   }
 
@@ -752,7 +897,15 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   function showResult(count: number) {
     if (!result) return;
     const { blob, name } = result;
-    const dl = button(t("redact.download", { name }), { variant: "primary", onClick: () => downloadBlob(blob, name) });
+    const dl = button(t("redact.download", { name }), {
+      variant: "primary",
+      onClick: () => {
+        downloadBlob(blob, name);
+        // The boxes are in a file the user has: leaving no longer loses them.
+        saved = true;
+        syncGuard();
+      },
+    });
     resultBox.replaceChildren(dl);
     resultBox.hidden = false;
     markEnter(dl);
@@ -763,6 +916,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
 
   /** Boxes changed: a saved result no longer matches them. */
   function changed() {
+    saved = false;
     if (result) {
       result = null;
       resultBox.hidden = true;
@@ -776,6 +930,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   function syncActions() {
     const any = pages.some((p) => p.boxes.length > 0);
     clearBtn.disabled = busy || !any;
+    syncGuard();
   }
 
   function setBusy(on: boolean) {
@@ -809,7 +964,9 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
     file = null;
     pages = [];
     result = null;
+    saved = false;
     list.replaceChildren();
+    list.hidden = true;
     editor.hidden = true;
     actions.hidden = true;
     note.hidden = true;

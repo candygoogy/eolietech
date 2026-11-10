@@ -16,11 +16,11 @@ faq:
   - q: "Perché il file oscurato pesa più dell'originale?"
     a: "Una pagina salvata come testo occupa pochissimo; la stessa pagina come immagine occupa di più. Ogni pagina oscurata aggiunge più o meno quanto una buona foto di quella pagina, di più se è piena di scritte piccole o di immagini. Le pagine senza riquadri vengono copiate così come sono e non aggiungono quasi niente."
   - q: "La ricerca non trova una parola che vedo sulla pagina. Come mai?"
-    a: "La ricerca legge il testo contenuto nel PDF. Se la pagina è una scansione o una foto, le parole fanno parte di un'immagine e non c'è testo da leggere, quindi lì la ricerca non trova niente. Quei riquadri disegnali a mano. Vale lo stesso per il testo dentro le immagini inserite in un PDF normale."
+    a: "La ricerca legge il testo contenuto nel PDF, i campi compilati dei moduli e le note di testo. Se la pagina è una scansione o una foto, le parole fanno parte di un'immagine e non c'è testo da leggere, quindi lì la ricerca non trova niente. Quei riquadri disegnali a mano. Vale lo stesso per il testo dentro le immagini inserite in un PDF normale, e per quasi tutti i timbri e le firme: quando una pagina ne ha, lo strumento te lo segnala su quella pagina."
   - q: "Il mio PDF viene caricato da qualche parte?"
     a: "No. Le pagine vengono disegnate e lette da PDF.js, il motore PDF open source di Firefox, dentro questa pagina, e il nuovo PDF viene montato nella memoria del tuo browser. Non arriva niente a un server, ed è proprio il motivo per oscurare qui e non su un sito che ti chiede prima di caricare il file."
   - q: "Posso oscurare un PDF protetto da password?"
-    a: "No. Se conosci la password, toglila con Sbloccare PDF su questo sito e oscura la copia sbloccata."
+    a: "No, e lo stesso vale per un PDF che si apre liberamente ma è bloccato contro le modifiche. Lo strumento te lo dice appena apri il file, prima che tu disegni qualcosa. Sbloccare PDF su questo sito toglie una password che conosci, e toglie quelle restrizioni anche senza password. Poi oscura la copia sbloccata."
 ui:
   redact.drop.label: "Scegli un PDF o trascinalo qui"
   redact.drop.replace: "Scegli un altro PDF"
@@ -37,7 +37,7 @@ ui:
   redact.pattern.phone: "Numeri di telefono"
   redact.pattern.iban: "IBAN"
   redact.pattern.cf: "Codici fiscali"
-  redact.search.note: "La ricerca legge il testo vero del PDF. Le parole di una pagina scansionata fanno parte di un'immagine e la ricerca non le vede: quei riquadri disegnali a mano."
+  redact.search.note: "La ricerca legge il testo vero del PDF, i campi compilati dei moduli e le note di testo. Le parole di una pagina scansionata fanno parte di un'immagine e la ricerca non le vede: quei riquadri disegnali a mano."
   redact.searching: "Cerco nella pagina {current} di {total}…"
   redact.searchStopped: "Ricerca fermata. I riquadri che aveva già messo restano sulle loro pagine."
   redact.found.one: "Trovato {count} risultato: {pages}. Ora è coperto da un riquadro: controllalo prima di salvare."
@@ -48,6 +48,7 @@ ui:
   redact.found.none.phone: "Nessun numero di telefono trovato."
   redact.found.none.iban: "Nessun IBAN trovato."
   redact.found.none.cf: "Nessun codice fiscale trovato."
+  redact.found.unread: "La ricerca non può leggere timbri, firme o segni simili, e ce ne sono su queste pagine: {pages}. Controllali tu."
   redact.found.noText: "Questo PDF non ha testo che la ricerca possa leggere, quindi probabilmente è una scansione. Disegna i riquadri a mano."
   redact.error.emptyQuery: "Scrivi una parola o un numero da cercare."
   redact.hint: "Trascina sulla pagina per disegnare un riquadro, oppure premi Aggiungi un riquadro. Trascina un riquadro per spostarlo e i suoi bordi per cambiarne la misura."
@@ -61,6 +62,7 @@ ui:
   redact.page.boxes.other: "{count} riquadri"
   redact.page.found.one: "{count} risultato"
   redact.page.found.other: "{count} risultati"
+  redact.page.unread: "Questa pagina ha timbri, firme o altri segni che la ricerca non può leggere. Controllali e, se serve, disegna i riquadri a mano."
   redact.page.add: "Aggiungi un riquadro"
   redact.page.addLabel: "Aggiungi un riquadro alla pagina {page}"
   redact.box.label: "Riquadro nero {box} della pagina {page}"
@@ -78,6 +80,12 @@ ui:
   redact.stopped: "Fermato. Non è stato salvato niente e i tuoi riquadri sono ancora qui."
   redact.working: "Oscuro la pagina {current} di {total}…"
   redact.saving: "Preparo il nuovo PDF…"
+  redact.error.restricted: "{name} è bloccato contro le modifiche (ha una password dei permessi), quindi qui non si può oscurare. Togli prima il blocco con"
+  redact.error.unlockLink: "Sbloccare PDF"
+  redact.error.unlockHref: "/it/sbloccare-pdf/"
+  redact.error.updated: "Questa pagina è stata aggiornata. Ricaricala per continuare."
+  redact.error.offline: "Una parte dello strumento non si è caricata. Controlla la connessione e riprova."
+  redact.error.output: "Il nuovo PDF non è venuto bene (non si apre, o mancano delle pagine), quindi non te lo proponiamo da scaricare. I tuoi riquadri sono ancora qui: riprova con Oscura e salva."
   redact.error.noBoxes: "Non c'è ancora niente da oscurare. Prima disegna un riquadro su una pagina o cerca una parola."
   redact.done.one: "Fatto. {count} pagina oscurata, {size} in tutto."
   redact.done.other: "Fatto. {count} pagine oscurate, {size} in tutto."
@@ -102,9 +110,9 @@ Questo strumento fa il contrario. Ogni pagina con un riquadro viene disegnata co
 
 ## La ricerca, e cosa non vede
 
-Il campo di ricerca trova ogni punto in cui compare una parola o un numero, senza badare a maiuscole e minuscole, e ci mette sopra un riquadro. I quattro pulsanti cercano i dati personali più comuni: indirizzi email, numeri di telefono (italiani e internazionali), IBAN (verificati con le cifre di controllo, così il riquadro finisce dove finisce l'IBAN) e codici fiscali.
+Il campo di ricerca cerca una parola o un numero nel testo del PDF, nei campi compilati dei moduli e nelle note di testo, senza badare a maiuscole e minuscole, e mette un riquadro sopra ogni risultato. Trova anche una parola spezzata su due righe, con o senza trattino, e un IBAN che va a capo. In un campo o in una nota il riquadro copre tutto il campo o tutta la nota. I quattro pulsanti cercano i dati personali più comuni: indirizzi email, numeri di telefono (italiani e internazionali), IBAN (verificati con le cifre di controllo, così il riquadro finisce dove finisce l'IBAN) e codici fiscali.
 
-La ricerca funziona solo sul testo vero. Un contratto scansionato o la foto di un documento non contengono testo, solo l'immagine del testo, quindi lì la ricerca non trova niente: in quel caso i riquadri disegnali tu. Con alcuni caratteri particolari la ricerca può anche sbagliare di poco, perché il PDF le dice dove sta una riga di testo, non dove sta ogni lettera. Guarda ogni riquadro prima di salvare e, se spunta una lettera, allargalo trascinando il bordo.
+La ricerca funziona solo sul testo vero. Un contratto scansionato o la foto di un documento non contengono testo, solo l'immagine del testo, quindi lì la ricerca non trova niente: in quel caso i riquadri disegnali tu. Anche timbri e firme di solito sono immagini: quando una pagina ne ha, lo strumento te lo segnala su quella pagina, così puoi controllarla. Con alcuni caratteri particolari la ricerca può anche sbagliare di poco, perché il PDF le dice dove sta una riga di testo, non dove sta ogni lettera. Guarda ogni riquadro prima di salvare e, se spunta una lettera, allargalo trascinando il bordo.
 
 ## Il tuo PDF resta sul tuo dispositivo
 

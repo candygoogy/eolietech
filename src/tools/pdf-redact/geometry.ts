@@ -124,6 +124,8 @@ export interface TextPiece {
   width: number;
   height: number;
   hasEOL?: boolean;
+  /** Set by the client when PDF.js reports an equal-width font (Courier and the like) for the item. */
+  mono?: boolean;
 }
 
 /** How far a box reaches above the baseline and below it, and past each end, in font sizes. */
@@ -150,8 +152,12 @@ export function glyphWidth(ch: string): number {
   return base >= 32 && base <= 126 ? WIDTHS[base - 32]! : 556;
 }
 
-/** Where characters `from` and `to` of `str` fall, as fractions of its whole width. */
-export function spanOf(str: string, from: number, to: number): [number, number] {
+/**
+ * Where characters `from` and `to` of `str` fall, as fractions of its whole width. In an equal-width
+ * font (`mono`) every character takes the same share, so Helvetica's widths would put a match in
+ * the wrong place (a box starting two or three letters late on a Courier line).
+ */
+export function spanOf(str: string, from: number, to: number, mono = false): [number, number] {
   const chars = [...str];
   let total = 0;
   let start = 0;
@@ -161,7 +167,8 @@ export function spanOf(str: string, from: number, to: number): [number, number] 
   for (const ch of chars) {
     if (unit === from) start = total;
     if (unit === to) end = total;
-    total += glyphWidth(ch);
+    // Combining accents sit on the letter before them and take no room of their own.
+    total += mono ? (/^\p{M}$/u.test(ch) ? 0 : 1) : glyphWidth(ch);
     unit += ch.length;
   }
   if (to >= unit) end = total;
@@ -171,13 +178,14 @@ export function spanOf(str: string, from: number, to: number): [number, number] 
 
 /**
  * The box (in viewport points) over characters `from` to `to` of a text item. PDF.js gives one
- * width per item, not per character, so the substring's position is estimated from typical glyph
- * widths (spanOf) and padded on every side to make up for the estimate. The four corners go
- * through the viewport matrix, so rotated pages and rotated text come out right.
+ * width per item, not per character, so the substring's position is estimated: the item's real
+ * width is shared out by typical glyph widths, or evenly in an equal-width font (spanOf), and the
+ * box is padded on every side to make up for the estimate. The four corners go through the
+ * viewport matrix, so rotated pages and rotated text come out right.
  */
 export function textBox(item: TextPiece, from: number, to: number, viewport: Matrix): Box {
   const [a, b, c, d, e, f] = item.transform as number[];
-  const [f0, f1] = spanOf(item.str, from, to);
+  const [f0, f1] = spanOf(item.str, from, to, item.mono);
   const along = Math.hypot(a!, b!) || 1;
   const size = Math.hypot(c!, d!) || item.height || along;
   const ux = a! / along;
@@ -191,6 +199,17 @@ export function textBox(item: TextPiece, from: number, to: number, viewport: Mat
   const t1 = size * ASCENT;
   const corner = (s: number, t: number) => applyMatrix(viewport, e! + ux * s + vx * t, f! + uy * s + vy * t);
   const r = boundsOf([corner(s0, t0), corner(s1, t0), corner(s1, t1), corner(s0, t1)]);
+  return { x: tidy(r.x), y: tidy(r.y), w: tidy(r.w), h: tidy(r.h) };
+}
+
+/**
+ * The box (in viewport points) over a rectangle given in PDF user space as [x0, y0, x1, y1], the
+ * way annotations (form fields, text notes) say where they are.
+ */
+export function rectBox(rect: readonly number[], viewport: Matrix): Box {
+  const [x0, y0, x1, y1] = rect as [number, number, number, number];
+  const corner = (x: number, y: number) => applyMatrix(viewport, x, y);
+  const r = boundsOf([corner(x0, y0), corner(x1, y0), corner(x1, y1), corner(x0, y1)]);
   return { x: tidy(r.x), y: tidy(r.y), w: tidy(r.w), h: tidy(r.h) };
 }
 

@@ -2,9 +2,10 @@
  * Finding text to redact (pure, unit-tested). A page's PDF.js text items are joined into one
  * string, searched with a typed query or a personal-data pattern, and every match is turned back
  * into boxes: one per text item it touches, placed proportionally inside the item (geometry.ts).
- * Only real text is found; words that are part of a scanned picture are not text to PDF.js.
+ * Filled-in form fields and text notes are searched too, and a match there covers the whole field
+ * or note. Words that are part of a scanned picture, a stamp or a signature are not text to PDF.js.
  */
-import { clipBox, textBox, type Box, type Matrix, type TextPiece } from "./geometry";
+import { clipBox, rectBox, textBox, type Box, type Matrix, type TextPiece } from "./geometry";
 
 export const PATTERNS = ["email", "phone", "iban", "cf"] as const;
 export type PatternId = (typeof PATTERNS)[number];
@@ -38,14 +39,28 @@ export function joinText(items: readonly TextPiece[]): PageText {
 
 const escape = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+/** A line break inside a word, after a hyphen (typed, soft or typographic): "Berlus-" / "coni". */
+const HYPHEN_BREAK = "(?:[-\\u00AD\\u2010\\u2011][^\\S\\n]*\\n[^\\S\\n]*)?";
+/** The same with the hyphen optional: a long number or name that simply carries on below. */
+const ANY_BREAK = "(?:[-\\u00AD\\u2010\\u2011]?[^\\S\\n]*\\n[^\\S\\n]*)?";
+/** Shorter words only break at a hyphen, or "to" would match the end of one line plus the start of the next. */
+const BREAKS_FREELY = 5;
+
+/** One word of the query as a pattern that also finds it wrapped onto the next line. */
+function wordPattern(word: string): string {
+  const chars = [...word];
+  return chars.map(escape).join(chars.length >= BREAKS_FREELY ? ANY_BREAK : HYPHEN_BREAK);
+}
+
 /**
  * Every occurrence of `query`, ignoring case. Spaces in the query match any run of spaces or a
- * line break (or none, since PDFs often store words without the space between them).
+ * line break (or none, since PDFs often store words without the space between them). A word may
+ * also be split over two lines, with or without a hyphen.
  */
 export function findQuery(text: string, query: string): Range[] {
   const words = query.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return [];
-  const re = new RegExp(words.map(escape).join("\\s*"), "giu");
+  const re = new RegExp(words.map(wordPattern).join("\\s*"), "giu");
   return [...text.matchAll(re)].filter((m) => m[0].length > 0).map((m) => ({ start: m.index, end: m.index + m[0].length }));
 }
 
@@ -136,31 +151,51 @@ export function ibanValid(compact: string): boolean {
   return rest === 1;
 }
 
-/** Country code, check digits, then letters and digits, written together or in groups. */
-const IBAN = /(?<![\p{L}\p{N}])[A-Z]{2}\d{2}(?:[  ]?[A-Z0-9]){11,32}/gu;
+/**
+ * Country code, check digits, then letters and digits, written together or in groups. A long IBAN
+ * often wraps, so one line break (with or without a space around it) may sit between two groups.
+ */
+const IBAN = /(?<![\p{L}\p{N}])[A-Z]{2}\d{2}(?:(?:[ \u00A0]?\n[ \u00A0]?|[ \u00A0])?[A-Z0-9]){11,32}/gu;
+
+/** Offsets of the characters that are not spaces or line breaks, so a length in compact characters maps back to the text. */
+function solidOffsets(raw: string): number[] {
+  const at: number[] = [];
+  for (let i = 0; i < raw.length; i++) if (raw[i] !== " " && raw[i] !== "\u00A0" && raw[i] !== "\n") at.push(i);
+  return at;
+}
+
+/**
+ * How many of the compact characters are the IBAN. A mistyped IBAN is still redacted, up to its
+ * country's length or, unless `strict`, the whole run. 0 means this is not taken as an IBAN.
+ */
+function ibanLength(compact: string, strict: boolean): number {
+  const known = IBAN_LENGTH[compact.slice(0, 2)];
+  if (known && compact.length >= known && ibanValid(compact.slice(0, known))) return known;
+  for (let l = Math.min(34, compact.length); l >= 15; l--) {
+    if (ibanValid(compact.slice(0, l))) return l;
+  }
+  if (known && compact.length >= known) return known;
+  return strict ? 0 : compact.length;
+}
 
 function findIbans(text: string): Range[] {
   const out: Range[] = [];
-  for (const m of text.matchAll(IBAN)) {
-    const raw = m[0];
-    // Offsets of the non-space characters, so a length in compact characters maps back to the text.
-    const at: number[] = [];
-    for (let i = 0; i < raw.length; i++) if (raw[i] !== " " && raw[i] !== " ") at.push(i);
-    const compact = at.map((i) => raw[i]).join("");
-    const known = IBAN_LENGTH[compact.slice(0, 2)];
-    let len = 0;
-    if (known && compact.length >= known && ibanValid(compact.slice(0, known))) len = known;
-    else {
-      for (let l = Math.min(34, compact.length); l >= 15; l--) {
-        if (ibanValid(compact.slice(0, l))) {
-          len = l;
-          break;
-        }
-      }
+  IBAN.lastIndex = 0;
+  for (let m = IBAN.exec(text); m; m = IBAN.exec(text)) {
+    let raw = m[0];
+    let at = solidOffsets(raw);
+    // A run that continues on the next line has to prove itself: there the next line may be anything.
+    let len = ibanLength(at.map((i) => raw[i]).join(""), raw.includes("\n"));
+    if (!len) {
+      // Not an IBAN across the break: judge the first line alone, as if the text ended there.
+      raw = raw.slice(0, raw.indexOf("\n"));
+      at = solidOffsets(raw);
+      len = at.length >= 15 ? ibanLength(at.map((i) => raw[i]).join(""), false) : 0;
     }
-    // A mistyped IBAN is still redacted: up to its country's length, or the whole run.
-    if (!len) len = known && compact.length >= known ? known : compact.length;
-    out.push({ start: m.index, end: m.index + at[len - 1]! + 1 });
+    const end = m.index + (len ? at[len - 1]! + 1 : raw.length);
+    if (len) out.push({ start: m.index, end });
+    // Carry on right after it, so an IBAN that follows closely (or starts the next line) is not skipped.
+    IBAN.lastIndex = end;
   }
   return out;
 }
@@ -221,4 +256,92 @@ export function rangeBoxes(
     });
     return boxes;
   });
+}
+
+// ---------- form fields and notes ----------
+
+/** The parts of a PDF.js annotation (page.getAnnotations) that search looks at. */
+export interface AnnotationData {
+  subtype?: string;
+  /** Where it sits, in PDF user space: [x0, y0, x1, y1]. */
+  rect?: readonly number[];
+  hidden?: boolean;
+  hasAppearance?: boolean;
+  /** Form fields: "Tx" text, "Ch" choice, "Btn" button, "Sig" signature. */
+  fieldType?: string | null;
+  fieldValue?: unknown;
+  /** The lines PDF.js read from what the field or note draws. */
+  textContent?: readonly string[];
+  contentsObj?: { str?: string };
+  options?: readonly { exportValue?: unknown; displayValue?: unknown }[];
+  combo?: boolean;
+  pushButton?: boolean;
+}
+
+/** A form field or note with text search can read: every spelling of that text, and its rectangle. */
+export interface Note {
+  texts: string[];
+  rect: readonly number[];
+}
+
+/** Annotations that draw lines, shapes or marks, or nothing at all on the page: no words to miss. */
+const WORDLESS = new Set([
+  "Link", "Popup", "Text", "Highlight", "Underline", "Squiggly", "StrikeOut", "Ink", "Line", "Square", "Circle",
+  "Polygon", "PolyLine", "Caret", "FileAttachment", "Sound", "Movie",
+]);
+
+const strings = (values: readonly unknown[]): string[] => [
+  ...new Set(values.filter((v): v is string => typeof v === "string" && v.trim() !== "")),
+];
+
+/**
+ * Sort a page's annotations into the ones search can read (filled-in text and choice fields, text
+ * notes) and a count of the ones it cannot but that may show words: stamps, signatures, buttons
+ * with a caption, and kinds this tool does not know.
+ */
+export function readNotes(annotations: readonly AnnotationData[]): { notes: Note[]; unread: number } {
+  const notes: Note[] = [];
+  let unread = 0;
+  for (const a of annotations) {
+    if (a.hidden || !a.rect || a.rect.length < 4) continue;
+    let texts: string[] = [];
+    let opaque = false;
+    if (a.subtype === "Widget") {
+      // A field with nothing to draw shows nothing, whatever value it holds.
+      if (!a.hasAppearance) continue;
+      if (a.fieldType === "Tx") {
+        texts = strings([a.fieldValue, a.textContent?.join("\n")]);
+      } else if (a.fieldType === "Ch") {
+        const chosen = Array.isArray(a.fieldValue) ? a.fieldValue : [a.fieldValue];
+        // A drop-down shows the chosen entry, a list shows every entry.
+        const shown = (a.options ?? []).filter((o) => !a.combo || chosen.includes(o.exportValue));
+        texts = strings([...chosen, ...shown.map((o) => o.displayValue), a.textContent?.join("\n")]);
+      } else {
+        opaque = a.fieldType === "Sig" || a.pushButton === true;
+      }
+    } else if (a.subtype === "FreeText") {
+      texts = strings([a.textContent?.join("\n"), a.contentsObj?.str]);
+      opaque = texts.length === 0 && a.hasAppearance === true;
+    } else {
+      opaque = a.hasAppearance === true && !WORDLESS.has(a.subtype ?? "");
+    }
+    if (texts.length) notes.push({ texts, rect: a.rect });
+    else if (opaque) unread++;
+  }
+  return { notes, unread };
+}
+
+/**
+ * Boxes for matches inside form fields and notes. Where the words sit inside one is not known, so
+ * the box covers all of it; it is listed once per match, to count the same way text matches do.
+ */
+export function noteBoxes(notes: readonly Note[], find: (text: string) => Range[], viewport: Matrix, W: number, H: number): Box[][] {
+  const out: Box[][] = [];
+  for (const note of notes) {
+    const count = Math.max(...note.texts.map((text) => find(text).length));
+    const box = count > 0 ? clipBox(rectBox(note.rect, viewport), W, H) : null;
+    if (!box) continue;
+    for (let i = 0; i < count; i++) out.push([box]);
+  }
+  return out;
 }

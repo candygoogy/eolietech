@@ -20,7 +20,7 @@ faq:
   - q: "Nella copia ricercabile si perde qualcosa?"
     a: "Ogni pagina resta com'è. Non vengono riportati gli elementi che valgono per tutto il documento: segnalibri, campi compilabili dei moduli e file allegati. Se ti servono, tieni l'originale accanto alla copia ricercabile."
   - q: "Funziona con un PDF protetto da password?"
-    a: "No. Se conosci la password, toglila con Sbloccare PDF su questo sito e usa la copia sbloccata."
+    a: "No. Se conosci la password, toglila con Sbloccare PDF su questo sito e usa la copia sbloccata. Un PDF che si apre liberamente ma è bloccato contro le modifiche si può leggere, ma non se ne può salvare una copia ricercabile: lo strumento te lo dice appena aggiungi il file, e Sbloccare PDF toglie quel blocco senza password."
 ---
 
 ## Una copia ricercabile della tua scansione
