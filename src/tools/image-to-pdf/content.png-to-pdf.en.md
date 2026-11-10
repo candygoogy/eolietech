@@ -18,7 +18,7 @@ faq:
   - q: "Is anything uploaded?"
     a: "No. The PDF is built in your browser with the open-source pdf-lib library, and your files never leave your device."
 ui:
-  topdf.drop: "Choose PNG images or drop them here"
+  topdf.drop: "Drop PNG images here, or choose them"
   topdf.drop.hint: "PNG images, plus JPG, WebP, AVIF and HEIC. Made into a PDF on your device; nothing is uploaded."
 ---
 

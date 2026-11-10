@@ -18,7 +18,7 @@ faq:
   - q: "Viene caricato qualcosa?"
     a: "No. Il decoder PNG e l'encoder MozJPEG girano nel tuo browser, e i tuoi file non escono mai dal dispositivo."
 ui:
-  img.drop.hint: "Immagini PNG. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini PNG. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "png-in-jpg.zip"
 ---
 

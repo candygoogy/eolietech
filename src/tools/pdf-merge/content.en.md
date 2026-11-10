@@ -10,7 +10,7 @@ howTo:
   - "Download the combined PDF and check it in your usual PDF reader."
 faq:
   - q: "Are my files uploaded anywhere?"
-    a: "No. The merge runs in your browser with the open-source pdf-lib library. Your PDFs are read from your disk into the page's memory and the result is saved back to your disk. You can disconnect from the internet after the page has loaded and the tool still works."
+    a: "No. The merge runs in your browser with the open-source pdf-lib library. Your PDFs are read from your disk into the page's memory and the result is saved back to your disk. You can disconnect from the internet after the first file and the tool still works."
   - q: "Can I merge password-protected PDFs?"
     a: "No. Encrypted PDFs cannot be combined here. If you know the password, remove it with Unlock PDF on this site, which also lifts editing restrictions, and add the unlocked copy instead."
   - q: "Do links, bookmarks and form fields survive?"
@@ -20,7 +20,7 @@ faq:
   - q: "Will merging reduce quality?"
     a: "No. Pages are copied as they are, without re-compressing images or converting text, so the combined file looks exactly like the originals."
 ui:
-  merge.drop: "Choose PDF files or drop them here"
+  merge.drop: "Drop PDF files here, or choose them"
   merge.listLabel: "Files to merge, in order"
   merge.orderHint: "Pages are merged from top to bottom. Drag files to reorder them, or use the Move buttons."
   merge.action: "Merge PDFs"
@@ -33,8 +33,8 @@ ui:
   merge.pages: "Pages: {count}"
   merge.moveUp: "Move up"
   merge.moveDown: "Move down"
-  merge.moveUpLabel: "Move {name} up"
-  merge.moveDownLabel: "Move {name} down"
+  merge.moveUpLabel: "Move up: {name}"
+  merge.moveDownLabel: "Move down: {name}"
   merge.removeLabel: "Remove {name}"
   merge.moved: "{name} is now number {position} of {total}."
   merge.removed: "Removed {name}."

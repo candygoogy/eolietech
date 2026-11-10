@@ -102,7 +102,16 @@ const structuredData = graph([
   <JsonLd slot="head" data={structuredData} />
   <article class="tool-page">
     <header class="tool-page__head container">
-      <a class="tool-page__back" href={pagePath(locale, "tools")}>{t(locale, "toolPage.allTools")}</a>
+      <div class="tool-page__crumbs">
+        <a class="tool-page__back" href={pagePath(locale, "tools")}>{t(locale, "toolPage.allTools")}</a>
+        {
+          variant && (
+            <a class="tool-page__parent" href={baseLink.href}>
+              {t(locale, "toolPage.partOf", { tool: baseLink.label })}
+            </a>
+          )
+        }
+      </div>
       <h1>{h1}</h1>
       {intro && <p class="lede">{intro}</p>}
     </header>
@@ -157,9 +166,11 @@ const structuredData = graph([
         <span>{t(locale, "toolPage.private")}</span>
         <a href={pagePath(locale, "security")}>{t(locale, "toolPage.verify")}</a>
       </p>
-      <p class="tool-page__private tool-page__source">
+      {/* Hidden until the tool has produced something: the script below reveals it on the first eolie:result. */}
+      <p class="tool-page__private tool-page__source" data-star-ask hidden>
         <span>{t(locale, "toolPage.openSource")}</span>
         <a href={siteConfig.sourceUrl}>{t(locale, "toolPage.star")}</a>
+        {related.length > 0 && <a href="#related-tools">{t(locale, "toolPage.next")}</a>}
       </p>
     </div>
 
@@ -201,7 +212,7 @@ const structuredData = graph([
             )}
 
             {related.length > 0 && (
-              <nav class="tool-page__section" aria-label={t(locale, "tool.related")}>
+              <nav class="tool-page__section" id="related-tools" aria-label={t(locale, "tool.related")}>
                 <h2>{t(locale, "tool.related")}</h2>
                 <ul class="related-list">
                   {related.map((r) => (
@@ -224,4 +235,8 @@ const structuredData = graph([
 <script>
   import { mountTools } from "../lib/tool-mount";
   void mountTools();
+
+  // The GitHub star ask appears after the first result (tool-ui.ts fires eolie:result), not before.
+  const starAsk = document.querySelector<HTMLElement>("[data-star-ask]");
+  if (starAsk) document.addEventListener("eolie:result", () => (starAsk.hidden = false), { once: true });
 </script>

@@ -123,7 +123,7 @@ test("/image-to-text/ reads English text from a screenshot, same-origin only", a
   await expect(page.locator(".tool-note[role=status]")).toHaveText("Text from 1 file ready.");
   await expect(page.locator(".tool--ocr").getByText(/The first time/)).toBeHidden();
 
-  const txt = await download(page, row.getByRole("button", { name: "Download the text from english.png" }));
+  const txt = await download(page, row.getByRole("button", { name: "Download .txt: english.png" }));
   expect(txt.name).toBe("english.txt");
   expect(txt.bytes.toString("utf8")).toContain("Payment due within thirty days.");
 
@@ -162,7 +162,7 @@ test("/it/estrarre-testo-da-immagine/ reads Italian accents and points HEIC to t
 test("/ocr-pdf/ makes a scanned PDF searchable and keeps a page that already has text", async ({ page, baseURL }) => {
   const w = await watch(page, baseURL!);
   await open(page, "/ocr-pdf/");
-  await expect(page.getByText("Choose a scanned PDF or drop it here")).toBeVisible();
+  await expect(page.getByText("Drop a scanned PDF here, or choose one")).toBeVisible();
   await upload(page, ["document/ocr/scan.pdf"]);
   await expect(page.getByLabel("Also read pages that already have text")).not.toBeChecked();
   await page.getByRole("button", { name: "Read text from 1 file" }).click();
@@ -175,7 +175,7 @@ test("/ocr-pdf/ makes a scanned PDF searchable and keeps a page that already has
   await expect(text).toContainText("quick brown fox");
   await expect(text).toContainText("Already searchable page");
 
-  const pdf = await download(page, row.getByRole("button", { name: "Download the searchable PDF of scan.pdf" }));
+  const pdf = await download(page, row.getByRole("button", { name: "Download searchable PDF: scan.pdf" }));
   expect(pdf.name).toBe("scan-ocr.pdf");
   const pages = await pdfText(pdf.bytes);
   expect(pages).toHaveLength(2);

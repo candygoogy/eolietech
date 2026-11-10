@@ -18,7 +18,7 @@ faq:
   - q: "La foto viene ruotata correttamente?"
     a: "Sì. L'orientamento EXIF viene applicato durante la decodifica, quindi le foto in verticale restano dritte nel PNG. Gli altri metadati, come la posizione GPS e i dati della fotocamera, non vengono copiati."
 ui:
-  img.drop.hint: "Immagini JPG. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini JPG. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "jpg-in-png.zip"
 ---
 

@@ -22,8 +22,8 @@ faq:
   - q: "E se lo screenshot è un file HEIC, o non si apre?"
     a: "Gli screenshot dell'iPhone vengono salvati in PNG e si aprono senza problemi. HEIC è il formato delle foto scattate con la fotocamera dell'iPhone, che questo strumento non sa aprire: convertile prima con da HEIC a JPG, che lavora anche lui sul tuo dispositivo. Se un file continua a non aprirsi, potrebbe essere danneggiato o in un formato che il browser non sa mostrare; aprirlo e farne un nuovo screenshot risolve."
 ui:
-  ocr.drop.label: "Scegli gli screenshot o trascinali qui"
-  ocr.drop.hint: "PNG, JPG o WebP. Letti sul tuo dispositivo, mai caricati."
+  ocr.drop.label: "Trascina gli screenshot qui, oppure sceglili"
+  ocr.drop.hint: "PNG, JPG o WebP. Letti sul tuo dispositivo; non viene caricato nulla."
   ocr.zipName: "testo-dagli-screenshot.zip"
 ---
 

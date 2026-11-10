@@ -105,7 +105,7 @@ Vengono aggiunte solo le immagini che hai messo. Testo, link, campi dei moduli, 
 
 Il PDF viene letto e salvato dentro il tuo browser, e la tua firma esiste solo nella memoria di questa pagina mentre lavori. Non viene mai inviata né conservata: chiudi la scheda e sparisce. La prossima volta che ti serve, disegnala di nuovo o riusa la stessa foto.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 - Per aprire un documento firmato con firma digitale, usa [Aprire file P7M](/it/aprire-file-p7m/).
 - Per unire le pagine firmate ad altri documenti, usa [Unire PDF](/it/unire-pdf/).

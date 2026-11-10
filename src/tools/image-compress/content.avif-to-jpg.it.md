@@ -18,7 +18,7 @@ faq:
   - q: "Funziona con gli AVIF HDR o animati?"
     a: "Lo strumento converte immagini statiche in JPG standard a 8 bit. Gli AVIF animati non vengono convertiti come animazioni, e le immagini HDR vengono convertite senza tone mapping HDR, quindi le zone molto luminose possono sembrare bruciate."
 ui:
-  img.drop.hint: "Immagini AVIF. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini AVIF. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "avif-in-jpg.zip"
 ---
 

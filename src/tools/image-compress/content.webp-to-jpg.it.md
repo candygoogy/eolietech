@@ -18,7 +18,7 @@ faq:
   - q: "Le mie immagini vengono caricate?"
     a: "No. Il decoder WebP e l'encoder MozJPEG girano come WebAssembly in questa scheda. Le immagini vengono lette dal tuo disco e i JPG vengono salvati direttamente lì."
 ui:
-  img.drop.hint: "Immagini WebP. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini WebP. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "webp-in-jpg.zip"
 ---
 

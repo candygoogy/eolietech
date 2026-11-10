@@ -18,7 +18,7 @@ faq:
   - q: "Le mie foto vengono caricate?"
     a: "No. Le foto vengono lette e riscritte dentro questa scheda del browser, e i dati dell'immagine vengono copiati byte per byte, quindi la foto resta intatta e non passa niente dalla rete."
 ui:
-  exif.drop.hint: "Foto JPG, PNG o WebP. Controllate e pulite sul tuo dispositivo; non viene caricato niente."
+  exif.drop.hint: "Foto JPG, PNG o WebP. Controllate e pulite sul tuo dispositivo; non viene caricato nulla."
 ---
 
 ## Perché una foto sa dove eri

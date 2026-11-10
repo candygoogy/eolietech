@@ -18,8 +18,8 @@ faq:
   - q: "Viene caricato qualcosa?"
     a: "No. Il PDF viene creato nel tuo browser con la libreria open source pdf-lib, e i tuoi file non lasciano mai il tuo dispositivo."
 ui:
-  topdf.drop: "Scegli le immagini PNG o trascinale qui"
-  topdf.drop.hint: "PNG, ma anche JPG, WebP, AVIF e HEIC. Il PDF viene creato sul tuo dispositivo; non viene caricato niente."
+  topdf.drop: "Trascina le immagini PNG qui, oppure scegliele"
+  topdf.drop.hint: "PNG, ma anche JPG, WebP, AVIF e HEIC. Il PDF viene creato sul tuo dispositivo; non viene caricato nulla."
 ---
 
 ## Screenshot e scansioni in un solo file

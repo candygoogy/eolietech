@@ -22,7 +22,7 @@ faq:
   - q: "La mia foto viene caricata?"
     a: "No. Apertura, ritaglio e salvataggio avvengono tutti in questa scheda del browser. La pagina scarica una volta gli encoder da questo sito e non invia mai la tua foto da nessuna parte."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre quadrato; non viene caricato niente."
+  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre quadrato. Ritagliata sul tuo dispositivo; non viene caricato nulla."
 ---
 
 Vuoi la foto intera nel quadrato, senza tagliare niente? [Foto quadrata senza tagliare](/it/foto-quadrata-senza-tagliare/) la mette dentro un quadrato e riempie i lati vuoti con il bianco, il nero, un colore o una copia sfocata della foto.

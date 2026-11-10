@@ -20,7 +20,7 @@ faq:
   - q: "Le mie foto vengono caricate su un server?"
     a: "No. Decodifica e codifica avvengono dentro questa scheda del browser, quindi le foto non lasciano mai il tuo dispositivo. Per lo stesso motivo la velocità dipende dal dispositivo: con molte foto un telefono datato ci mette di più di un portatile recente."
 ui:
-  img.drop.hint: "Foto HEIC o HEIF, salvate in PNG senza perdita sul tuo dispositivo. Non viene caricato niente."
+  img.drop.hint: "Foto HEIC o HEIF. Salvate in PNG senza perdita sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "heic-in-png.zip"
 ---
 

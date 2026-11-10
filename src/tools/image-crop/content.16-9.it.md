@@ -20,7 +20,7 @@ faq:
   - q: "La mia immagine viene caricata?"
     a: "No. Apertura, ritaglio e salvataggio avvengono tutti in questa scheda del browser. La pagina scarica una volta gli encoder da questo sito e non invia mai la tua immagine da nessuna parte."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre in 16:9; non viene caricato niente."
+  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre in 16:9. Ritagliata sul tuo dispositivo; non viene caricato nulla."
 ---
 
 ## Copertine, slide e banner

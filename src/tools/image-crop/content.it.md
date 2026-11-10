@@ -20,9 +20,9 @@ faq:
   - q: "Posso ritagliare le foto HEIC dell'iPhone?"
     a: "Non direttamente: questa pagina apre JPG, PNG, WebP e AVIF. Prima converti i file HEIC con il convertitore da HEIC a JPG di questo sito, poi ritaglia qui il JPG."
 ui:
-  crop.drop.label: "Scegli un'immagine o trascinala qui"
+  crop.drop.label: "Trascina un'immagine qui, oppure scegliela"
   crop.drop.replace: "Scegli un'altra immagine"
-  crop.drop.hint: "JPG, PNG, WebP o AVIF. Ritagliata sul tuo dispositivo; non viene caricato niente."
+  crop.drop.hint: "JPG, PNG, WebP o AVIF. Ritagliata sul tuo dispositivo; non viene caricato nulla."
   crop.opening: "Apertura di {name}…"
   crop.opened: "Hai aperto {name}, {width} × {height} px. Imposta l'area di ritaglio, poi premi Ritaglia."
   crop.fileInfo: "{name} · {width} × {height} px · {size}"

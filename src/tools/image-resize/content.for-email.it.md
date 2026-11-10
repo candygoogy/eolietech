@@ -20,7 +20,7 @@ faq:
   - q: "Le mie foto vengono caricate?"
     a: "No. Il ridimensionamento e la codifica in JPG avvengono in questa scheda del browser, e le foto non lasciano mai il tuo dispositivo. Partono solo quando le alleghi tu all'email."
 ui:
-  img.drop.hint: "Foto JPG, PNG, WebP o AVIF. Ridimensionate sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Foto JPG, PNG, WebP o AVIF. Ridimensionate sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "foto-per-email.zip"
 ---
 

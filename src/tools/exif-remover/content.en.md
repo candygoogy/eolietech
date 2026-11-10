@@ -74,7 +74,7 @@ ui:
   exif.error.avifHref: "/avif-to-jpg/"
   exif.downloadNamed: "Download {name}"
   exif.removeFile: "Remove from list"
-  exif.removeNamed: "Remove {name} from the list"
+  exif.removeNamed: "Remove from list: {name}"
   exif.summary.reading.one: "Reading: {done} of {total} photo."
   exif.summary.reading.other: "Reading: {done} of {total} photos."
   exif.summary.checked.one: "{count} photo checked."

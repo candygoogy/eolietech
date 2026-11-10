@@ -20,7 +20,7 @@ faq:
   - q: "Is my photo uploaded?"
     a: "No. The photo is opened, cropped and saved inside this browser tab, and nothing is sent to a server. The saved file also leaves out EXIF data such as GPS location, so the copy you post carries only the pixels you kept."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens at 4:5; nothing is uploaded."
+  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens at 4:5. Cropped on your device; nothing is uploaded."
 ---
 
 ## Instagram feed shapes

@@ -20,7 +20,7 @@ faq:
   - q: "Posso pulire qui le foto HEIC dell'iPhone?"
     a: "Non direttamente: questo strumento legge JPG, PNG e WebP. Converti le foto HEIC con il convertitore da HEIC a JPG di questo sito. Il JPG che crea contiene solo l'immagine, quindi la posizione e tutti gli altri dettagli sono già spariti."
 ui:
-  exif.drop.hint: "JPG, PNG o WebP. Controllate e pulite sul tuo dispositivo; non viene caricato niente."
+  exif.drop.hint: "JPG, PNG o WebP. Controllate e pulite sul tuo dispositivo; non viene caricato nulla."
   exif.mode.legend: "Cosa rimuovere"
   exif.mode.all: "Tutto"
   exif.mode.gps: "Solo la posizione"
@@ -74,7 +74,7 @@ ui:
   exif.error.avifHref: "/it/avif-in-jpg/"
   exif.downloadNamed: "Scarica {name}"
   exif.removeFile: "Togli dall'elenco"
-  exif.removeNamed: "Togli {name} dall'elenco"
+  exif.removeNamed: "Togli dall'elenco: {name}"
   exif.summary.reading.one: "Lettura in corso: {done} su {total}."
   exif.summary.reading.other: "Lettura in corso: {done} su {total}."
   exif.summary.checked.one: "Foto controllate: {count}."

@@ -18,7 +18,7 @@ faq:
   - q: "Gli screenshot sono adatti all'AVIF?"
     a: "Di solito sì, con un'impostazione di qualità alta. L'encoder salva il colore a metà risoluzione, quindi il testo colorato molto piccolo può sembrare un po' morbido: confronta il risultato, e tieni il PNG se deve restare identico al pixel."
 ui:
-  img.drop.hint: "Immagini PNG. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini PNG. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "png-in-avif.zip"
 ---
 

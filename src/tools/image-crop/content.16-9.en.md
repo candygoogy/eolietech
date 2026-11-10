@@ -20,7 +20,7 @@ faq:
   - q: "Is my image uploaded?"
     a: "No. Opening, cropping and saving all happen in this browser tab. The page downloads its encoders from this site once and never sends your image anywhere."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens at 16:9; nothing is uploaded."
+  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens at 16:9. Cropped on your device; nothing is uploaded."
 ---
 
 ## Thumbnails, slides and banners

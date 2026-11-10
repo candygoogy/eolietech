@@ -19,7 +19,7 @@ faq:
   - q: "I miei file vengono caricati?"
     a: "No. La busta viene aperta e la firma controllata dentro la scheda del browser. Non passa niente dalla rete."
 ui:
-  p7m.drop.hint: "Un .pdf.p7m o qualsiasi .p7m. Resta sul tuo dispositivo."
+  p7m.drop.hint: "Un .pdf.p7m o qualsiasi .p7m. Aperto sul tuo dispositivo; non viene caricato nulla."
   p7m.fattura: "È una fattura elettronica: un file XML, senza un'impaginazione sua. Per averla in PDF, trascina lo stesso file .p7m in"
   p7m.fattura.link: "Fattura elettronica in PDF"
   p7m.fattura.href: "/it/fattura-elettronica-in-pdf/"

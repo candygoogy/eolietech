@@ -17,7 +17,16 @@
   padding-block: var(--space-6) var(--space-5);
 }
 
-.tool-page__back {
+/* "All tools" and, on a preset page, "Part of <tool>": one row that wraps on narrow screens. */
+.tool-page__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-4);
+}
+
+.tool-page__back,
+.tool-page__parent {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
@@ -43,7 +52,8 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .tool-page__back:hover {
+  .tool-page__back:hover,
+  .tool-page__parent:hover {
     color: var(--color-accent);
   }
 }
@@ -66,7 +76,8 @@
     padding-block: var(--space-1) var(--space-3);
   }
 
-  .tool-page__back {
+  .tool-page__back,
+  .tool-page__parent {
     margin-bottom: 0;
   }
 
@@ -127,9 +138,21 @@
   min-height: var(--target-min);
 }
 
-/* Second line, right under the first: the repository link. */
+/* Second line, right under the first: the repository link. Hidden until the tool has given a result
+ * (ToolPage script, on the eolie:result event); it fades in once, like a new row does. */
 .tool-page__source {
   margin-top: 0;
+  transition: opacity var(--duration-base, 200ms) ease-out;
+
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-page__source {
+    transition: none;
+  }
 }
 
 /* ---------- loading shell ----------

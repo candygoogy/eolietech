@@ -25,8 +25,8 @@ const messages = {
   generic: t(locale, "waitlist.error.generic"),
   network: t(locale, "waitlist.error.network"),
   check: t(locale, "waitlist.error.check"),
-  checkLoad: t(locale, "waitlist.error.checkLoad"),
 };
+const contactEmail = t(locale, "privacy.email");
 ---
 
 <form
@@ -60,6 +60,11 @@ const messages = {
     </div>
   </fieldset>
   <p class="waitlist-form__status" id="waitlist-status" role="status" aria-live="polite" data-status></p>
+  <p class="waitlist-form__fallback" id="waitlist-fallback" role="status" data-fallback hidden>
+    {t(locale, "waitlist.error.checkLoad")}{" "}
+    {t(locale, "waitlist.fallback")}{" "}
+    <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+  </p>
   <p class="waitlist-form__privacy" id="waitlist-privacy">
     {t(locale, "waitlist.privacy")}{" "}
     <a href={pagePath(locale, "privacy")}>{t(locale, "waitlist.privacyLink")}</a>
@@ -77,8 +82,7 @@ const messages = {
     | "rateLimited"
     | "generic"
     | "network"
-    | "check"
-    | "checkLoad",
+    | "check",
     string
   >;
 
@@ -93,6 +97,9 @@ const messages = {
   /** Below 360px the normal widget (a fixed 300px) can't fit with padding: use the compact one (150 × 140).
    * Same query as the compact rules in components.css, which reserve its height. */
   const COMPACT_CHECK = "(max-width: 22.49rem)";
+
+  /** How long the spam check gets to render before the form offers the email address instead. */
+  const CHECK_TIMEOUT_MS = 8000;
 
   let loading: Promise<Turnstile> | undefined;
   function loadTurnstile(src: string): Promise<Turnstile> {
@@ -119,6 +126,7 @@ const messages = {
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     const status = form.querySelector<HTMLElement>("[data-status]")!;
     const checkEl = form.querySelector<HTMLElement>("[data-turnstile]")!;
+    const fallback = form.querySelector<HTMLElement>("[data-fallback]")!;
     const msg = JSON.parse(form.dataset.messages ?? "{}") as Messages;
     const endpoint = form.dataset.endpoint ?? "/api/v1/waitlist";
 
@@ -126,14 +134,37 @@ const messages = {
     let widgetId: string | undefined;
     let token = "";
     let busy = false;
+    let blocked = false;
+    let giveUp: ReturnType<typeof setTimeout> | undefined;
 
     const say = (text: string, tone: "info" | "success" | "error" = "info") => {
       status.textContent = text;
       status.dataset.tone = tone;
     };
 
+    // A content blocker can stop the Turnstile script (or its widget) without any error we can see. If the
+    // check has not rendered in time, or its script fails, say so under the form, offer the contact email
+    // and keep the submit disabled. A check that arrives late takes the message away again.
+    const showBlocked = () => {
+      blocked = true;
+      button.disabled = true;
+      fallback.hidden = false;
+      status.textContent = "";
+    };
+    const clearBlocked = () => {
+      clearTimeout(giveUp);
+      if (!blocked) return;
+      blocked = false;
+      button.disabled = busy;
+      fallback.hidden = true;
+    };
+
     const startTurnstile = () => {
       if (turnstile || loading) return;
+      clearTimeout(giveUp);
+      giveUp = setTimeout(() => {
+        if (widgetId === undefined) showBlocked();
+      }, CHECK_TIMEOUT_MS);
       loadTurnstile(form.dataset.turnstileSrc ?? "")
         .then((ts) => {
           turnstile = ts;
@@ -154,8 +185,12 @@ const messages = {
               say(msg.turnstile, "error");
             },
           });
+          clearBlocked();
         })
-        .catch(() => say(msg.checkLoad, "error"));
+        .catch(() => {
+          clearTimeout(giveUp);
+          showBlocked();
+        });
     };
 
     // The form works as soon as the script runs; the spam check loads when the form is near the viewport.
@@ -190,9 +225,11 @@ const messages = {
         return;
       }
 
+      if (blocked) return;
       const turnstileToken = (turnstile && widgetId !== undefined ? turnstile.getResponse(widgetId) : "") || token;
       if (!turnstileToken) {
-        say(turnstile ? msg.check : msg.checkLoad, "error");
+        if (turnstile) say(msg.check, "error");
+        else showBlocked();
         startTurnstile();
         return;
       }
@@ -231,7 +268,7 @@ const messages = {
         say(msg.network, "error");
       } finally {
         busy = false;
-        button.disabled = false;
+        button.disabled = blocked;
         form.removeAttribute("aria-busy");
         // Tokens are single-use: get a fresh one for the next attempt.
         token = "";

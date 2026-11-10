@@ -47,7 +47,7 @@ ui:
   compress.done.other: "Finito. {count} file pronti."
   compress.downloadOriginal: "Scarica l'originale"
   compress.downloadLabel: "Scarica {name}"
-  compress.downloadOriginalLabel: "Scarica il file originale {name}"
+  compress.downloadOriginalLabel: "Scarica l'originale: {name}"
   compress.outputName: "{name}-compresso.pdf"
   compress.zipName: "pdf-compressi.zip"
   compress.error.engine: "Non è stato possibile caricare il motore di compressione. Controlla la connessione e riprova."

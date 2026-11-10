@@ -216,7 +216,7 @@ test("a sideways phone photo is cropped where the preview shows it", async ({ pa
 test("Italian page crops too", async ({ page, baseURL }) => {
   const w = watch(page, baseURL!);
   await openTool(page, "/it/ritagliare-immagini/");
-  await expect(page.locator(".tool-drop__label")).toHaveText("Scegli un'immagine o trascinala qui");
+  await expect(page.locator(".tool-drop__label")).toHaveText("Trascina un'immagine qui, oppure scegliela");
   await choose(page, fixture("sample.webp"));
   await expect(page.locator(".tool-drop__label")).toHaveText("Scegli un'altra immagine");
   await page.getByRole("button", { name: "Ritaglia", exact: true }).click();

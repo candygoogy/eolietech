@@ -22,7 +22,7 @@ faq:
   - q: "Is my photo uploaded?"
     a: "No. Opening, cropping and saving all happen in this browser tab. The page downloads its encoders from this site once and never sends your photo anywhere."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens square; nothing is uploaded."
+  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens square. Cropped on your device; nothing is uploaded."
 ---
 
 Want the whole photo in the square, with nothing cut off? [Make an image square](/make-image-square/) fits it inside a square and fills the empty sides with white, black, a colour or a blurred copy of the photo.

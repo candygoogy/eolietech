@@ -104,12 +104,12 @@ test("three images, reordered from the keyboard, become one upright PDF", async 
   await expect(rows.nth(1).locator(".tool-item__meta")).toHaveText(/^PNG · /);
 
   // Move the PNG to the top with its keyboard-reachable button; focus stays on the moved row.
-  const up = page.getByRole("button", { name: "Move sample.png up" });
+  const up = page.getByRole("button", { name: "Move up: sample.png" });
   await up.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("status").filter({ hasText: "sample.png is now page 1 of 3." })).toBeVisible();
   await expect(rows.nth(0).locator(".tool-item__name")).toHaveText("sample.png");
-  await expect(page.getByRole("button", { name: "Move sample.png down" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Move down: sample.png" })).toBeFocused();
 
   const { name, doc } = await createAndDownload(page, "Create PDF", /^Download PDF \(3 pages, /);
   expect(name).toBe("images.pdf");
@@ -149,7 +149,7 @@ test("Italian page: WebP, AVIF and HEIC go into one PDF", async ({ page, baseURL
   test.skip(browserName === "webkit", "Playwright's WebKit has no OffscreenCanvas in workers (the HEIC page is decoded through one)");
   const w = watch(page, baseURL!);
   await openTool(page, "/it/jpg-in-pdf/");
-  await expect(page.locator(".tool-drop__label")).toHaveText("Scegli le immagini o trascinale qui");
+  await expect(page.locator(".tool-drop__label")).toHaveText("Trascina le immagini qui, oppure scegliele");
   await page.locator('.tool-drop input[type="file"]').setInputFiles([fixture("sample.webp"), fixture("sample.avif"), fixture("sample.heic")]);
   await expect(page.locator(".tool-item")).toHaveCount(3);
   const { name, doc } = await createAndDownload(page, "Crea PDF", /^Scarica il PDF \(3 pagine, /);
@@ -168,7 +168,7 @@ test("Italian page: WebP, AVIF and HEIC go into one PDF", async ({ page, baseURL
 test("one image keeps its name; an unreadable file is flagged and left out", async ({ page, baseURL }) => {
   const w = watch(page, baseURL!);
   await openTool(page, "/png-to-pdf/");
-  await expect(page.locator(".tool-drop__label")).toHaveText("Choose PNG images or drop them here");
+  await expect(page.locator(".tool-drop__label")).toHaveText("Drop PNG images here, or choose them");
   await page.locator('.tool-drop input[type="file"]').setInputFiles([
     { name: "broken.png", mimeType: "image/png", buffer: Buffer.from("not really a png") },
     await file("sample.png"),
@@ -193,9 +193,9 @@ test("a photo's camera, date and location stay out of the PDF", async ({ page })
 });
 
 for (const [url, label] of [
-  ["/heic-to-pdf/", "Choose photos or drop them here"],
-  ["/it/png-in-pdf/", "Scegli le immagini PNG o trascinale qui"],
-  ["/it/heic-in-pdf/", "Scegli le foto o trascinale qui"],
+  ["/heic-to-pdf/", "Drop photos here, or choose them"],
+  ["/it/png-in-pdf/", "Trascina le immagini PNG qui, oppure scegliele"],
+  ["/it/heic-in-pdf/", "Trascina le foto qui, oppure scegliele"],
 ] as const) {
   test(`variant page ${url} mounts with its own label`, async ({ page }) => {
     await openTool(page, url);

@@ -24,7 +24,7 @@ faq:
   - q: "Can I redact a password-protected PDF?"
     a: "No, and the same goes for a PDF that opens freely but is locked against changes. The tool tells you as soon as you open the file, before you draw anything. Unlock PDF on this site removes a password you know, and removes those restrictions without one. Then redact the unlocked copy."
 ui:
-  redact.drop.label: "Choose a PDF or drop it here"
+  redact.drop.label: "Drop a PDF here, or choose one"
   redact.drop.replace: "Choose another PDF"
   redact.reading: "Reading {name}…"
   redact.fileInfo.one: "{name}: {pages} page, {size}"
@@ -120,7 +120,7 @@ Search only works on real text. A scanned contract or a photo of a document has 
 
 The pages are drawn and read by PDF.js, the open-source PDF engine inside Firefox, running in this page. The new PDF is put together by pdf-lib, also in your browser. Nothing is uploaded at any point, which matters most for exactly the documents people redact: payslips, medical reports, contracts, bank statements.
 
-## Related tools
+## Other tools for nearby jobs
 
 - To shrink a redacted PDF that came out large, try [Compress PDF](/compress-pdf/).
 - To send only some pages, cut them out first with [Split PDF](/split-pdf/).

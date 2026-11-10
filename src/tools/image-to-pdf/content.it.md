@@ -10,7 +10,7 @@ howTo:
   - "Premi Crea PDF, poi scarica il file e controllalo con il lettore PDF che usi di solito."
 faq:
   - q: "Le mie immagini vengono caricate da qualche parte?"
-    a: "No. Il PDF viene creato nel tuo browser con la libreria open source pdf-lib, in un worker in background sul tuo dispositivo. Le immagini vengono lette dal tuo disco e il PDF viene salvato di nuovo lì. Dopo la prima apertura della pagina puoi anche scollegarti da internet: lo strumento funziona lo stesso."
+    a: "No. Il PDF viene creato nel tuo browser con la libreria open source pdf-lib, in un worker in background sul tuo dispositivo. Le immagini vengono lette dal tuo disco e il PDF viene salvato di nuovo lì. Dopo il primo file puoi anche scollegarti da internet: lo strumento funziona lo stesso."
   - q: "Le immagini perdono qualità?"
     a: "Se sono JPG o PNG, no. I dati dell'immagine di un JPG entrano nel PDF esattamente come li ha salvati la fotocamera o lo scanner (restano fuori solo le note nascoste, come la posizione), e un PNG resta senza perdita. WebP, AVIF e HEIC non si possono mettere direttamente in un PDF, quindi vengono convertiti una volta sola: le foto in JPG di alta qualità (qualità 92), le immagini trasparenti o senza perdita in PNG. Il PDF non usa i profili colore incorporati nelle immagini, quindi le foto ad ampia gamma cromatica, come molte scattate con l'iPhone, possono apparire un po' meno sature."
   - q: "Le foto del telefono escono girate di lato?"
@@ -20,8 +20,8 @@ faq:
   - q: "C'è un limite al numero o alla dimensione delle immagini?"
     a: "Puoi aggiungere fino a 50 immagini da massimo 100 MB l'una. In pratica conta la memoria del tuo dispositivo: decine di foto grandi possono richiedere un po' di tempo su uno smartphone. Il PDF pesa più o meno quanto le immagini che ci metti dentro."
 ui:
-  topdf.drop: "Scegli le immagini o trascinale qui"
-  topdf.drop.hint: "JPG, PNG, WebP, AVIF o HEIC. Il PDF viene creato sul tuo dispositivo; non viene caricato niente."
+  topdf.drop: "Trascina le immagini qui, oppure scegliele"
+  topdf.drop.hint: "JPG, PNG, WebP, AVIF o HEIC. Il PDF viene creato sul tuo dispositivo; non viene caricato nulla."
   topdf.option.pageSize: "Formato pagina"
   topdf.option.fit: "Adatta all'immagine"
   topdf.option.letter: "Letter (USA)"
@@ -39,8 +39,8 @@ ui:
   topdf.reading: "Lettura…"
   topdf.moveUp: "Sposta su"
   topdf.moveDown: "Sposta giù"
-  topdf.moveUpLabel: "Sposta su {name}"
-  topdf.moveDownLabel: "Sposta giù {name}"
+  topdf.moveUpLabel: "Sposta su: {name}"
+  topdf.moveDownLabel: "Sposta giù: {name}"
   topdf.removeLabel: "Rimuovi {name}"
   topdf.moved: "{name} ora è la pagina {position} di {total}."
   topdf.removed: "Rimossa: {name}."
@@ -86,6 +86,6 @@ Le foto del telefono sono spesso salvate di lato, con un'indicazione nel file su
 
 Molti convertitori online caricano le tue foto sui loro server e ti rimandano un PDF. Qui non viene inviato niente. Le immagini vengono lette dal tuo disco, il PDF viene creato nella memoria del browser e salvato direttamente nei tuoi download. Dopo l'apertura della pagina puoi perfino staccare la connessione: continua a funzionare.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 Devi aggiungere il risultato ad altri PDF? [Unire PDF](/it/unire-pdf/) mette insieme più file, e [Organizzare le pagine PDF](/it/organizzare-pdf/) ti permette poi di ruotare, riordinare o eliminare le pagine. Se il PDF è troppo pesante per un'email, prova [Comprimere PDF](/it/comprimere-pdf/), oppure alleggerisci prima le foto con [Comprimere immagini](/it/comprimere-immagini/). Per trasformare un PDF di nuovo in immagini, usa [Da PDF a JPG](/it/pdf-in-jpg/). Per togliere la posizione dalle foto che condividi così come sono, usa [Rimuovere i dati EXIF](/it/rimuovere-exif/).

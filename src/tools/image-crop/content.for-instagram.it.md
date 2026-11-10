@@ -20,7 +20,7 @@ faq:
   - q: "La mia foto viene caricata?"
     a: "No. La foto viene aperta, ritagliata e salvata dentro questa scheda del browser, e niente viene inviato a un server. Il file salvato non contiene nemmeno i dati EXIF come la posizione GPS, quindi la copia che pubblichi porta con sé solo i pixel che hai tenuto."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre in 4:5; non viene caricato niente."
+  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre in 4:5. Ritagliata sul tuo dispositivo; non viene caricato nulla."
 ---
 
 ## I formati del feed di Instagram

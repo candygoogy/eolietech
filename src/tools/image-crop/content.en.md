@@ -20,7 +20,7 @@ faq:
   - q: "Can I crop HEIC photos from an iPhone?"
     a: "Not directly. This page opens JPG, PNG, WebP and AVIF. Convert the HEIC files with the HEIC to JPG converter on this site first, then crop the JPG here."
 ui:
-  crop.drop.label: "Choose an image or drop it here"
+  crop.drop.label: "Drop an image here, or choose one"
   crop.drop.replace: "Choose another image"
   crop.drop.hint: "JPG, PNG, WebP or AVIF. Cropped on your device; nothing is uploaded."
   crop.opening: "Opening {name}…"

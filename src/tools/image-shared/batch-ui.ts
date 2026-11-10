@@ -10,6 +10,7 @@ import {
   formatBytes,
   markEnter,
   matchesAccept,
+  notifyResult,
   type FileIntake,
 } from "../../lib/tool-ui";
 import { tPlural } from "../../i18n/plural";
@@ -457,7 +458,10 @@ export function createBatch(root: HTMLElement, opts: BatchOptions): Batch {
       item.state = out.result ? "done" : "error";
       renderItem(item);
       render();
-      if (out.result) revealResult(item);
+      if (out.result) {
+        revealResult(item);
+        notifyResult();
+      }
     }
   }
 

@@ -97,7 +97,7 @@ Lo strumento usa [qpdf](https://github.com/qpdf/qpdf) 12.2.0, una libreria open 
 
 Tutto avviene in questa scheda. I PDF e la password non vengono caricati da nessuna parte e la pagina non conserva la password. Puoi aggiungere fino a 10 file da 200 MB ciascuno. I file molto grandi richiedono parecchia memoria, quindi sullo smartphone può aiutare proteggerli uno alla volta.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 - Per togliere la password da un PDF di cui la conosci, usa [Sbloccare PDF](/it/sbloccare-pdf/).
 - Per eliminare davvero un nome o un IBAN prima di condividere un file, usa [Oscurare PDF](/it/oscurare-pdf/).

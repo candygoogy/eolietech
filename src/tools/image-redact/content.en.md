@@ -22,7 +22,7 @@ faq:
   - q: "Can I redact HEIC photos from an iPhone?"
     a: "Not directly. Convert them with HEIC to JPG on this site first, then open the JPG here."
 ui:
-  redact.drop.label: "Choose an image or drop it here"
+  redact.drop.label: "Drop an image here, or choose one"
   redact.drop.replace: "Choose another image"
   redact.drop.hint: "JPG, PNG, WebP or AVIF. Redacted on your device; nothing is uploaded."
   redact.opening: "Opening {name}…"
@@ -106,7 +106,7 @@ The image is decoded in a background worker inside this tab. Phone photos are tu
 
 One effect and one strength apply to every box in the image. To blur a face and black out a name in the same picture, save once with one effect, open the saved copy and redact it again with the other.
 
-## Related tools
+## Other tools for nearby jobs
 
 - For PDFs, [Redact PDF](/redact-pdf/) blacks out text and removes it from the file.
 - If what you want to hide sits at an edge, cutting it off with [Crop an image](/crop-image/) can be cleaner than covering it.

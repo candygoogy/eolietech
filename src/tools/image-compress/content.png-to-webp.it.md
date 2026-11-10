@@ -18,7 +18,7 @@ faq:
   - q: "Tutti i browser mostrano il WebP?"
     a: "Tutte le versioni attuali di Chrome, Edge, Firefox e Safari mostrano il WebP. Safari lo supporta dalla versione 14 (2020) e per mostrarlo richiede macOS Big Sur o successivo."
 ui:
-  img.drop.hint: "Immagini PNG. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini PNG. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "png-in-webp.zip"
 ---
 

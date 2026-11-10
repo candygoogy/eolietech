@@ -55,7 +55,7 @@ async function convertOne(page: Page, url: string, input: string, expectedExt: s
   const item = page.locator(".tool-item").first();
   await expect(item).toHaveAttribute("data-state", "done", { timeout: 60_000 });
   // Same-format compression of a tiny fixture may come out larger; the tool then offers the original.
-  const btn = item.getByRole("button", { name: /^Download (?!the original)/ }).first();
+  const btn = item.getByRole("button", { name: /^Download (?!original)/ }).first();
   const out = await download(page, btn);
   expect(out.name.toLowerCase().endsWith(`.${expectedExt}`), `${out.name} ends with .${expectedExt}`).toBe(true);
   expect(MAGIC[expectedExt]!(out.bytes), `${out.name} is a real ${expectedExt}`).toBe(true);

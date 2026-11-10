@@ -2334,6 +2334,16 @@ a.tool-index__row:focus-visible::after {
   color: var(--color-danger);
 }
 
+.waitlist-form__fallback {
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.waitlist-form__fallback a {
+  color: inherit;
+  text-underline-offset: 0.15em;
+}
+
 .waitlist-form__privacy {
   font-size: var(--text-sm);
   color: var(--color-text-muted);

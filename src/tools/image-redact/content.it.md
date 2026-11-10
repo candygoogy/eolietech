@@ -22,9 +22,9 @@ faq:
   - q: "Posso oscurare le foto HEIC dell'iPhone?"
     a: "Non direttamente. Prima convertile con lo strumento da HEIC a JPG di questo sito, poi apri qui il JPG."
 ui:
-  redact.drop.label: "Scegli un'immagine o trascinala qui"
+  redact.drop.label: "Trascina un'immagine qui, oppure scegliela"
   redact.drop.replace: "Scegli un'altra immagine"
-  redact.drop.hint: "JPG, PNG, WebP o AVIF. Oscurata sul tuo dispositivo; non viene caricato niente."
+  redact.drop.hint: "JPG, PNG, WebP o AVIF. Oscurata sul tuo dispositivo; non viene caricato nulla."
   redact.opening: "Apertura di {name}…"
   redact.opened: "Hai aperto {name}, {width} × {height} px. Trascina sull'immagine per disegnare un riquadro su ciò che vuoi nascondere."
   redact.fileInfo: "{name} · {width} × {height} px · {size}"
@@ -106,7 +106,7 @@ L'immagine viene decodificata in un worker in background dentro questa scheda. L
 
 Un solo effetto e una sola intensità valgono per tutti i riquadri dell'immagine. Per sfocare un volto e coprire di nero un nome nella stessa foto, salva una volta con un effetto, poi apri la copia salvata e oscurala di nuovo con l'altro.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 - Per i PDF c'è [Oscurare PDF](/it/oscurare-pdf/), che copre il testo e lo toglie dal file.
 - Se quello che vuoi nascondere sta su un bordo, tagliarlo via con [Ritaglia un'immagine](/it/ritagliare-immagini/) può essere più pulito che coprirlo.

@@ -100,7 +100,7 @@ Due cose possono smettere di funzionare: una firma digitale già presente, che d
 
 Il PDF viene letto e salvato nel tuo browser e non viene mai caricato. I file molto grandi richiedono parecchia memoria, quindi sullo smartphone un PDF pesante può richiedere un po' di tempo.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 - Per unire più file prima di numerarli, usa [Unire PDF](/it/unire-pdf/).
 - Per riordinare, ruotare o togliere pagine prima, usa [Organizzare PDF](/it/organizzare-pdf/).

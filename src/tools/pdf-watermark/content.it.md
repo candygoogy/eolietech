@@ -141,7 +141,7 @@ Due cose possono smettere di funzionare: una firma digitale già presente, che d
 
 Le impostazioni restano quando scegli un altro PDF, quindi puoi mettere la stessa filigrana su più file, uno dopo l'altro.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 - Per riunire più documenti in uno prima di mettere la filigrana, usa [Unire PDF](/it/unire-pdf/).
 - Per numerare anche le pagine, usa [Numerare pagine PDF](/it/numerare-pagine-pdf/).

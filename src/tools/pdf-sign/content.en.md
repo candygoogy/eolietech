@@ -105,7 +105,7 @@ Only the images you placed are added. The text, links, form fields, bookmarks an
 
 The PDF is read and saved inside your browser, and your signature only exists in this page's memory while you work. It is never sent anywhere and never stored: close the tab and it's gone. Next time you need it, draw it again or reuse the same photo.
 
-## Related tools
+## Other tools for nearby jobs
 
 - To open a document someone signed with a firma digitale, use [Open P7M files](/open-p7m-file/).
 - To put the signed pages together with other documents, use [Merge PDF](/merge-pdf/).

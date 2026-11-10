@@ -75,7 +75,7 @@ A PDF page has a size in inches or centimeters, not in pixels. The resolution, i
 
 The pages are drawn by PDF.js, the open-source renderer Firefox uses for its own PDF viewer, running inside this page. The images are encoded by your browser and, when there are several, packed into a .zip in memory too. Nothing is uploaded, which matters for bank statements, contracts and anything else you would rather not hand to a website.
 
-## Related tools
+## Other tools for nearby jobs
 
 - To keep part of a PDF as a PDF rather than as images, use [Split PDF](/split-pdf/).
 - To go the other way and turn photos or scans into one PDF, use [JPG to PDF](/jpg-to-pdf/).

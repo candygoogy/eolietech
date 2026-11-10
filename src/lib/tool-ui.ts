@@ -186,6 +186,17 @@ function isEditable(target: EventTarget | null): boolean {
  */
 export const DOWNLOAD_URL_TTL_MS = 60_000;
 
+/** Name of the event a tool fires on `document` once the user has a result (see notifyResult). */
+export const RESULT_EVENT = "eolie:result";
+
+/**
+ * Tell the page the user now has a result (a finished file, a download). ToolPage listens once to
+ * reveal the "star it on GitHub" ask, so it never shows before the tool has done anything useful.
+ */
+export function notifyResult(): void {
+  document.dispatchEvent(new CustomEvent(RESULT_EVENT));
+}
+
 /** Save a Blob with a filename (object URL, revoked a minute after the click). */
 export function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -197,6 +208,7 @@ export function downloadBlob(blob: Blob, filename: string): void {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_TTL_MS);
+  notifyResult();
 }
 
 /**

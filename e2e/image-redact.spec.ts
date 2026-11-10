@@ -241,7 +241,7 @@ test("/blur-faces-in-photo/ starts on Blur and blurs only inside the box", async
 test("the Italian pixelate page opens an image with Pixel selected", async ({ page, baseURL }) => {
   const w = watch(page, baseURL!);
   await openTool(page, "/it/pixelare-immagine/");
-  await expect(page.locator(".tool-drop__label")).toHaveText("Scegli un'immagine o trascinala qui");
+  await expect(page.locator(".tool-drop__label")).toHaveText("Trascina un'immagine qui, oppure scegliela");
   await choose(page, "sample.webp");
   await expect(page.getByRole("radio", { name: "Pixel" })).toBeChecked();
   await expect(page.getByRole("button", { name: "Aggiungi un riquadro" })).toBeVisible();

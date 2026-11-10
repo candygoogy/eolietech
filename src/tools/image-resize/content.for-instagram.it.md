@@ -20,7 +20,7 @@ faq:
   - q: "Le mie foto vengono caricate?"
     a: "No. Il ridimensionamento avviene in questa scheda del browser, e le foto non lasciano mai il tuo dispositivo. Arrivano su Instagram solo quando le pubblichi tu."
 ui:
-  img.drop.hint: "Foto JPG, PNG, WebP o AVIF. Ridimensionate sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Foto JPG, PNG, WebP o AVIF. Ridimensionate sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "instagram-1080.zip"
 ---
 

@@ -18,7 +18,7 @@ faq:
   - q: "Devo tenere anche i JPG per il mio sito?"
     a: "Tutti i browser attuali mostrano il WebP, quindi per la maggior parte dei siti basta il WebP. Se devi supportare browser molto vecchi, servi il WebP con un JPG di riserva usando l'elemento HTML picture."
 ui:
-  img.drop.hint: "Immagini JPG. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini JPG. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "jpg-in-webp.zip"
 ---
 

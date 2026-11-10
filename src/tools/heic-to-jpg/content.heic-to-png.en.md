@@ -20,7 +20,7 @@ faq:
   - q: "Are my photos uploaded to a server?"
     a: "No. Decoding and encoding both happen inside this browser tab, so the photos never leave your device. It also means the speed depends on your device: a large batch takes longer on an older phone than on a recent laptop."
 ui:
-  img.drop.hint: "HEIC or HEIF photos, saved as lossless PNG on your device. Nothing is uploaded."
+  img.drop.hint: "HEIC or HEIF photos. Saved as lossless PNG on your device; nothing is uploaded."
   img.zipName: "heic-to-png.zip"
 ---
 

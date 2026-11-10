@@ -47,7 +47,7 @@ ui:
   compress.done.other: "Finished. {count} files ready."
   compress.downloadOriginal: "Download original"
   compress.downloadLabel: "Download {name}"
-  compress.downloadOriginalLabel: "Download the original file {name}"
+  compress.downloadOriginalLabel: "Download original: {name}"
   compress.outputName: "{name}-compressed.pdf"
   compress.zipName: "compressed-pdfs.zip"
   compress.error.engine: "The compression engine could not be loaded. Check your connection and try again."

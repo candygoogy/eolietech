@@ -18,8 +18,8 @@ faq:
   - q: "Le mie foto vengono caricate?"
     a: "No. Il decoder HEIC (libheif, compilato in WebAssembly) e la libreria per i PDF girano dentro questa scheda del browser. Le foto vengono lette dal tuo disco e il PDF viene salvato di nuovo lì."
 ui:
-  topdf.drop: "Scegli le foto o trascinale qui"
-  topdf.drop.hint: "Foto HEIC o altre immagini. Il PDF viene creato sul tuo dispositivo; non viene caricato niente."
+  topdf.drop: "Trascina le foto qui, oppure scegliele"
+  topdf.drop.hint: "Foto HEIC o altre immagini. Il PDF viene creato sul tuo dispositivo; non viene caricato nulla."
   topdf.outputName: "foto.pdf"
 ---
 

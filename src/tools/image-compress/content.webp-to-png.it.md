@@ -18,7 +18,7 @@ faq:
   - q: "Posso convertire i WebP animati?"
     a: "No. Questo strumento converte immagini statiche. Un WebP animato viene segnalato come file che non è stato possibile leggere."
 ui:
-  img.drop.hint: "Immagini WebP. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini WebP. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "webp-in-png.zip"
 ---
 

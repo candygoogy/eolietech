@@ -24,7 +24,7 @@ faq:
   - q: "Posso oscurare un PDF protetto da password?"
     a: "No, e lo stesso vale per un PDF che si apre liberamente ma è bloccato contro le modifiche. Lo strumento te lo dice appena apri il file, prima che tu disegni qualcosa. Sbloccare PDF su questo sito toglie una password che conosci, e toglie quelle restrizioni anche senza password. Poi oscura la copia sbloccata."
 ui:
-  redact.drop.label: "Scegli un PDF o trascinalo qui"
+  redact.drop.label: "Trascina un PDF qui, oppure sceglilo"
   redact.drop.replace: "Scegli un altro PDF"
   redact.reading: "Lettura di {name}…"
   redact.fileInfo.one: "{name}: {pages} pagina, {size}"
@@ -120,7 +120,7 @@ La ricerca funziona solo sul testo vero. Un contratto scansionato o la foto di u
 
 Le pagine vengono disegnate e lette da PDF.js, il motore PDF open source di Firefox, che gira dentro questa pagina. Il nuovo PDF lo monta pdf-lib, sempre nel tuo browser. Non viene caricato niente in nessun momento, e conta soprattutto per i documenti che di solito si oscurano: buste paga, referti, contratti, estratti conto.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 - Se il PDF oscurato è venuto pesante, prova [Comprimere PDF](/it/comprimere-pdf/).
 - Per mandare solo alcune pagine, ritagliale prima con [Dividere PDF](/it/dividere-pdf/).

@@ -10,7 +10,7 @@ howTo:
   - "Scarica il PDF unito e controllalo con il lettore PDF che usi di solito."
 faq:
   - q: "I miei file vengono caricati da qualche parte?"
-    a: "No. L'unione avviene nel tuo browser con la libreria open source pdf-lib. I tuoi PDF vengono letti dal disco nella memoria della pagina e il risultato viene salvato di nuovo sul disco. Dopo la prima apertura della pagina puoi anche scollegarti da internet: lo strumento funziona lo stesso."
+    a: "No. L'unione avviene nel tuo browser con la libreria open source pdf-lib. I tuoi PDF vengono letti dal disco nella memoria della pagina e il risultato viene salvato di nuovo sul disco. Dopo il primo file puoi anche scollegarti da internet: lo strumento funziona lo stesso."
   - q: "Posso unire PDF protetti da password?"
     a: "No. I PDF cifrati non si possono unire qui. Se conosci la password, toglila con Sbloccare PDF su questo sito, che rimuove anche le restrizioni sulle modifiche, e aggiungi la copia sbloccata."
   - q: "Link, segnalibri e campi dei moduli restano?"
@@ -20,7 +20,7 @@ faq:
   - q: "L'unione riduce la qualità?"
     a: "No. Le pagine vengono copiate così come sono, senza ricomprimere le immagini né convertire il testo, quindi il file unito è identico agli originali."
 ui:
-  merge.drop: "Scegli i file PDF o trascinali qui"
+  merge.drop: "Trascina i file PDF qui, oppure sceglili"
   merge.listLabel: "File da unire, in ordine"
   merge.orderHint: "Le pagine vengono unite dall'alto verso il basso. Trascina i file per riordinarli, oppure usa i pulsanti Sposta."
   merge.action: "Unisci PDF"
@@ -33,8 +33,8 @@ ui:
   merge.pages: "Pagine: {count}"
   merge.moveUp: "Sposta su"
   merge.moveDown: "Sposta giù"
-  merge.moveUpLabel: "Sposta su {name}"
-  merge.moveDownLabel: "Sposta giù {name}"
+  merge.moveUpLabel: "Sposta su: {name}"
+  merge.moveDownLabel: "Sposta giù: {name}"
   merge.removeLabel: "Rimuovi {name}"
   merge.moved: "{name} ora è il numero {position} di {total}."
   merge.removed: "Rimosso: {name}."

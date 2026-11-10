@@ -10,7 +10,7 @@ howTo:
   - "Press Create PDF, then download the file and check it in your usual PDF reader."
 faq:
   - q: "Are my images uploaded anywhere?"
-    a: "No. The PDF is built in your browser with the open-source pdf-lib library, in a background worker on your own device. Your images are read from your disk and the PDF is saved back to it. You can disconnect from the internet once the page has loaded and the tool still works."
+    a: "No. The PDF is built in your browser with the open-source pdf-lib library, in a background worker on your own device. Your images are read from your disk and the PDF is saved back to it. You can disconnect from the internet after the first file and the tool still works."
   - q: "Will my images lose quality?"
     a: "Not if they are JPG or PNG. A JPG's image data goes into the PDF exactly as your camera or scanner saved it (only hidden notes like the location are left out), and a PNG stays lossless. WebP, AVIF and HEIC have no direct place in a PDF, so they are converted once: photos to a high-quality JPG (quality 92), transparent or lossless images to PNG. The PDF does not use the images' embedded colour profiles, so wide-gamut photos, such as many taken on an iPhone, can look slightly less saturated."
   - q: "Will my phone photos come out sideways?"
@@ -20,7 +20,7 @@ faq:
   - q: "Is there a limit on the number or size of images?"
     a: "You can add up to 50 images of up to 100 MB each. In practice your device's memory sets the pace: dozens of large photos can take a while on a phone. The PDF ends up about as large as the images you put in."
 ui:
-  topdf.drop: "Choose images or drop them here"
+  topdf.drop: "Drop images here, or choose them"
   topdf.drop.hint: "JPG, PNG, WebP, AVIF or HEIC. Made into a PDF on your device; nothing is uploaded."
   topdf.option.pageSize: "Page size"
   topdf.option.fit: "Fit to image"
@@ -39,8 +39,8 @@ ui:
   topdf.reading: "Reading…"
   topdf.moveUp: "Move up"
   topdf.moveDown: "Move down"
-  topdf.moveUpLabel: "Move {name} up"
-  topdf.moveDownLabel: "Move {name} down"
+  topdf.moveUpLabel: "Move up: {name}"
+  topdf.moveDownLabel: "Move down: {name}"
   topdf.removeLabel: "Remove {name}"
   topdf.moved: "{name} is now page {position} of {total}."
   topdf.removed: "Removed {name}."
@@ -86,6 +86,6 @@ Phone photos are often stored sideways, with a note in the file saying how to tu
 
 Many online converters upload your photos to their servers and send a PDF back. Here, nothing is sent anywhere. Your images are read from your disk, the PDF is made in your browser's memory, and it is saved straight to your downloads. Once the page has loaded, you can even switch off your internet connection and it keeps working.
 
-## Related tools
+## Other tools for nearby jobs
 
 Need to add the result to other PDFs? [Merge PDF files](/merge-pdf/) puts several PDFs together, and [Organize PDF pages](/organize-pdf/) lets you rotate, reorder or delete pages afterwards. If the PDF is too large to email, try [Compress PDF](/compress-pdf/), or shrink the photos first with [Compress images](/compress-image/). To turn a PDF back into pictures, use [PDF to JPG](/pdf-to-jpg/). To clean the location out of photos you share as they are, use [Remove EXIF data](/remove-exif/).

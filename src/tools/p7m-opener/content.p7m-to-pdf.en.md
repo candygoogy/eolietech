@@ -17,7 +17,7 @@ faq:
   - q: "Are my files uploaded?"
     a: "No. The envelope is opened and the signature checked inside your browser tab. Nothing goes over the network."
 ui:
-  p7m.drop.hint: "A .pdf.p7m or other .p7m. It never leaves your device."
+  p7m.drop.hint: "A .pdf.p7m or other .p7m. Opened on your device; nothing is uploaded."
   p7m.fattura: "This is an Italian e-invoice: an XML file with no page layout of its own. To get a PDF of it, drop the same .p7m file on"
   p7m.fattura.link: "FatturaPA to PDF"
   p7m.fattura.href: "/fatturapa-to-pdf/"

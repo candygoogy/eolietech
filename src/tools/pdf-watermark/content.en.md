@@ -141,7 +141,7 @@ Two things can stop working: a digital signature already on the file, which no l
 
 Your settings stay when you choose another PDF, so you can give several files the same watermark one after the other.
 
-## Related tools
+## Other tools for nearby jobs
 
 - To combine several documents before adding the watermark, use [Merge PDF](/merge-pdf/).
 - To number the pages as well, use [Add page numbers to a PDF](/add-page-numbers-to-pdf/).

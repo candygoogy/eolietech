@@ -75,7 +75,7 @@ Una pagina PDF ha una misura in pollici o centimetri, non in pixel. La risoluzio
 
 Le pagine vengono disegnate da PDF.js, il motore open source che Firefox usa per il suo lettore PDF, e funziona dentro questa pagina. Le immagini vengono create dal tuo browser e, quando sono più di una, raccolte in un .zip anch'esso creato in memoria. Non viene caricato niente, ed è importante per estratti conto, contratti e tutto quello che preferiresti non affidare a un sito web.
 
-## Strumenti collegati
+## Altri strumenti per compiti affini
 
 - Per tenere una parte del PDF come PDF invece che come immagini, usa [Dividi PDF](/it/dividere-pdf/).
 - Per fare il contrario e trasformare foto o scansioni in un unico PDF, usa [Da JPG a PDF](/it/jpg-in-pdf/).

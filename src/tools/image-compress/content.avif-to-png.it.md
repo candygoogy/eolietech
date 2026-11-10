@@ -18,7 +18,7 @@ faq:
   - q: "Può convertire gli AVIF animati?"
     a: "No. Questo strumento è fatto per le immagini statiche e non produce PNG animati."
 ui:
-  img.drop.hint: "Immagini AVIF. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini AVIF. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "avif-in-png.zip"
 ---
 

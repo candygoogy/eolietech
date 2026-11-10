@@ -18,7 +18,7 @@ faq:
   - q: "Are my photos uploaded?"
     a: "No. The HEIC decoder (libheif, compiled to WebAssembly) and the PDF library run inside this browser tab. Your photos are read from your disk, and the PDF is saved straight back to it."
 ui:
-  topdf.drop: "Choose photos or drop them here"
+  topdf.drop: "Drop photos here, or choose them"
   topdf.drop.hint: "HEIC photos or other images. Made into a PDF on your device; nothing is uploaded."
   topdf.outputName: "photos.pdf"
 ---

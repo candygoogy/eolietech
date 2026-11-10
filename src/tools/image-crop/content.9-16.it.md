@@ -20,7 +20,7 @@ faq:
   - q: "La mia immagine viene caricata?"
     a: "No. L'immagine viene aperta, ritagliata e salvata dentro questa scheda del browser, e niente viene inviato a un server. Arriva su Instagram, TikTok o YouTube solo quando la pubblichi tu."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre in 9:16; non viene caricato niente."
+  crop.drop.hint: "JPG, PNG, WebP o AVIF. Il riquadro si apre in 9:16. Ritagliata sul tuo dispositivo; non viene caricato nulla."
 ---
 
 ## Storie, Reel, TikTok e Shorts

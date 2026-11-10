@@ -79,7 +79,7 @@ test("/fatturapa-viewer/ shows an invoice, opens it and saves its PDF and attach
   await expect(sheet.locator(".fv-table").first()).toContainText("Sopralluogo in cantiere");
   await expect(row.getByRole("button", { name: /Close the invoice/ })).toBeFocused();
 
-  const pdf = await download(page, row.getByRole("button", { name: "Download IT01234567890_00002.pdf" }));
+  const pdf = await download(page, row.getByRole("button", { name: "Download PDF: IT01234567890_00002.pdf" }));
   expect(pdf.name).toBe("IT01234567890_00002.pdf");
   expect(isPdf(pdf.bytes)).toBe(true);
 
@@ -144,7 +144,7 @@ test("/it/visualizzare-fattura-elettronica/ works in Italian at 375px without si
   await expect(sheet.getByRole("heading", { name: "Riepilogo IVA" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 
-  const pdf = await download(page, row.getByRole("button", { name: "Scarica IT01234567890_00003.pdf" }));
+  const pdf = await download(page, row.getByRole("button", { name: "Scarica PDF: IT01234567890_00003.pdf" }));
   expect(isPdf(pdf.bytes)).toBe(true);
   w.assertPrivate();
 });
@@ -156,7 +156,7 @@ test("the PDF variants load and lead with the PDF button", async ({ page, baseUR
   await upload(page, [fattura("IT01234567890_00005.xml")]);
   const row = page.locator(".tool-item").first();
   await expect(row.locator(".tool-item__name")).toHaveText("Verde Esempio Soc. Coop.");
-  const pdfBtn = row.getByRole("button", { name: "Download IT01234567890_00005.pdf" });
+  const pdfBtn = row.getByRole("button", { name: "Download PDF: IT01234567890_00005.pdf" });
   await expect(pdfBtn).toHaveClass(/btn--primary/);
   const pdf = await download(page, pdfBtn);
   expect(isPdf(pdf.bytes)).toBe(true);

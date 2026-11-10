@@ -133,9 +133,9 @@ test("/open-p7m-file/ flags tampering, detached signatures and plain files, and 
   expect(isZip(zip.bytes)).toBe(true);
 
   // Removing a row keeps focus inside the list.
-  await rows.nth(2).getByRole("button", { name: "Remove detached.xml.p7m from the list" }).click();
+  await rows.nth(2).getByRole("button", { name: "Remove from list: detached.xml.p7m" }).click();
   await expect(rows).toHaveCount(5);
-  await expect(page.locator(":focus")).toHaveAttribute("aria-label", "Remove two-pages.pdf from the list");
+  await expect(page.locator(":focus")).toHaveAttribute("aria-label", "Remove from list: two-pages.pdf");
   w.assertPrivate();
 });
 
@@ -165,7 +165,7 @@ test("/p7m-to-pdf/ leads with Download PDF and points e-invoices to the PDF make
   await expect(page.locator("h1")).toHaveText("P7M to PDF");
   await upload(page, ["document/sample.pdf.p7m", "document/IT01234567890_00001.xml.p7m"]);
   const rows = page.locator(".tool-item");
-  const pdf = rows.nth(0).getByRole("button", { name: "Download PDF sample.pdf" });
+  const pdf = rows.nth(0).getByRole("button", { name: "Download PDF: sample.pdf" });
   await expect(pdf).toHaveText("Download PDF");
   await expect(pdf).toHaveClass(/btn--primary/);
   await expect(rows.nth(1).getByRole("link", { name: "FatturaPA to PDF" })).toHaveAttribute("href", "/fatturapa-to-pdf/");
@@ -179,6 +179,6 @@ test("/it/p7m-in-pdf/ loads in Italian", async ({ page, baseURL }) => {
   await open(page, "/it/p7m-in-pdf/");
   await expect(page.locator("h1")).toHaveText("Da P7M a PDF");
   await upload(page, ["document/sample.pdf.p7m"]);
-  await expect(page.locator(".tool-item").first().getByRole("button", { name: "Scarica il PDF sample.pdf" })).toBeVisible();
+  await expect(page.locator(".tool-item").first().getByRole("button", { name: "Scarica il PDF: sample.pdf" })).toBeVisible();
   w.assertPrivate();
 });

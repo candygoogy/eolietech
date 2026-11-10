@@ -97,7 +97,7 @@ The tool runs [qpdf](https://github.com/qpdf/qpdf) 12.2.0, an open-source librar
 
 Everything happens in this tab. The PDFs and the password are never uploaded, and the page does not store the password. You can add up to 10 files of up to 200 MB each. Very large files need a lot of memory, so on a phone it can help to protect them one at a time.
 
-## Related tools
+## Other tools for nearby jobs
 
 - To take the password off a PDF you know the password for, use [Unlock PDF](/unlock-pdf/).
 - To remove a name or an account number for good before you share a file, use [Redact PDF](/redact-pdf/).

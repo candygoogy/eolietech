@@ -100,7 +100,7 @@ Two things can stop working: a digital signature already on the file, which no l
 
 The PDF is read and saved in your browser and never uploaded. Very large files need a lot of memory, so on a phone a big PDF can take a while.
 
-## Related tools
+## Other tools for nearby jobs
 
 - To combine several files before numbering them, use [Merge PDF](/merge-pdf/).
 - To reorder, rotate or remove pages first, use [Organize PDF](/organize-pdf/).

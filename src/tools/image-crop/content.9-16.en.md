@@ -20,7 +20,7 @@ faq:
   - q: "Is my image uploaded?"
     a: "No. The image is opened, cropped and saved inside this browser tab, and nothing is sent to a server. It reaches Instagram, TikTok or YouTube only when you post it yourself."
 ui:
-  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens at 9:16; nothing is uploaded."
+  crop.drop.hint: "JPG, PNG, WebP or AVIF. The box opens at 9:16. Cropped on your device; nothing is uploaded."
 ---
 
 ## Stories, Reels, TikTok and Shorts

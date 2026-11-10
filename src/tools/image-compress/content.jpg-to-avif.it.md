@@ -18,7 +18,7 @@ faq:
   - q: "Cosa succede ai dati EXIF?"
     a: "La foto viene ruotata secondo il suo tag di orientamento, poi salvata senza metadati. Posizione GPS, dati della fotocamera e data dello scatto non vengono copiati nell'AVIF."
 ui:
-  img.drop.hint: "Immagini JPG. Convertite sul tuo dispositivo: non viene caricato nulla."
+  img.drop.hint: "Immagini JPG. Convertite sul tuo dispositivo; non viene caricato nulla."
   img.zipName: "jpg-in-avif.zip"
 ---
 

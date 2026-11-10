@@ -9,7 +9,9 @@ import {
   isChunkLoadError,
   markEnter,
   matchesAccept,
+  notifyResult,
   renameExtension,
+  RESULT_EVENT,
 } from "./tool-ui";
 
 const file = (name: string, type: string, size = 10) => new File([new Uint8Array(size)], name, { type });
@@ -75,6 +77,22 @@ describe("tool-ui", () => {
     expect(isChunkLoadError(new TypeError("Failed to fetch"))).toBe(false);
     expect(isChunkLoadError(undefined)).toBe(false);
     expect(isChunkLoadError({ message: "Importing a module script failed." })).toBe(false);
+  });
+
+  it("tells the page about a result when a file is downloaded", () => {
+    const heard = vi.fn();
+    document.addEventListener(RESULT_EVENT, heard);
+    const create = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:test");
+    try {
+      expect(RESULT_EVENT).toBe("eolie:result");
+      notifyResult();
+      expect(heard).toHaveBeenCalledTimes(1);
+      downloadBlob(new Blob(["x"]), "x.txt");
+      expect(heard).toHaveBeenCalledTimes(2);
+    } finally {
+      document.removeEventListener(RESULT_EVENT, heard);
+      create.mockRestore();
+    }
   });
 
   it("keeps a download's object URL valid long enough for the iOS download prompt", () => {
