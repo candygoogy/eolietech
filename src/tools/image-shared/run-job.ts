@@ -1,7 +1,9 @@
 /** Worker-side job runner shared by the image workers: sniff -> decode -> (resize) -> encode. */
 import { decode, encode, fit, resizeTo } from "./codecs";
-import { resolveOutput, sniffFormat, targetSize, type InputFormat, type RasterFormat } from "./formats";
-import type { JobErrorCode, JobRequest, JobResponse, JobSettings } from "./protocol";
+import { isAnimatedPng, resolveOutput, sniffFormat, targetSize, type InputFormat, type RasterFormat } from "./formats";
+import { JobError, type JobErrorCode, type JobErrorKind, type JobRequest, type JobResponse, type JobSettings } from "./protocol";
+
+export { JobError };
 
 export type HeicDecoder = (buffer: ArrayBuffer) => Promise<ImageData>;
 
@@ -35,16 +37,6 @@ export type EncodeStep = (
   source: { buffer: ArrayBuffer; input: InputFormat },
 ) => Promise<EncodeResult>;
 
-/** An error with a code the UI translates (see JobErrorCode). */
-export class JobError extends Error {
-  constructor(
-    readonly code: JobErrorCode,
-    message: string = code,
-  ) {
-    super(message);
-  }
-}
-
 export async function runJob(
   req: JobRequest,
   allowed: readonly InputFormat[],
@@ -64,8 +56,10 @@ export async function runJob(
     try {
       img = input === "heic" ? await decodeHeic!(buffer) : await decode(buffer, input);
     } catch (err) {
-      return { res: { id, ok: false, error: classify(err, "decode"), detail: String(err) }, transfer: [] };
+      return { res: failure(id, err, "decode"), transfer: [] };
     }
+    // Read before encoding: an encode step may transfer the source buffer.
+    const firstFrameOnly = input === "png" && isAnimatedPng(new Uint8Array(buffer));
     const sourceWidth = img.width;
     const sourceHeight = img.height;
     let notEnlarged = false;
@@ -97,18 +91,25 @@ export async function runJob(
     };
     if (out.quality !== undefined) res.quality = out.quality;
     if (out.unchanged) res.unchanged = true;
+    if (firstFrameOnly) res.firstFrameOnly = true;
     return { res, transfer: [out.buffer] };
   } catch (err) {
-    return { res: { id, ok: false, error: classify(err, "generic"), detail: String(err) }, transfer: [] };
+    return { res: failure(id, err, "generic"), transfer: [] };
   }
 }
 
-function classify(err: unknown, fallback: JobErrorCode): JobErrorCode {
-  if (err instanceof JobError) return err.code;
+function failure(id: number, err: unknown, fallback: JobErrorCode): JobResponse {
+  const { code, kind } = classify(err, fallback);
+  return kind ? { id, ok: false, error: code, kind, detail: String(err) } : { id, ok: false, error: code, detail: String(err) };
+}
+
+/** Error code (and kind, from a JobError) for a thrown error; `fallback` when nothing more precise is known. */
+export function classify(err: unknown, fallback: JobErrorCode): { code: JobErrorCode; kind?: JobErrorKind } {
+  if (err instanceof JobError) return err.kind ? { code: err.code, kind: err.kind } : { code: err.code };
   const msg = String(err instanceof Error ? err.message : err).toLowerCase();
-  if (msg.includes("unsupported")) return "unsupported";
-  if (err instanceof RangeError || msg.includes("memory") || msg.includes("allocation")) return "memory";
-  return fallback;
+  if (msg.includes("unsupported")) return { code: "unsupported" };
+  if (err instanceof RangeError || msg.includes("memory") || msg.includes("allocation")) return { code: "memory" };
+  return { code: fallback };
 }
 
 /** Wire a worker scope to runJob. */

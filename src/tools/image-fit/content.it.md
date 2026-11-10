@@ -20,7 +20,7 @@ faq:
   - q: "Posso spostare la foto dentro il quadrato?"
     a: "No, la foto sta sempre al centro, con lo stesso spazio dai due lati. Se vuoi il soggetto in un altro punto, o nessuno sfondo visibile, ritaglia la foto con lo strumento per ritagliare in quadrato di questo sito."
   - q: "Le mie foto vengono caricate?"
-    a: "No. Ogni foto viene aperta, inserita nel riquadro e salvata in questa scheda del browser, e niente viene inviato a un server. I nuovi file non contengono nemmeno i dati EXIF come la posizione GPS e il modello della fotocamera."
+    a: "No. Ogni foto viene aperta, inserita nel riquadro e salvata in questa scheda del browser, e niente viene inviato a un server. I nuovi file non contengono nemmeno i dati EXIF come la posizione GPS e il modello della fotocamera. I profili colore incorporati non vengono conservati, quindi le foto ad ampia gamma cromatica, come molte scattate con l'iPhone, possono apparire un po' meno sature."
 ui:
   fit.option.shape: "Formato"
   fit.option.background: "Sfondo"

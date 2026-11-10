@@ -7,7 +7,8 @@ import { createDropzone, downloadBlob, formatBytes } from "../../lib/tool-ui";
 import { tPlural } from "../../i18n/plural";
 import { selectField } from "../image-shared/batch-ui";
 import { acceptFor, sniffFormat, type InputFormat } from "../image-shared/formats";
-import type { JobErrorCode } from "../image-shared/protocol";
+import type { JobErrorCode, JobErrorKind } from "../image-shared/protocol";
+import { canDecodeHeic } from "../heic-to-jpg/canvas";
 import { button, enableDragSort, entryTracker, errorRegion, h, moveItem, pdfBlob, setDisabled, statusRegion } from "../pdf-shared/dom";
 import type { ToolCtx } from "../types";
 import { DEFAULT_OPTIONS, pdfName, readOptions } from "./layout";
@@ -38,6 +39,8 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   let result: { blob: Blob; name: string } | null = null;
   let worker: Worker | null = null;
   const enterRow = entryTracker();
+  // Checked once, up front: without it a HEIC can only fail, so it is flagged when added, not after the build.
+  const heicOk = canDecodeHeic();
 
   // ---------- options ----------
   const pageSize = selectField(
@@ -123,6 +126,7 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
           entry.format = null;
         }
         if (!entry.format) entry.error = t("topdf.error.decode", { name: entry.file.name });
+        else if (entry.format === "heic" && !heicOk) entry.error = t("topdf.error.heicBrowser", { name: entry.file.name });
         else if (PREVIEWABLE.includes(entry.format)) setThumb(entry);
       }),
     ).then(() => {
@@ -195,6 +199,13 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   }
 
   function render() {
+    // The rows are rebuilt below. If focus is on a row's button, put it back on the same button of the
+    // same image afterwards (or another button of that row) instead of letting it fall to the page.
+    const active = document.activeElement;
+    const activeRow = active instanceof HTMLElement && list.contains(active) ? active.closest<HTMLElement>("[data-id]") : null;
+    const refocus = activeRow
+      ? { id: activeRow.dataset.id, control: (active as HTMLElement).dataset.move ? `[data-move="${(active as HTMLElement).dataset.move}"]` : "[data-remove]" }
+      : null;
     list.replaceChildren(
       ...entries.map((entry, i) => {
         const meta =
@@ -236,9 +247,16 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
         return li;
       }),
     );
+    if (refocus) {
+      const row = list.querySelector<HTMLElement>(`[data-id="${refocus.id}"]`);
+      (row?.querySelector<HTMLButtonElement>(`${refocus.control}:not(:disabled)`) ?? row?.querySelector<HTMLButtonElement>("button:not(:disabled)"))?.focus();
+    }
     list.hidden = entries.length === 0;
     orderHint.hidden = entries.length < 2;
-    createBtn.disabled = busy || ready().length === 0 || entries.some((e) => e.format === undefined);
+    // While building, Create PDF is only marked busy: a disabled button would drop focus to the page.
+    createBtn.disabled = !busy && (ready().length === 0 || entries.some((e) => e.format === undefined));
+    if (busy) createBtn.setAttribute("aria-disabled", "true");
+    else createBtn.removeAttribute("aria-disabled");
     // Once a PDF exists, its Download is the one primary button.
     createBtn.classList.toggle("btn--primary", !result);
     resetBtn.disabled = entries.length === 0;
@@ -316,19 +334,29 @@ export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
       resultBox.replaceChildren(dl);
       resultBox.hidden = false;
       render();
-      status.set(tPlural(ctx, "topdf.done", res.pages, vars));
+      const animated = res.firstFrameOnly.map((i) => items[i]?.file.name).filter((n): n is string => !!n);
+      const done = tPlural(ctx, "topdf.done", res.pages, vars);
+      status.set(animated.length ? `${done} ${t("topdf.firstFrameOnly", { names: animated.join(", ") })}` : done);
       dl.focus();
     } else if (res.type === "error") {
       const entry = res.index >= 0 ? items[res.index] : undefined;
-      const message = entry ? errorText(res.code, entry.file.name) : t("topdf.error.failed");
+      const message = entry ? errorText(res.code, res.kind, entry.file.name) : t("topdf.error.failed");
       if (entry) entry.error = message;
       errors.show(entry ? [message, t("topdf.error.skipHint")] : [message]);
       status.set("");
       render();
+      // Focus was on Create PDF; it stays there while it can be used, else goes to the failed image's Remove.
+      if (createBtn.disabled && (document.activeElement === createBtn || document.activeElement === document.body)) {
+        const row = entry && list.querySelector<HTMLElement>(`[data-id="${entry.id}"]`);
+        (row?.querySelector<HTMLButtonElement>("[data-remove]") ?? drop.querySelector("input"))?.focus();
+      }
     }
   }
 
-  function errorText(code: JobErrorCode, name: string): string {
+  function errorText(code: JobErrorCode, kind: JobErrorKind | undefined, name: string): string {
+    if (kind === "cmyk") return t("topdf.error.cmyk", { name });
+    if (kind === "canvasTooLarge") return t("topdf.error.tooLarge", { name });
+    if (kind === "browser") return t("topdf.error.heicBrowser", { name });
     if (code === "memory") return t("topdf.error.memory", { name });
     if (code === "unsupported") return t("topdf.error.unsupported", { name });
     return t("topdf.error.decode", { name });

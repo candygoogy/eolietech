@@ -25,6 +25,28 @@ export interface JobRequest {
  */
 export type JobErrorCode = "decode" | "unsupported" | "memory" | "noFit" | "generic";
 
+/**
+ * A more precise reason, sent next to the error code. A UI that has a string for it shows
+ * img.error.<kind>; any other UI shows the code's string, which still fits.
+ *   cmyk ("unsupported"): a CMYK or YCCK JPEG, which the decoder cannot read.
+ *   webpTooLarge ("memory"): WebP output over WEBP_MAX_SIDE (16383 px) on a side.
+ *   avifTooLarge ("memory"): the AVIF encoder ran out of memory; JPG or WebP still work.
+ *   canvasTooLarge ("memory"): the browser would not give a canvas this big (iOS: about 16.7 MP).
+ *   browser ("unsupported"): this browser lacks a feature the tool needs (OffscreenCanvas, createImageBitmap).
+ */
+export type JobErrorKind = "cmyk" | "webpTooLarge" | "avifTooLarge" | "canvasTooLarge" | "browser";
+
+/** An error with a code (and optional kind) the UI translates. Its message starts with the code, for workers that classify by message. */
+export class JobError extends Error {
+  constructor(
+    readonly code: JobErrorCode,
+    readonly kind?: JobErrorKind,
+    detail?: string,
+  ) {
+    super([kind ? `${code}: ${kind}` : code, detail].filter(Boolean).join(" - "));
+  }
+}
+
 export type JobResponse =
   | {
       id: number;
@@ -48,5 +70,7 @@ export type JobResponse =
        * under the target; its metadata is stripped losslessly). The UI keeps the original file name.
        */
       unchanged?: boolean;
+      /** The source was an animated PNG; only its first frame was kept. */
+      firstFrameOnly?: boolean;
     }
-  | { id: number; ok: false; error: JobErrorCode; detail?: string };
+  | { id: number; ok: false; error: JobErrorCode; kind?: JobErrorKind; detail?: string };

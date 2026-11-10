@@ -20,7 +20,7 @@ faq:
   - q: "Can I move the photo inside the square?"
     a: "No. The photo is always centred, with the same space on both sides. If you want the subject somewhere else, or no background showing at all, crop the photo with the square cropper on this site."
   - q: "Are my photos uploaded?"
-    a: "No. Each photo is opened, framed and saved in this browser tab, and nothing is sent to a server. The new files also leave out EXIF data such as GPS location and camera model."
+    a: "No. Each photo is opened, framed and saved in this browser tab, and nothing is sent to a server. The new files also leave out EXIF data such as GPS location and camera model. Embedded colour profiles are not kept either, so wide-gamut photos, such as many taken on an iPhone, can look slightly less saturated."
 ui:
   fit.option.shape: "Shape"
   fit.option.background: "Background"

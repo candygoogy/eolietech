@@ -66,12 +66,171 @@ export function formatFromName(name: string): InputFormat | null {
   return null;
 }
 
-/** Output name: same base name with the target extension; keeps the original extension when the format is unchanged. */
+/**
+ * Output name: same base name with the target extension. The original name is kept only when the
+ * format is unchanged and its extension already names that format (a JPEG called "x.heic" becomes "x.jpg").
+ */
 export function outputName(inputName: string, inputFormat: InputFormat | null, outFormat: RasterFormat): string {
   const dot = inputName.lastIndexOf(".");
   const base = dot > 0 ? inputName.slice(0, dot) : inputName;
-  if (inputFormat === outFormat && dot > 0) return inputName;
+  if (inputFormat === outFormat && dot > 0 && formatFromName(inputName) === outFormat) return inputName;
   return `${base}.${outFormat}`;
+}
+
+/** WebP stores width and height in 14 bits: no side can be larger than this. */
+export const WEBP_MAX_SIDE = 16383;
+
+/** True when a PNG has an acTL chunk before its image data (an animated PNG; decoders keep only the first frame). */
+export function isAnimatedPng(b: Uint8Array): boolean {
+  let i = 8;
+  while (i + 8 <= b.length) {
+    const len = ((b[i]! << 24) | (b[i + 1]! << 16) | (b[i + 2]! << 8) | b[i + 3]!) >>> 0;
+    const type = String.fromCharCode(b[i + 4]!, b[i + 5]!, b[i + 6]!, b[i + 7]!);
+    if (type === "acTL") return true;
+    if (type === "IDAT" || type === "IEND") return false;
+    i += 12 + len;
+  }
+  return false;
+}
+
+/**
+ * Number of colour components in a JPEG's frame header (1 grey, 3 RGB/YCbCr, 4 CMYK/YCCK), or null
+ * when no frame header is found before the image data.
+ */
+export function jpegComponents(b: Uint8Array): number | null {
+  let i = 2;
+  while (i + 4 <= b.length) {
+    if (b[i] !== 0xff) return null;
+    const m = b[i + 1]!;
+    if (m === 0xff) {
+      i++; // fill byte
+      continue;
+    }
+    if (m === 0x01 || (m >= 0xd0 && m <= 0xd8)) {
+      i += 2;
+      continue;
+    }
+    const len = (b[i + 2]! << 8) | b[i + 3]!;
+    // SOF0 to SOF15, except DHT (C4), JPG (C8) and DAC (CC).
+    if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return i + 9 < b.length ? b[i + 9]! : null;
+    if (m === 0xda || m === 0xd9) return null;
+    i += 2 + len;
+  }
+  return null;
+}
+
+/**
+ * A HEIF/AVIF transformative property of the primary item, in the order it is to be applied:
+ * `rotate`: anticlockwise quarter turns (irot); `mirror`: 0 swaps top and bottom, 1 swaps left and right (imir).
+ */
+export type AvifTransform = { rotate: 1 | 2 | 3 } | { mirror: 0 | 1 };
+
+/**
+ * The irot/imir properties linked to an AVIF's primary item (pitm, iprp/ipco, ipma), in ipma order.
+ * Empty when there are none or the boxes cannot be read (the image is then shown as stored).
+ */
+export function avifTransforms(b: Uint8Array): AvifTransform[] {
+  const u32 = (i: number) => ((b[i]! << 24) | (b[i + 1]! << 16) | (b[i + 2]! << 8) | b[i + 3]!) >>> 0;
+  const u16 = (i: number) => (b[i]! << 8) | b[i + 1]!;
+  const fourcc = (i: number) => String.fromCharCode(b[i]!, b[i + 1]!, b[i + 2]!, b[i + 3]!);
+  /** Child boxes in [start, end): type, payload start, box end. */
+  const boxes = (start: number, end: number) => {
+    const out: { type: string; body: number; end: number }[] = [];
+    let i = start;
+    while (i + 8 <= end) {
+      let size = u32(i);
+      let body = i + 8;
+      if (size === 1) {
+        if (i + 16 > end) break;
+        size = u32(i + 8) * 2 ** 32 + u32(i + 12);
+        body = i + 16;
+      } else if (size === 0) size = end - i;
+      if (size < body - i || i + size > end) break;
+      out.push({ type: fourcc(i + 4), body, end: i + size });
+      i += size;
+    }
+    return out;
+  };
+  try {
+    const meta = boxes(0, b.length).find((x) => x.type === "meta");
+    if (!meta) return [];
+    const inMeta = boxes(meta.body + 4, meta.end); // meta is a FullBox
+    const pitm = inMeta.find((x) => x.type === "pitm");
+    const iprp = inMeta.find((x) => x.type === "iprp");
+    if (!pitm || !iprp) return [];
+    const primary = b[pitm.body] === 0 ? u16(pitm.body + 4) : u32(pitm.body + 4);
+    const inIprp = boxes(iprp.body, iprp.end);
+    const ipco = inIprp.find((x) => x.type === "ipco");
+    if (!ipco) return [];
+    const props = boxes(ipco.body, ipco.end);
+    const out: AvifTransform[] = [];
+    for (const ipma of inIprp.filter((x) => x.type === "ipma")) {
+      const version = b[ipma.body]!;
+      const wide = (b[ipma.body + 3]! & 1) === 1;
+      let i = ipma.body + 4;
+      const count = u32(i);
+      i += 4;
+      for (let e = 0; e < count && i < ipma.end; e++) {
+        const item = version < 1 ? u16(i) : u32(i);
+        i += version < 1 ? 2 : 4;
+        const n = b[i++]!;
+        for (let a = 0; a < n; a++) {
+          const index = wide ? u16(i) & 0x7fff : b[i]! & 0x7f;
+          i += wide ? 2 : 1;
+          if (item !== primary || index === 0) continue;
+          const prop = props[index - 1];
+          if (!prop || prop.body >= prop.end) continue;
+          if (prop.type === "irot") {
+            const turns = b[prop.body]! & 3;
+            if (turns) out.push({ rotate: turns as 1 | 2 | 3 });
+          } else if (prop.type === "imir") {
+            out.push({ mirror: (b[prop.body]! & 1) as 0 | 1 });
+          }
+        }
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+export interface Pixels {
+  data: Uint8ClampedArray;
+  width: number;
+  height: number;
+}
+
+/** Apply AVIF transforms to RGBA pixels, in order. Returns new pixels; the input is left as it is. */
+export function applyTransforms(img: Pixels, ops: readonly AvifTransform[]): Pixels {
+  if (ops.length === 0) return img;
+  let { width: w, height: h } = img;
+  // One 32-bit word per RGBA pixel; read only, so a view is enough when the bytes are aligned.
+  const d = img.data;
+  let src = d.byteOffset % 4 === 0 ? new Uint32Array(d.buffer, d.byteOffset, d.length >> 2) : new Uint32Array(d.slice().buffer);
+  for (const op of ops) {
+    const dst = new Uint32Array(src.length);
+    if ("rotate" in op) {
+      // Anticlockwise: 1 turn (x, y) -> (y, w-1-x); 2 turns -> (w-1-x, h-1-y); 3 turns -> (h-1-y, x).
+      for (let y = 0, s = 0; y < h; y++) {
+        for (let x = 0; x < w; x++, s++) {
+          const d =
+            op.rotate === 1 ? (w - 1 - x) * h + y : op.rotate === 2 ? (h - 1 - y) * w + (w - 1 - x) : x * h + (h - 1 - y);
+          dst[d] = src[s]!;
+        }
+      }
+      if (op.rotate !== 2) [w, h] = [h, w];
+    } else if (op.mirror === 1) {
+      for (let y = 0; y < h; y++) {
+        const row = y * w;
+        for (let x = 0; x < w; x++) dst[row + w - 1 - x] = src[row + x]!;
+      }
+    } else {
+      for (let y = 0; y < h; y++) dst.set(src.subarray(y * w, (y + 1) * w), (h - 1 - y) * w);
+    }
+    src = dst;
+  }
+  return { data: new Uint8ClampedArray(src.buffer), width: w, height: h };
 }
 
 /** Make names unique inside one zip: "a.jpg", "a.jpg" -> "a.jpg", "a (2).jpg". Case-insensitive. */

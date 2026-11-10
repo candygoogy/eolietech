@@ -22,7 +22,7 @@ faq:
   - q: "What does it mean when an image does not get under the target?"
     a: "The tool never makes an image smaller than 200 px on its longest side. A few images, such as very noisy or grainy ones, still weigh too much at that size, and their row shows an error. Type a larger size, or crop away the parts you do not need and try again."
   - q: "Does it keep the photo's location and camera details?"
-    a: "No. Every file you download contains only the image, without EXIF data such as GPS location or camera model, including the ones that were already small enough. Photos still come out the right way up."
+    a: "No. Every file you download contains only the image, without EXIF data such as GPS location or camera model, including the ones that were already small enough. Photos still come out the right way up. Embedded colour profiles are not kept in the files it compresses, so wide-gamut photos, such as many taken on an iPhone, can look slightly less saturated."
 ui:
   img.drop.hint: "JPG, PNG, WebP or AVIF. Compressed on your device; nothing is uploaded."
   img.option.targetKb: "Target size (KB)"

@@ -18,7 +18,7 @@ faq:
   - q: "Posso ritagliare le immagini in un quadrato o in un altro formato?"
     a: "Non qui. Il ridimensionamento tiene tutta l'immagine e cambia solo quanti pixel ha. Per ritagliarla in un quadrato, in 4:5 o in 16:9 usa lo strumento Ritagliare immagini di questo sito, poi ridimensiona qui il risultato se ti serve."
   - q: "Il ridimensionamento conserva la posizione e i dati della fotocamera?"
-    a: "No. I nuovi file contengono solo l'immagine, senza dati EXIF come la posizione GPS o il modello della fotocamera. Prima le foto vengono raddrizzate, così anche quelle scattate di lato escono nel verso giusto."
+    a: "No. I nuovi file contengono solo l'immagine, senza dati EXIF come la posizione GPS o il modello della fotocamera. Prima le foto vengono raddrizzate, così anche quelle scattate di lato escono nel verso giusto. Nemmeno i profili colore incorporati vengono conservati, quindi le foto ad ampia gamma cromatica, come molte scattate con l'iPhone, possono apparire un po' meno sature."
 ui:
   img.drop.hint: "JPG, PNG, WebP o AVIF. Ridimensionate sul tuo dispositivo; non viene caricato niente."
   img.option.mode: "Ridimensiona per"

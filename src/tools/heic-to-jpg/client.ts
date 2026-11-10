@@ -4,10 +4,20 @@
  */
 import type { ToolCtx } from "../types";
 import { createBatch, rangeField, selectField } from "../image-shared/batch-ui";
+import { canDecodeHeic } from "./canvas";
 import { HEIC_ACCEPT, HEIC_DEFAULT_QUALITY, heicSettings, initialFormat } from "./settings";
 
 export function mount(el: HTMLElement, ctx: ToolCtx): () => void {
   const t = ctx.t;
+
+  // Said before any file is chosen: without these every photo would fail, and the message would blame the photo.
+  if (!canDecodeHeic()) {
+    const note = document.createElement("p");
+    note.className = "tool-error";
+    note.textContent = t("heic.error.browser");
+    el.append(note);
+    return () => note.remove();
+  }
 
   const options = document.createElement("div");
   options.className = "tool-options";

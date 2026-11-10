@@ -10,7 +10,7 @@ vi.mock("./codecs", () => ({
   encode: vi.fn(async () => ({ buffer: new ArrayBuffer(1), flattened: false })),
 }));
 
-const { encode, fit, resizeTo } = await import("./codecs");
+const { decode, encode, fit, resizeTo } = await import("./codecs");
 const { JobError, runJob } = await import("./run-job");
 
 const PNG = () => new Uint8Array([0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10]).buffer;
@@ -82,6 +82,24 @@ describe("runJob", () => {
       throw new JobError("noFit");
     });
     expect(res).toMatchObject({ id: 7, ok: false, error: "noFit" });
+  });
+
+  it("sends a JobError's kind next to its code", async () => {
+    vi.mocked(encode).mockRejectedValueOnce(new JobError("memory", "avifTooLarge"));
+    const { res } = await runJob({ id: 9, buffer: PNG(), settings: { output: "avif", quality: 50 } }, ["png"]);
+    expect(res).toMatchObject({ id: 9, ok: false, error: "memory", kind: "avifTooLarge" });
+    vi.mocked(decode).mockRejectedValueOnce(new JobError("unsupported", "cmyk"));
+    const cmyk = await runJob({ id: 10, buffer: PNG(), settings: { output: "jpg", quality: 80 } }, ["png"]);
+    expect(cmyk.res).toMatchObject({ ok: false, error: "unsupported", kind: "cmyk" });
+  });
+
+  it("says when an animated PNG was reduced to its first frame", async () => {
+    const chunk = (type: string, len: number) => [0, 0, 0, len, ...[...type].map((c) => c.charCodeAt(0)), ...new Array(len + 4).fill(0)];
+    const apng = new Uint8Array([...new Uint8Array(PNG()), ...chunk("IHDR", 13), ...chunk("acTL", 8), ...chunk("IDAT", 2)]).buffer;
+    const { res } = await runJob({ id: 11, buffer: apng, settings: { output: "png", quality: 80 } }, ["png"]);
+    expect(res).toMatchObject({ ok: true, firstFrameOnly: true });
+    const still = await runJob({ id: 12, buffer: PNG(), settings: { output: "png", quality: 80 } }, ["png"]);
+    expect(still.res).not.toHaveProperty("firstFrameOnly");
   });
 
   it("leaves responses of the other tools without the new fields", async () => {

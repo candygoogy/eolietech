@@ -18,7 +18,7 @@ faq:
   - q: "Can it crop my images to a square or another shape?"
     a: "No. Resizing keeps the whole picture and changes only how many pixels it has. To cut an image to a square, 4:5 or 16:9, use the image cropper on this site, then resize the result here if you need to."
   - q: "Does resizing keep the photo's location and camera details?"
-    a: "No. The new files contain only the image, without EXIF data such as GPS location or camera model. Photos are turned upright first, so sideways shots come out the right way up."
+    a: "No. The new files contain only the image, without EXIF data such as GPS location or camera model. Photos are turned upright first, so sideways shots come out the right way up. Embedded colour profiles are not kept either, so wide-gamut photos, such as many taken on an iPhone, can look slightly less saturated."
 ui:
   img.drop.hint: "JPG, PNG, WebP or AVIF. Resized on your device; nothing is uploaded."
   img.option.mode: "Resize by"

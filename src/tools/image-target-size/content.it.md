@@ -22,7 +22,7 @@ faq:
   - q: "Cosa vuol dire che l'immagine non scende sotto il peso scelto?"
     a: "Lo strumento non rimpicciolisce mai un'immagine sotto i 200 px sul lato lungo. Alcune immagini, per esempio quelle molto sgranate o piene di rumore, pesano troppo anche a quella misura, e la loro riga mostra un errore. Scrivi un peso maggiore, oppure ritaglia le parti che non servono e riprova."
   - q: "La foto conserva la posizione e i dati della fotocamera?"
-    a: "No. Ogni file che scarichi contiene solo l'immagine, senza dati EXIF come la posizione GPS o il modello della fotocamera, anche quelli che erano già abbastanza leggeri. Le foto restano comunque nel verso giusto."
+    a: "No. Ogni file che scarichi contiene solo l'immagine, senza dati EXIF come la posizione GPS o il modello della fotocamera, anche quelli che erano già abbastanza leggeri. Le foto restano comunque nel verso giusto. I file che comprime non conservano i profili colore incorporati, quindi le foto ad ampia gamma cromatica, come molte scattate con l'iPhone, possono apparire un po' meno sature."
 ui:
   img.drop.hint: "JPG, PNG, WebP o AVIF. Compresse sul tuo dispositivo; non viene caricato niente."
   img.option.targetKb: "Peso massimo (KB)"
