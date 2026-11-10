@@ -8,6 +8,8 @@ interface Slot {
 
 export class WorkerPool {
   private slots: Slot[];
+  /** Jobs in flight: ended with an error result when the pool is terminated, so no caller waits forever. */
+  private pending = new Set<(res: JobResponse) => void>();
 
   constructor(
     private readonly create: () => Worker,
@@ -32,8 +34,11 @@ export class WorkerPool {
         worker.onmessage = null;
         worker.onerror = null;
         slot.busy = false;
+        this.pending.delete(settle);
         resolve(res);
       };
+      const settle = (res: JobResponse) => done(res);
+      this.pending.add(settle);
       worker.onmessage = (e: MessageEvent<JobResponse>) => done(e.data);
       worker.onerror = (e) => {
         e.preventDefault();
@@ -46,12 +51,16 @@ export class WorkerPool {
     });
   }
 
+  /** End every worker. Jobs in flight settle as a "generic" error (the caller discards them); the next run starts fresh workers. */
   terminate(): void {
+    const jobs = [...this.pending];
+    this.pending.clear();
     for (const slot of this.slots) {
       slot.worker?.terminate();
       slot.worker = null;
       slot.busy = false;
     }
+    for (const settle of jobs) settle({ id: -1, ok: false, error: "generic", detail: "terminated" });
   }
 }
 
