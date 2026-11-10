@@ -48,7 +48,7 @@ for (const [it, en] of pages) {
 
 test("Italian tool pages are cross-origin isolated", async ({ page }) => {
   const res = await page.goto("/it/rimuovere-sfondo/");
-  expect(res?.headers()["cross-origin-embedder-policy"]).toBe("credentialless");
+  expect(res?.headers()["cross-origin-embedder-policy"]).toBe("require-corp");
   expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
 });
 

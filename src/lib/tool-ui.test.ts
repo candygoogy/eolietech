@@ -1,5 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import { createDropzone, ENTER_MS, filterFiles, formatBytes, markEnter, matchesAccept, renameExtension } from "./tool-ui";
+import {
+  createDropzone,
+  DOWNLOAD_URL_TTL_MS,
+  downloadBlob,
+  ENTER_MS,
+  filterFiles,
+  formatBytes,
+  isChunkLoadError,
+  markEnter,
+  matchesAccept,
+  renameExtension,
+} from "./tool-ui";
 
 const file = (name: string, type: string, size = 10) => new File([new Uint8Array(size)], name, { type });
 const ctx = {
@@ -48,6 +59,38 @@ describe("tool-ui", () => {
       vi.advanceTimersByTime(ENTER_MS);
       expect(el.hasAttribute("data-enter")).toBe(false);
     } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("recognises a failed chunk load in every engine, and nothing else", () => {
+    // Chromium, Firefox, Safari, Vite's CSS preload, and the MIME error a 404 page as a script gives.
+    expect(isChunkLoadError(new TypeError("Failed to fetch dynamically imported module: https://x/_astro/client.abc.js"))).toBe(true);
+    expect(isChunkLoadError(new TypeError("error loading dynamically imported module: https://x/_astro/client.abc.js"))).toBe(true);
+    expect(isChunkLoadError(new TypeError("Importing a module script failed."))).toBe(true);
+    expect(isChunkLoadError(new Error("Unable to preload CSS for /_astro/tool.abc.css"))).toBe(true);
+    expect(isChunkLoadError("Failed to load module script: Expected a JavaScript module script")).toBe(true);
+    expect(isChunkLoadError(Object.assign(new Error("Loading chunk 3 failed."), { name: "ChunkLoadError" }))).toBe(true);
+    expect(isChunkLoadError(new Error("Cannot read properties of undefined (reading 'x')"))).toBe(false);
+    expect(isChunkLoadError(new TypeError("Failed to fetch"))).toBe(false);
+    expect(isChunkLoadError(undefined)).toBe(false);
+    expect(isChunkLoadError({ message: "Importing a module script failed." })).toBe(false);
+  });
+
+  it("keeps a download's object URL valid long enough for the iOS download prompt", () => {
+    vi.useFakeTimers();
+    const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+    const create = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:test");
+    try {
+      downloadBlob(new Blob(["x"]), "x.txt");
+      expect(DOWNLOAD_URL_TTL_MS).toBeGreaterThanOrEqual(60_000);
+      vi.advanceTimersByTime(DOWNLOAD_URL_TTL_MS - 1);
+      expect(revoke).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(revoke).toHaveBeenCalledWith("blob:test");
+    } finally {
+      revoke.mockRestore();
+      create.mockRestore();
       vi.useRealTimers();
     }
   });

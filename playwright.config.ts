@@ -15,6 +15,10 @@ export default defineConfig({
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    // Safari's engine. Playwright's Windows WebKit has no OffscreenCanvas and no SharedArrayBuffer, so
+    // the specs that need them skip here (reason in each); e2e/console.ts tolerates one known
+    // WebKit-only CSP message. Real Safari 16.4+ has both: check those tools on a device.
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
   // Production-shaped: astro build + wrangler dev (static assets, _headers, _redirects, Worker).
   webServer: {

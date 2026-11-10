@@ -180,7 +180,13 @@ function isEditable(target: EventTarget | null): boolean {
   return target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target.isContentEditable;
 }
 
-/** Save a Blob with a filename (object URL, revoked after the click). */
+/**
+ * How long a download's object URL stays valid after the click. iOS Safari shows a prompt first and
+ * only reads the URL once it is answered, so a short delay (it was 1s) can revoke it under the user.
+ */
+export const DOWNLOAD_URL_TTL_MS = 60_000;
+
+/** Save a Blob with a filename (object URL, revoked a minute after the click). */
 export function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -190,7 +196,20 @@ export function downloadBlob(blob: Blob, filename: string): void {
   document.body.append(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_TTL_MS);
+}
+
+/**
+ * Messages of a failed dynamic import or chunk preload: Chromium, Firefox, Safari, and Vite's preload
+ * helper (CSS). After a deploy, a tab left open asks for hashed chunks that no longer exist.
+ */
+const CHUNK_LOAD_ERROR =
+  /failed to fetch dynamically imported module|error loading dynamically imported module|importing a module script failed|failed to load module script|unable to preload css/i;
+
+/** True when `err` means a script or stylesheet chunk could not be loaded (stale page or no network). */
+export function isChunkLoadError(err: unknown): boolean {
+  if (err instanceof Error) return err.name === "ChunkLoadError" || CHUNK_LOAD_ERROR.test(err.message);
+  return typeof err === "string" && CHUNK_LOAD_ERROR.test(err);
 }
 
 /** Zip several outputs in the browser (client-zip, loaded on demand) and save the archive. */

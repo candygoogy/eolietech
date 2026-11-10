@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "og": "node scripts/og.mjs",
-    "typecheck": "astro check && tsc -p src/worker/tsconfig.json"
+    "typecheck": "astro check && tsc -p src/worker/tsconfig.json",
+    "build:ci": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",

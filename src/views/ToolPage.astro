@@ -116,9 +116,10 @@ const structuredData = graph([
           data-limits={JSON.stringify(tool.limits.free)}
           data-strings={JSON.stringify(strings)}
         >
-          {/* Loading shell: the drop well's shape plus a reserved height (tool.css), so mounting shifts nothing. */}
+          {/* Loading shell: the drop well's shape plus a reserved height (tool.css), so mounting shifts nothing.
+              The loading line starts hidden and tool-mount.ts shows it, so with JavaScript off only the noscript note shows. */}
           <div class="tool-shell__well">
-            <p class="tool-shell__status">{t(locale, "tool.loading")}</p>
+            <p class="tool-shell__status" hidden>{t(locale, "tool.loading")}</p>
           </div>
         </div>
         <noscript><p class="tool-note">{t(locale, "tool.noscript")}</p></noscript>

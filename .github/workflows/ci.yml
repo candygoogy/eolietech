@@ -1,0 +1,55 @@
+# Typecheck, unit and Worker tests, and a production-shaped build on every push and pull request to
+# main. Workers Builds deploys main on its own; make this workflow a required check so a change that
+# breaks the tests never reaches main. Locally: npm run build:ci.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      # The pinned AI models (about 210 MiB from Hugging Face) and OCR language data (GitHub), keyed
+      # on their pins: the fetch scripts verify every file and download only what is missing.
+      - name: Cache AI models
+        uses: actions/cache@v4
+        with:
+          path: public/models
+          key: models-${{ hashFiles('src/tools/ai-shared/models.json') }}
+
+      - name: Cache OCR language data
+        uses: actions/cache@v4
+        with:
+          path: public/tessdata
+          key: tessdata-${{ hashFiles('src/tools/ocr/tessdata.json') }}
+
+      # This build is never deployed, so Turnstile's test key is allowed (src/site.config.ts).
+      - run: npm run build
+        env:
+          ALLOW_TEST_TURNSTILE: "1"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}

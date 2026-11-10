@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { secureHeaders } from "hono/secure-headers";
 import waitlist from "./routes/waitlist";
 
 /** Worker bindings (see wrangler.jsonc). TURNSTILE_SECRET is a secret (.dev.vars locally). */
@@ -11,6 +12,23 @@ export interface Env {
 }
 
 const app = new Hono<{ Bindings: Env }>();
+
+// public/_headers does not apply to Worker responses, so the API sets its own: JSON only, never
+// framed, never cached. HSTS comes from the zone (SSL/TLS settings), not from here.
+app.use(
+  "/api/*",
+  secureHeaders({
+    contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+    xFrameOptions: "DENY",
+    referrerPolicy: "no-referrer",
+    crossOriginOpenerPolicy: "same-origin",
+    strictTransportSecurity: false,
+  }),
+);
+app.use("/api/*", async (c, next) => {
+  await next();
+  c.res.headers.set("Cache-Control", "no-store");
+});
 
 app.get("/api/health", (c) => c.json({ ok: true }));
 

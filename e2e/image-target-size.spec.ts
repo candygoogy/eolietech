@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 import { inspectJpeg } from "../src/tools/exif-remover/jpeg";
 
 /**
@@ -23,7 +24,7 @@ function watch(page: Page, baseURL: string) {
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
+    if (isConsoleError(m)) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
   return {
@@ -58,13 +59,14 @@ const done = (row: Locator) => expect(row).toHaveAttribute("data-state", "done",
 
 /**
  * A 2400 x 1800 photo-like JPG (gradients, shapes, grain), about 1 to 2 MB: far over 20 KB at full
- * size, comfortably under it once scaled down. Drawn on a canvas in the page, no file committed.
+ * size, comfortably under it once scaled down. Drawn on a canvas in the page, no file committed (a DOM
+ * canvas: Playwright's WebKit has no OffscreenCanvas on the main thread).
  */
 async function photo(page: Page, name = "photo.jpg") {
   const base64 = await page.evaluate(async () => {
     let seed = 12345;
     const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
-    const c = new OffscreenCanvas(2400, 1800);
+    const c = Object.assign(document.createElement("canvas"), { width: 2400, height: 1800 });
     const g = c.getContext("2d")!;
     const sky = g.createLinearGradient(0, 0, 0, 1800);
     sky.addColorStop(0, "#5b8bd0");
@@ -86,7 +88,9 @@ async function photo(page: Page, name = "photo.jpg") {
       img.data[i + 2] += n;
     }
     g.putImageData(img, 0, 0);
-    const blob = await c.convertToBlob({ type: "image/jpeg", quality: 0.92 });
+    const blob = await new Promise<Blob>((resolve, reject) =>
+      c.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob gave no image"))), "image/jpeg", 0.92),
+    );
     const bytes = new Uint8Array(await blob.arrayBuffer());
     let s = "";
     for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));

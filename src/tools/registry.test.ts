@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { CONTENT_SECURITY_POLICY } from "../components/csp";
 import { contentFileName } from "./content-files";
 import { localePath } from "../i18n";
 import { toolPages, tools } from "./registry";
@@ -124,7 +125,8 @@ describe("tool registry", () => {
     const rules = headers.split(/\r?\n(?=\S)/).filter((block) => block.startsWith("/"));
     expect(rules.length, "_headers rules (Cloudflare limit: 100)").toBeLessThanOrEqual(100);
     const siteWide = rules.find((block) => block.startsWith("/*\n") || block.startsWith("/*\r\n"));
-    expect(siteWide).toMatch(/^\s+Cross-Origin-Embedder-Policy: credentialless$/m);
+    // require-corp, not credentialless: WebKit ignores credentialless.
+    expect(siteWide).toMatch(/^\s+Cross-Origin-Embedder-Policy: require-corp$/m);
     const coepRules = rules.filter((block) => /^\s+Cross-Origin-Embedder-Policy:/m.test(block));
     expect(coepRules, "COEP set by more than one rule is joined with a comma, which browsers reject").toHaveLength(1);
     const optedOut = rules.filter((block) => /^\s+! Cross-Origin-Embedder-Policy$/m.test(block)).map((block) => block.split(/\r?\n/)[0]);
@@ -133,6 +135,30 @@ describe("tool registry", () => {
       for (const locale of tool.locales) {
         for (const { slug } of toolPages(tool, locale)) expect(optedOut).not.toContain(localePath(locale, slug));
       }
+    }
+  });
+
+  it("allows Turnstile in the CSP of the waitlist pages only, each ending with exactly one policy", () => {
+    const rules = headers.split(/\r?\n(?=\S)/).filter((block) => block.startsWith("/"));
+    const cspOf = (block: string) => [...block.matchAll(/^\s+Content-Security-Policy:\s*(.+?)\s*$/gm)].map((m) => m[1]!);
+    const siteWide = rules.find((block) => /^\/\*\r?\n/.test(block))!;
+    const [sitePolicy, ...more] = cspOf(siteWide);
+    expect(more).toEqual([]);
+    expect(sitePolicy).not.toContain("challenges.cloudflare.com");
+    expect(sitePolicy).toMatch(/(^|; )frame-src 'none'(;|$)/);
+    // src/components/csp.ts quotes the first policy line in the file on /security/ and the home page.
+    expect(CONTENT_SECURITY_POLICY).toBe(sitePolicy);
+
+    const withPolicy = rules.filter((block) => cspOf(block).length > 0).map((block) => block.split(/\r?\n/)[0]);
+    expect(withPolicy.sort()).toEqual(["/*", "/it/prezzi/", "/pricing/"]);
+    const turnstile = sitePolicy!
+      .replace("script-src 'self' 'wasm-unsafe-eval'", "script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com")
+      .replace("frame-src 'none'", "frame-src https://challenges.cloudflare.com");
+    for (const page of ["/pricing/", "/it/prezzi/"]) {
+      const block = rules.find((b) => b.split(/\r?\n/)[0] === page)!;
+      // Without the detach, Cloudflare joins the two policies with a comma: both apply, Turnstile stays blocked.
+      expect(block, page).toMatch(/^\s+! Content-Security-Policy$/m);
+      expect(cspOf(block), page).toEqual([turnstile]);
     }
   });
 

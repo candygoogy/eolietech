@@ -1,32 +1,66 @@
 # Security headers for every static asset. Only /api/* runs the Worker (see wrangler.jsonc);
-# Worker responses do not get these headers.
+# Worker responses do not get these headers (src/worker/index.ts sets its own).
 #
 # The CSP enforces "your files never leave your device": connect-src 'self' means page scripts
 # cannot send data to any other origin. No 'unsafe-inline' / 'unsafe-eval': Astro is configured
-# not to inline scripts or styles (astro.config.mjs). Turnstile (waitlist) is the only third party.
+# not to inline scripts or styles (astro.config.mjs). No third-party script or frame is allowed
+# here: Turnstile (waitlist) gets its own policy on the waitlist pages only, below.
+# src/components/csp.ts reads the first policy line in this file as the site-wide policy (the
+# security and home pages quote it): keep the /* rule's policy first.
 # Cloudflare Web Analytics (later) will need script-src https://static.cloudflareinsights.com and
 # connect-src https://cloudflareinsights.com.
 #
 # Permissions-Policy: microphone=() blocks recording. If audio-transcribe adds live recording,
 # give that tool's path its own Permissions-Policy with microphone=(self).
 /*
-  Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'wasm-unsafe-eval'; frame-src 'none'; worker-src 'self' blob:; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
   # Cross-origin isolation (SharedArrayBuffer for multi-threaded WASM: AVIF encoder, ONNX Runtime) for
   # every page, including /_astro/ workers (Chromium starts a dedicated worker on an isolated page only
-  # if its script carries COEP too). Site-wide on purpose: Cloudflare allows 100 _headers rules, so
-  # tool pages can't be listed one by one. Only the waitlist pages opt out, below.
-  Cross-Origin-Embedder-Policy: credentialless
+  # if its script carries COEP too). require-corp, not credentialless: WebKit (Safari) ignores
+  # credentialless and would not be isolated. Every subresource is same-origin, so nothing needs a
+  # Cross-Origin-Resource-Policy header; a cross-origin one added later would need it (or CORS).
+  # Site-wide on purpose: Cloudflare allows 100 _headers rules, so tool pages can't be listed one by
+  # one. Only the waitlist pages opt out, below.
+  Cross-Origin-Embedder-Policy: require-corp
 
+# Build output: file names carry a content hash.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
-# The waitlist form embeds the Turnstile iframe (challenges.cloudflare.com), which COEP would block.
-# Keep this list to pages that load Turnstile (src/views/Pricing.astro); the registry test checks it.
+# Fonts keep their names across releases (no hash), so 30 days, not immutable.
+/fonts/*
+  Cache-Control: public, max-age=2592000
+
+# Open Graph cards are regenerated in place (npm run og).
+/og/*
+  Cache-Control: public, max-age=86400
+
+# Model chunks are content-addressed (scripts/fetch-models.mjs: file sha256, chunk size and index in
+# the name), so a URL never changes content. The manifest keeps its URL across pins: revalidated.
+/models/*
+  Cache-Control: public, max-age=31536000, immutable
+/models/:id/manifest.json
+  ! Cache-Control
+  Cache-Control: public, max-age=0, must-revalidate
+
+# OCR language data sits under the pinned commit (scripts/fetch-ocr-data.mjs: /tessdata/<commit 12>/),
+# verified against its sha256, so a URL never changes content.
+/tessdata/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The waitlist form loads the Turnstile script and iframe (challenges.cloudflare.com): these pages
+# replace the site-wide CSP with the same policy plus that host, and drop COEP, which would block the
+# iframe. Keep this list to pages that load Turnstile (src/views/Pricing.astro); the registry test
+# checks it.
 /pricing/
   ! Cross-Origin-Embedder-Policy
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 /it/prezzi/
   ! Cross-Origin-Embedder-Policy
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'

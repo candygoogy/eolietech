@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 
 /**
  * Image to text (OCR): the page starts as the drop well only, shows the first-run download size,
@@ -17,7 +18,7 @@ const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), "fixtur
 const fixture = (name: string) => path.join(FIXTURES, name);
 
 const CSP =
-  "default-src 'self'; connect-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+  "default-src 'self'; connect-src 'self'; script-src 'self' 'wasm-unsafe-eval'; frame-src 'none'; worker-src 'self' blob:; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
 
 /** Model OCR runs; the first one also downloads and compiles the engine. */
 test.setTimeout(240_000);
@@ -34,7 +35,7 @@ async function enforceHeaders(context: BrowserContext, origin: string): Promise<
       const type = headers["content-type"] ?? "";
       if (!headers["content-security-policy"] && /html|javascript/.test(type)) {
         headers["content-security-policy"] = CSP;
-        headers["cross-origin-embedder-policy"] = "credentialless";
+        headers["cross-origin-embedder-policy"] = "require-corp";
         headers["cross-origin-opener-policy"] = "same-origin";
       }
       await route.fulfill({ response, headers });
@@ -53,7 +54,7 @@ async function watch(page: Page, baseURL: string) {
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
+    if (isConsoleError(m)) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
   return {

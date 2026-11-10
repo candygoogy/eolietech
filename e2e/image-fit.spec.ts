@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 
 /**
  * Image fitter (/make-image-square/ and its 16:9 variant): fit the whole photo into a frame of the
@@ -38,7 +39,7 @@ function watch(page: Page, baseURL: string) {
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
+    if (isConsoleError(m)) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
   return {

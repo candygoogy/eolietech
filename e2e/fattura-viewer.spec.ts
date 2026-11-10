@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 
 /**
  * Italian e-invoice viewer: read FatturaPA XML (and a signed .xml.p7m), show a row per invoice, open
@@ -22,7 +23,7 @@ function watch(page: Page, baseURL: string, { brokenXml = false } = {}) {
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
+    if (isConsoleError(m)) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
   return {

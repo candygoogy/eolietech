@@ -1,8 +1,9 @@
 import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 
 /**
- * Tool pages are cross-origin isolated (COEP credentialless in public/_headers). A dedicated worker
+ * Tool pages are cross-origin isolated (COEP require-corp in public/_headers). A dedicated worker
  * only starts there if its own script response carries COEP too, so these checks run against the
  * production-shaped server and fail if a worker is blocked or silently falls back to the main thread.
  */
@@ -11,7 +12,7 @@ const fixture = (name: string) => fileURLToPath(new URL(`./fixtures/pdf/${name}`
 function watchConsole(page: Page) {
   const problems: string[] = [];
   page.on("console", (msg) => {
-    if (msg.type() === "error" || /fake worker/i.test(msg.text())) problems.push(msg.text());
+    if (isConsoleError(msg) || /fake worker/i.test(msg.text())) problems.push(msg.text());
   });
   page.on("requestfailed", (req) => problems.push(`${req.url()} ${req.failure()?.errorText ?? ""}`));
   return problems;

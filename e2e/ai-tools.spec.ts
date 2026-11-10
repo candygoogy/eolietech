@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 
 /**
  * On-device AI tools (background-remover, audio-transcribe): the size notice is shown before any
@@ -19,7 +20,7 @@ function watch(page: Page, baseURL: string) {
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
+    if (isConsoleError(m)) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
   return {
@@ -71,7 +72,8 @@ async function alphaStats(page: Page, png: Buffer) {
 
 test.describe.configure({ mode: "serial" });
 
-test("/remove-background/ cuts out the subject on the device and caches the model", async ({ page, baseURL }) => {
+test("/remove-background/ cuts out the subject on the device and caches the model", async ({ page, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit has no OffscreenCanvas in workers (the tool's worker and this test's alpha check draw on one)");
   test.setTimeout(300_000);
   const w = watch(page, baseURL!);
   await page.goto("/remove-background/");

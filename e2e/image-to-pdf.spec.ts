@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 import { PDFDict, PDFDocument, PDFName, PDFRawStream } from "pdf-lib";
 
 /**
@@ -25,7 +26,7 @@ function watch(page: Page, baseURL: string) {
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
+    if (isConsoleError(m)) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
   return {
@@ -144,7 +145,8 @@ test("A4 with a margin: pages follow each image's orientation", async ({ page, b
   w.assertPrivate();
 });
 
-test("Italian page: WebP, AVIF and HEIC go into one PDF", async ({ page, baseURL }) => {
+test("Italian page: WebP, AVIF and HEIC go into one PDF", async ({ page, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit has no OffscreenCanvas in workers (the HEIC page is decoded through one)");
   const w = watch(page, baseURL!);
   await openTool(page, "/it/jpg-in-pdf/");
   await expect(page.locator(".tool-drop__label")).toHaveText("Scegli le immagini o trascinale qui");

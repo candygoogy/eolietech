@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
+import { isConsoleError } from "./console.ts";
 
 /**
  * Image tools (image-compress + variants, heic-to-jpg): drop a file, wait for the in-browser
@@ -27,7 +28,7 @@ function watch(page: Page, baseURL: string) {
   const errors: string[] = [];
   page.context().on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
+    if (isConsoleError(m)) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
   return {
@@ -82,13 +83,15 @@ for (const [slug, input, ext] of variants) {
   });
 }
 
-test("/heic-to-jpg/ converts a HEIC photo to JPG on the device", async ({ page, baseURL }) => {
+test("/heic-to-jpg/ converts a HEIC photo to JPG on the device", async ({ page, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit has no OffscreenCanvas in workers (HEIC decoding reads pixels back through one)");
   const w = watch(page, baseURL!);
   await convertOne(page, "/heic-to-jpg/", "sample.heic", "jpg");
   w.assertPrivate();
 });
 
-test("/heic-to-png/ starts on PNG and converts a HEIC photo to PNG", async ({ page, baseURL }) => {
+test("/heic-to-png/ starts on PNG and converts a HEIC photo to PNG", async ({ page, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit has no OffscreenCanvas in workers (HEIC decoding reads pixels back through one)");
   const w = watch(page, baseURL!);
   await convertOne(page, "/heic-to-png/", "sample.heic", "png");
   w.assertPrivate();
