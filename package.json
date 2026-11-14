@@ -30,7 +30,7 @@
     "@jsquash/webp": "1.5.0",
     "@neslinesli93/qpdf-wasm": "0.3.0",
     "@okathira/ghostpdl-wasm": "1.1.0",
-    "astro": "7.4.0",
+    "astro": "7.4.7",
     "client-zip": "2.5.1",
     "heic-to": "1.6.6",
     "hono": "4.13.13",
